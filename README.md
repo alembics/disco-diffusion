@@ -4,6 +4,11 @@
 
 A frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
 
+[to be updated with further info soon]
+
+
+
+
 ## Changelog
 #### v1 Oct 29th 2021 - Somnai
       
