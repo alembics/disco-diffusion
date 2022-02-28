@@ -17,7 +17,7 @@ import torchvision.transforms.functional as TF
 
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
 import pytorch3d.transforms as p3dT
-import disco_xform_utils as dxf
+import disco.disco_xform_utils as dxf
 
 def interp(t):
     return 3 * t**2 - 2 * t ** 3
