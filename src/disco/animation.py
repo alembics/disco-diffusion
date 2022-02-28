@@ -55,8 +55,8 @@ def get_inbetweens(
     key_frames, 
     integer=False,
     # new args
-    interp_spline,
-    max_frames,
+    interp_spline=None,
+    max_frames=None,
     ):
     """Given a dict with frame numbers as keys and a parameter value as values,
     return a pandas Series containing the value of the parameter at every frame from 0 to max_frames.
@@ -154,8 +154,8 @@ def process_keyframe_animation(
     rotation_3d_z,
     key_frames=None,
     # new args
-    interp_spline,
-    max_frames,
+    interp_spline=None,
+    max_frames=None,
 ):
     """
     Given a dictionary of keyframes, return a dictionary of interpolated values
