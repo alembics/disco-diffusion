@@ -3,6 +3,7 @@ Isolating animation stuff from disco, probably port it into pytti at some point
 """
 
 from loguru import logger
+import numpy as np
 import pandas as pd
 
 def parse_key_frames(string, prompt_parser=None):
@@ -50,7 +51,13 @@ def parse_key_frames(string, prompt_parser=None):
         raise RuntimeError('Key Frame string not correctly formatted')
     return frames
 
-def get_inbetweens(key_frames, integer=False):
+def get_inbetweens(
+    key_frames, 
+    integer=False,
+    # new args
+    interp_spline,
+    max_frames,
+    ):
     """Given a dict with frame numbers as keys and a parameter value as values,
     return a pandas Series containing the value of the parameter at every frame from 0 to max_frames.
     Any values not provided in the input dict are calculated by linear interpolation between
@@ -114,7 +121,11 @@ def get_inbetweens(key_frames, integer=False):
         return key_frame_series.astype(int)
     return key_frame_series
 
-def split_prompts(prompts):
+def split_prompts(
+    prompts,
+    # new args
+    max_frames,
+    ):
     """
     The function takes in a dictionary of prompt indices and their corresponding prompts. 
     It then creates a pandas series of nans of length max_frames. 
@@ -142,6 +153,9 @@ def process_keyframe_animation(
     rotation_3d_y,
     rotation_3d_z,
     key_frames=None,
+    # new args
+    interp_spline,
+    max_frames,
 ):
     """
     Given a dictionary of keyframes, return a dictionary of interpolated values
@@ -171,7 +185,13 @@ def process_keyframe_animation(
         'rotation_3d_z':rotation_3d_z,
     }.items():
         try:
-            outv[k+'_series'] = get_inbetweens(parse_key_frames(v))
+            outv[k+'_series'] = get_inbetweens(
+                key_frames=parse_key_frames(v),
+                integer=False,
+                # new args
+                interp_spline=interp_spline,
+                max_frames=max_frames,
+                )
         except RuntimeError:
             logger.warning(
                 "WARNING: You have selected to use key frames, but you have not "
@@ -182,6 +202,13 @@ def process_keyframe_animation(
                 "correctly.\n"
             )
             v = f"0: ({v})"
-            outv[k+'_series'] = get_inbetweens(parse_key_frames(v))
+            outv[k+'_series'] = get_inbetweens(
+                key_frames=parse_key_frames(v),
+                integer=False,
+                # new args
+                interp_spline=interp_spline,
+                max_frames=max_frames,
+
+            )
     return outv
 
