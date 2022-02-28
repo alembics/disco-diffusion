@@ -3,7 +3,7 @@ Isolating animation stuff from disco, probably port it into pytti at some point
 """
 
 from loguru import logger
-
+import pandas as pd
 
 def parse_key_frames(string, prompt_parser=None):
     """Given a string representing frame numbers paired with parameter values at that frame,
