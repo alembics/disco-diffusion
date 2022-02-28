@@ -329,5 +329,5 @@ def disable_cudnn(DEVICE):
         logger.debug('Disabling CUDNN for A100 gpu', file=sys.stderr)
         torch.backends.cudnn.enabled = False
 
-def a100_cudnn_fix():
-    disable_cudnn()
+def a100_cudnn_fix(DEVICE):
+    disable_cudnn(DEVICE)
