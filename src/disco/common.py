@@ -2,10 +2,20 @@
 isolating stuff that's not specific to disco.
 at some point, this stuff should get imported from pytti-core
 """
+import cv2
+import io
+import math
+import requests
+import sys
 
+from PIL import ImageOps
+from resize_right import resize
+from torch import nn
+from torch.nn import functional as F
+import torchvision.transforms as T
+import torchvision.transforms.functional as TF
 
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
-
 import pytorch3d.transforms as p3dT
 import disco_xform_utils as dxf
 
@@ -40,7 +50,15 @@ def perlin_ms(octaves, width, height, grayscale, device=device):
             oct_height *= 2
     return torch.cat(out_array)
 
-def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True):
+def create_perlin_noise(
+    octaves=[1, 1, 1, 1], 
+    width=2, 
+    height=2, 
+    grayscale=True,
+    # new args
+    side_y, 
+    side_x,
+    ):
     out = perlin_ms(octaves, width, height, grayscale)
     if grayscale:
         out = TF.resize(size=(side_y, side_x), img=out.unsqueeze(0))
@@ -53,7 +71,12 @@ def create_perlin_noise(octaves=[1, 1, 1, 1], width=2, height=2, grayscale=True)
     out = ImageOps.autocontrast(out)
     return out
 
-def regen_perlin():
+def regen_perlin(
+    # new args
+    perlin_mode,
+    batch_size,
+    device,
+):
     if perlin_mode == 'color':
         init = create_perlin_noise([1.5**-i*0.5 for i in range(12)], 1, 1, False)
         init2 = create_perlin_noise([1.5**-i*0.5 for i in range(8)], 4, 4, False)
@@ -179,8 +202,12 @@ class MakeCutoutsDango(nn.Module):
     def __init__(self, cut_size,
                  Overview=4, 
                  InnerCrop = 0, IC_Size_Pow=0.5, IC_Grey_P = 0.2,
+                 # new args
                  cutout_debug = False,
                  padargs = None,
+                 animation_mode = None, # args.animation_mode 
+                 debug_outpath = "./",
+                 skip_augs=False,
                  ):
         super().__init__()
         self.cut_size = cut_size
@@ -188,7 +215,13 @@ class MakeCutoutsDango(nn.Module):
         self.InnerCrop = InnerCrop
         self.IC_Size_Pow = IC_Size_Pow
         self.IC_Grey_P = IC_Grey_P
-        if args.animation_mode == 'None':
+
+        # Augs should be an argument that defaults to nn.Identity
+        # rather than requiring an "animation mode" which only makes sense in 
+        # our particular use context
+        animation_mode = str(animation_mode)
+        self.augs = nn.Identity()
+        if (not skip_augs) and (animation_mode == 'None'):
           self.augs = T.Compose([
               T.RandomHorizontalFlip(p=0.5),
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
@@ -198,7 +231,7 @@ class MakeCutoutsDango(nn.Module):
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
               T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
           ])
-        elif args.animation_mode == 'Video Input':
+        elif (not skip_augs) and (animation_mode == 'Video Input'):
           self.augs = T.Compose([
               T.RandomHorizontalFlip(p=0.5),
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
@@ -210,7 +243,7 @@ class MakeCutoutsDango(nn.Module):
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
               # T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1),
           ])
-        elif  args.animation_mode == '2D' or args.animation_mode == '3D':
+        elif (not skip_augs) and (animation_mode in ('2D','3D')):
           self.augs = T.Compose([
               T.RandomHorizontalFlip(p=0.4),
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
@@ -222,6 +255,7 @@ class MakeCutoutsDango(nn.Module):
           ])
           
         self.cutout_debug = cutout_debug
+        self.debug_outpath = debug_outpath
         if padargs is None:
             padargs = {}
         self.padargs = padargs
@@ -254,11 +288,7 @@ class MakeCutoutsDango(nn.Module):
                     cutouts.append(cutout)
 
             if self.cutout_debug:
-                if is_colab:
-                    TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save("/content/cutout_overview0.jpg",quality=99)
-                else:
-                    TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save("cutout_overview0.jpg",quality=99)
-
+                TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save(self.debug_outpath + "cutout_overview0.jpg",quality=99)
                               
         if self.InnerCrop >0:
             for i in range(self.InnerCrop):
@@ -271,12 +301,8 @@ class MakeCutoutsDango(nn.Module):
                 cutout = resize(cutout, out_shape=output_shape)
                 cutouts.append(cutout)
             if self.cutout_debug:
-                if is_colab:
-                    TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save("/content/cutout_InnerCrop.jpg",quality=99)
-                else:
-                    TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save("cutout_InnerCrop.jpg",quality=99)
+                TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save(self.debug_outpath + "cutout_InnerCrop.jpg",quality=99)
         cutouts = torch.cat(cutouts)
-        if skip_augs is not True: cutouts=self.augs(cutouts)
         return cutouts
 
 def spherical_dist_loss(x, y):
