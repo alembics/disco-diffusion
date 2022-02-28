@@ -56,8 +56,8 @@ def create_perlin_noise(
     height=2, 
     grayscale=True,
     # new args
-    side_y, 
-    side_x,
+    side_y=None, 
+    side_x=None,
     ):
     out = perlin_ms(octaves, width, height, grayscale)
     if grayscale:
