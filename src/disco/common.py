@@ -300,8 +300,8 @@ from loguru import logger
 
 def disable_cudnn():
     if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
-    logger.debug('Disabling CUDNN for A100 gpu', file=sys.stderr)
-    torch.backends.cudnn.enabled = False
+        logger.debug('Disabling CUDNN for A100 gpu', file=sys.stderr)
+        torch.backends.cudnn.enabled = False
 
 def a100_cudnn_fix():
     disable_cudnn()
