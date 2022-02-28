@@ -220,7 +220,7 @@ class MakeCutoutsDango(nn.Module):
         # rather than requiring an "animation mode" which only makes sense in 
         # our particular use context
         animation_mode = str(animation_mode)
-        self.augs = nn.Identity()
+        #self.augs = nn.Identity() # don't reassign module
         if (not skip_augs) and (animation_mode == 'None'):
           self.augs = T.Compose([
               T.RandomHorizontalFlip(p=0.5),
@@ -253,6 +253,8 @@ class MakeCutoutsDango(nn.Module):
               T.Lambda(lambda x: x + torch.randn_like(x) * 0.01),
               T.ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.3),
           ])
+        else:
+          self.augs = nn.Identity()
           
         self.cutout_debug = cutout_debug
         self.debug_outpath = debug_outpath
