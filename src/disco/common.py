@@ -35,7 +35,7 @@ def perlin(width, height, scale=10, device=None):
     dots += (1 - wx) * (1 - wy) * (-gx[1:, 1:] * (1 - xs) - gy[1:, 1:] * (1 - ys))
     return dots.permute(0, 2, 1, 3).contiguous().view(width * scale, height * scale)
 
-def perlin_ms(octaves, width, height, grayscale, device=device):
+def perlin_ms(octaves, width, height, grayscale, device):
     out_array = [0.5] if grayscale else [0.5, 0.5, 0.5]
     # out_array = [0.0] if grayscale else [0.0, 0.0, 0.0]
     for i in range(1 if grayscale else 3):
