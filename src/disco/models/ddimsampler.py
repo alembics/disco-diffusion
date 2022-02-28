@@ -10,7 +10,7 @@ from ldm.modules.diffusionmodules.util import make_ddim_sampling_parameters, mak
 # from ldm.models.diffusion.ddim import DDIMSampler
 
 # need to add model_path
-def download_models(mode):
+def download_models(mode, model_path):
     """
     Downloads the models from the internet and saves them to the specified path
     
@@ -55,8 +55,8 @@ def load_model_from_config(config, ckpt):
     return {"model": model}, global_step
 
 
-def get_model(mode):
-    path_conf, path_ckpt = download_models(mode)
+def get_model(mode, model_path):
+    path_conf, path_ckpt = download_models(mode, model_path)
     config = OmegaConf.load(path_conf)
     model, step = load_model_from_config(config, path_ckpt)
     return model
