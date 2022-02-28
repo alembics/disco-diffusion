@@ -324,7 +324,7 @@ def range_loss(input):
 import torch
 from loguru import logger
 
-def disable_cudnn():
+def disable_cudnn(DEVICE):
     if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
         logger.debug('Disabling CUDNN for A100 gpu', file=sys.stderr)
         torch.backends.cudnn.enabled = False
