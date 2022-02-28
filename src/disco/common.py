@@ -178,7 +178,7 @@ class MakeCutouts(nn.Module):
 class MakeCutoutsDango(nn.Module):
     def __init__(self, cut_size,
                  Overview=4, 
-                 InnerCrop = 0, IC_Size_Pow=0.5, IC_Grey_P = 0.2
+                 InnerCrop = 0, IC_Size_Pow=0.5, IC_Grey_P = 0.2,
                  cutout_debug = False,
                  padargs = None,
                  ):
