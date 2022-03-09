@@ -6,7 +6,7 @@ import numpy as np
 import sys, math
 
 try:
-    from infer import InferenceHelper
+    from adabins.infer import InferenceHelper
 except:
     print("disco_xform_utils.py failed to import InferenceHelper. Please ensure that AdaBins directory is in the path (i.e. via sys.path.append('./AdaBins') or other means).")
     sys.exit()
