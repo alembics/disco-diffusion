@@ -400,7 +400,7 @@ if is_colab:
 if not path_exists(f'{model_path}'):
   pathlib.Path(model_path).mkdir(parents=True, exist_ok=True)
 if not path_exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
-  wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", out=model_path)
+  wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
 
 import sys
 import torch
@@ -497,7 +497,7 @@ if USE_ADABINS:
   if is_colab:
     gitclone("https://github.com/shariqfarooq123/AdaBins.git")
     if not path_exists(f'{model_path}/AdaBins_nyu.pt'):
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", out=model_path)
+      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", model_path)
     pathlib.Path("pretrained").mkdir(parents=True, exist_ok=True)
     shutil.copyfile(f"{model_path}/AdaBins_nyu.pt", "pretrained/AdaBins_nyu.pt")
   sys.path.append('./AdaBins')
@@ -2107,12 +2107,12 @@ if diffusion_model == '256x256_diffusion_uncond':
       model_256_downloaded = True
     else: 
       print("256 Model SHA doesn't match, redownloading...")
-      wget(model_256_link, out=model_path)
+      wget(model_256_link, model_path)
       model_256_downloaded = True
   elif os.path.exists(model_256_path) and not check_model_SHA or model_256_downloaded == True:
     print('256 Model already downloaded, check check_model_SHA if the file is corrupt')
   else:  
-    wget(model_256_link, out=model_path)
+    wget(model_256_link, model_path)
     model_256_downloaded = True
 elif diffusion_model == '512x512_diffusion_uncond_finetune_008100':
   if os.path.exists(model_512_path) and check_model_SHA:
@@ -2125,12 +2125,12 @@ elif diffusion_model == '512x512_diffusion_uncond_finetune_008100':
       model_512_downloaded = True
     else:  
       print("512 Model SHA doesn't match, redownloading...")
-      wget(model_512_link, out=model_path)
+      wget(model_512_link, model_path)
       model_512_downloaded = True
   elif os.path.exists(model_512_path) and not check_model_SHA or model_512_downloaded == True:
     print('512 Model already downloaded, check check_model_SHA if the file is corrupt')
   else:  
-    wget(model_512_link, out=model_path)
+    wget(model_512_link, model_path)
     model_512_downloaded = True
 
 
@@ -2146,12 +2146,12 @@ if use_secondary_model == True:
       model_secondary_downloaded = True
     else:  
       print("Secondary Model SHA doesn't match, redownloading...")
-      wget(model_secondary_link, out=model_path)
+      wget(model_secondary_link, model_path)
       model_secondary_downloaded = True
   elif os.path.exists(model_secondary_path) and not check_model_SHA or model_secondary_downloaded == True:
     print('Secondary Model already downloaded, check check_model_SHA if the file is corrupt')
   else:  
-    wget(model_secondary_link, out=model_path)
+    wget(model_secondary_link, model_path)
     model_secondary_downloaded = True
 
 model_config = model_and_diffusion_defaults()
@@ -2215,7 +2215,7 @@ if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().req
 if SLIPB16:
   SLIPB16model = SLIP_VITB16(ssl_mlp_dim=4096, ssl_emb_dim=256)
   if not os.path.exists(f'{model_path}/slip_base_100ep.pt'):
-    wget("https://dl.fbaipublicfiles.com/slip/slip_base_100ep.pt", out=model_path)
+    wget("https://dl.fbaipublicfiles.com/slip/slip_base_100ep.pt", model_path)
   sd = torch.load(f'{model_path}/slip_base_100ep.pt')
   real_sd = {}
   for k, v in sd['state_dict'].items():
@@ -2229,7 +2229,7 @@ if SLIPB16:
 if SLIPL16:
   SLIPL16model = SLIP_VITL16(ssl_mlp_dim=4096, ssl_emb_dim=256)
   if not os.path.exists(f'{model_path}/slip_large_100ep.pt'):
-    wget("https://dl.fbaipublicfiles.com/slip/slip_large_100ep.pt", out=model_path)
+    wget("https://dl.fbaipublicfiles.com/slip/slip_large_100ep.pt", model_path)
   sd = torch.load(f'{model_path}/slip_large_100ep.pt')
   real_sd = {}
   for k, v in sd['state_dict'].items():
