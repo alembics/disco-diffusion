@@ -257,9 +257,10 @@ Setting | Description | Default
 `diffusion_steps` || 1000
 **Diffusion:**
 `clip_models`  | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
-
-# 1. Set Up
 """
+
+# %%
+"""# 1. Set Up"""
 
 # %%
 #@title 1.1 Check GPU Status
