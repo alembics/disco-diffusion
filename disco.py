@@ -49,7 +49,7 @@ Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques,
 
 # %%
 """
-@title Licensed under the MIT License
+Licensed under the MIT License
 
 Copyright (c) 2021 Katherine Crowson 
 
@@ -2073,8 +2073,8 @@ diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_d
 use_secondary_model = True #@param {type: 'boolean'}
 sampling_mode = 'ddim' #@param ['plms','ddim']  
 
-timestep_respacing = '250' # param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
-diffusion_steps = 1000 # param {type: 'number'}
+timestep_respacing = '250' #@param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
+diffusion_steps = 1000 #@param {type: 'number'}
 use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
 ViTB16 = True #@param{type:"boolean"}
@@ -2084,8 +2084,8 @@ RN50 = True #@param{type:"boolean"}
 RN50x4 = False #@param{type:"boolean"}
 RN50x16 = False #@param{type:"boolean"}
 RN50x64 = False #@param{type:"boolean"}
-SLIPB16 = False # param{type:"boolean"}
-SLIPL16 = False # param{type:"boolean"}
+SLIPB16 = False #@param{type:"boolean"}
+SLIPL16 = False #@param{type:"boolean"}
 
 #@markdown If you're having issues with model downloads, check this to compare SHA's:
 check_model_SHA = False #@param{type:"boolean"}
