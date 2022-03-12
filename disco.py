@@ -1,6 +1,7 @@
 # %%
-"""<a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>"""
-
+"""
+<a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
+"""
 
 # %%
 """
@@ -260,7 +261,9 @@ Setting | Description | Default
 """
 
 # %%
-"""# 1. Set Up"""
+"""
+# 1. Set Up
+"""
 
 # %%
 #@title 1.1 Check GPU Status
@@ -1177,11 +1180,11 @@ def do_run():
               return grad * magnitude.clamp(max=args.clamp_max) / magnitude  #min=-0.02, min=-clamp_max, 
           return grad
   
-      if model_config['timestep_respacing'].startswith('ddim'):
+      if args.sampling_mode == 'ddim':
           sample_fn = diffusion.ddim_sample_loop_progressive
       else:
-          sample_fn = diffusion.p_sample_loop_progressive
-    
+          sample_fn = diffusion.plms_sample_loop_progressive
+
 
       image_display = Output()
       for i in range(args.n_batches):
@@ -1200,7 +1203,7 @@ def do_run():
           if perlin_init:
               init = regen_perlin()
 
-          if model_config['timestep_respacing'].startswith('ddim'):
+          if args.sampling_mode == 'ddim':
               samples = sample_fn(
                   model,
                   (batch_size, 3, args.side_y, args.side_x),
@@ -1224,6 +1227,7 @@ def do_run():
                   skip_timesteps=skip_steps,
                   init_image=init,
                   randomize_class=randomize_class,
+                  order=2,
               )
           
           
@@ -1331,6 +1335,7 @@ def save_settings():
     'use_secondary_model': use_secondary_model,
     'steps': steps,
     'diffusion_steps': diffusion_steps,
+    'sampling_mode': sampling_mode,
     'ViTB32': ViTB32,
     'ViTB16': ViTB16,
     'ViTL14': ViTL14,
@@ -2066,8 +2071,9 @@ def do_superres(img, filepath):
 #@markdown ####**Models Settings:**
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
+sampling_mode = 'ddim' #@param ['plms','ddim']  
 
-timestep_respacing = '50' # param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
+timestep_respacing = '250' # param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
 diffusion_steps = 1000 # param {type: 'number'}
 use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
@@ -2267,7 +2273,7 @@ skip_augs = False#@param{type: 'boolean'}
 #@markdown ####**Init Settings:**
 init_image = None #@param{type: 'string'}
 init_scale = 1000 #@param{type: 'integer'}
-skip_steps = 0 #@param{type: 'integer'}
+skip_steps = 10 #@param{type: 'integer'}
 #@markdown *Make sure you set skip_steps to ~50% of your steps if you want to use an init image.*
 
 #Get corrected sizes
@@ -2711,6 +2717,14 @@ image_prompts = {
 display_rate =  50 #@param{type: 'number'}
 n_batches =  50 #@param{type: 'number'}
 
+#Update Model Settings
+timestep_respacing = f'ddim{steps}'
+diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
+model_config.update({
+    'timestep_respacing': timestep_respacing,
+    'diffusion_steps': diffusion_steps,
+})
+
 batch_size = 1 
 
 def move_files(start_num, end_num, old_folder, new_folder):
@@ -2780,6 +2794,7 @@ args = {
     'batch_size':batch_size,
     'batch_name': batch_name,
     'steps': steps,
+    'sampling_mode': sampling_mode,
     'width_height': width_height,
     'clip_guidance_scale': clip_guidance_scale,
     'tv_scale': tv_scale,
