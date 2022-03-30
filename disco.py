@@ -938,9 +938,10 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
       img_filepath = '/content/prevFrame.png' if is_colab else 'prevFrame.png'
     trans_scale = 1.0/200.0
     translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
-    rotate_xyz = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
+    rotate_xyz_degrees = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
     print('translation:',translate_xyz)
-    print('rotation:',rotate_xyz)
+    print('rotation:',rotate_xyz_degrees)
+    rotate_xyz = [math.radians(rotate_xyz_degrees[0]), math.radians(rotate_xyz_degrees[1]), math.radians(rotate_xyz_degrees[2])]
     rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
     print("rot_mat: " + str(rot_mat))
     next_step_pil = dxf.transform_image_3d(img_filepath, midas_model, midas_transform, DEVICE,
@@ -2394,6 +2395,7 @@ if animation_mode == "Video Input":
 
 #@markdown ####**2D Animation Settings:**
 #@markdown `zoom` is a multiplier of dimensions, 1 is no zoom.
+#@markdown All rotations are provided in degrees.
 
 key_frames = True #@param {type:"boolean"}
 max_frames = 10000#@param {type:"number"}
