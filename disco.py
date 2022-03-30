@@ -1018,16 +1018,20 @@ def do_run():
                                                  sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
           next_step_pil.save('prevFrameScaled.png')
 
-          ### Turbo mode - skip some diffusions to save time          
-          if turbo_mode == True and frame_num > 10 and frame_num % int(turbo_steps) != 0:
-            print('turbo mode is on this frame: skipping clip diffusion steps')
-            filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
-            next_step_pil.save(f'{batchFolder}/{filename}') #save it as this frame
-            next_step_pil.save(f'{img_filepath}') # save it also as prev_frame for next iteration
-            continue
-          elif turbo_mode == True:
-            print('turbo mode is OFF this frame')
-          #else: no turbo
+          ### Turbo mode - skip some diffusions to save time
+          turbo_blend = False # default to normal frame saving later
+          if turbo_mode and frame_num > 10: #preroll is 10 frames
+            if frame_num % int(turbo_steps) != 0:
+              print('turbo skip this frame: skipping clip diffusion steps')
+              filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
+              next_step_pil.save(f'{batchFolder}/{filename}') #save it as this frame. done.
+              next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
+              turbo_blend = False # default to normal-frame-saving later
+              continue
+            else:
+              if turbo_frame_blend:
+                turbo_blend = True # blend frames for smoothness..
+              print('clip/diff this frame - generate clip diff image')
 
           init_image = 'prevFrameScaled.png'
           init_scale = args.frames_scale
@@ -1300,6 +1304,17 @@ def do_run():
                             image.save(f'{unsharpenFolder}/{filename}')
                         else:
                           image.save(f'{batchFolder}/{filename}')
+                          if args.animation_mode == "3D":
+                            # If turbo_blend, save a blended image
+                            if turbo_mode and turbo_blend:
+                              # Mix new image with prevFrameScaled
+                              newFrame = cv2.imread('prevFrame.png') # This is already updated..
+                              prev_frame_warped = cv2.imread('prevFrameScaled.png')
+                              blendedImage = cv2.addWeighted(newFrame, 0.5, prev_frame_warped, 0.5, 0.0)
+                              cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
+                              turbo_blend = False # reset to false
+                            else:
+                              image.save(f'{batchFolder}/{filename}')
                         # if frame_num != args.max_frames-1:
                         #   display.clear_output()
 
@@ -1381,6 +1396,7 @@ def save_settings():
     'extract_nth_frame':extract_nth_frame,
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
+    'turbo_frame_blend':turbo_frame_blend,
   }
   # print('Settings:', setting_list)
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
@@ -2377,11 +2393,12 @@ sampling_mode = 'bicubic'#@param {type:"string"}
 #======= TURBO MODE
 #@markdown ---
 #@markdown ####**Turbo Mode (3D anim only):**
-#@markdown (Starts after frame 10,) skips diffusion steps and just uses MIDAS depth map to warp images for skipped frames.
-#@markdown Speeds up rendering by 2x-4x, and may improve image coherence between frames.
+#@markdown (Starts after frame 10,) skips diffusion steps and just uses depth map to warp images for skipped frames.
+#@markdown Speeds up rendering by 2x-4x, and may improve image coherence between frames. frame_blend_mode smooths abrupt texture changes across 2 frames.
 
 turbo_mode = True #@param {type:"boolean"}
-turbo_steps = "3" #@param ["2","3","4"] {type:'string'}
+turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
+turbo_frame_blend = True #@param {type:"boolean"}
 #@markdown ---
 
 #@markdown ####**Coherency Settings:**
