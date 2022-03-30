@@ -1017,6 +1017,18 @@ def do_run():
                                                  args.fov, padding_mode=args.padding_mode,
                                                  sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
           next_step_pil.save('prevFrameScaled.png')
+
+          ### Turbo mode - skip some diffusions to save time          
+          if turbo_mode == True and frame_num > 10 and frame_num % int(turbo_steps) != 0:
+            print('turbo mode is on this frame: skipping clip diffusion steps')
+            filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
+            next_step_pil.save(f'{batchFolder}/{filename}') #save it as this frame
+            next_step_pil.save(f'{img_filepath}') # save it also as prev_frame for next iteration
+            continue
+          elif turbo_mode == True:
+            print('turbo mode is OFF this frame')
+          #else: no turbo
+
           init_image = 'prevFrameScaled.png'
           init_scale = args.frames_scale
           skip_steps = args.calc_frames_skip_steps
@@ -1367,6 +1379,8 @@ def save_settings():
     'sampling_mode': sampling_mode,
     'video_init_path':video_init_path,
     'extract_nth_frame':extract_nth_frame,
+    'turbo_mode':turbo_mode,
+    'turbo_steps':turbo_steps,
   }
   # print('Settings:', setting_list)
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
@@ -2360,6 +2374,14 @@ fov = 40#@param {type:"number"}
 padding_mode = 'border'#@param {type:"string"}
 sampling_mode = 'bicubic'#@param {type:"string"}
 
+#======= TURBO MODE
+#@markdown ---
+#@markdown ####**Turbo Mode (3D anim only):**
+#@markdown (Starts after frame 10,) skips diffusion steps and just uses MIDAS depth map to warp images for skipped frames.
+#@markdown Speeds up rendering by 2x-4x, and may improve image coherence between frames.
+
+turbo_mode = True #@param {type:"boolean"}
+turbo_steps = "3" #@param ["2","3","4"] {type:'string'}
 #@markdown ---
 
 #@markdown ####**Coherency Settings:**
@@ -2762,8 +2784,12 @@ if resume_run:
     batchNum = int(run_to_resume)
   if resume_from_frame == 'latest':
     start_frame = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
+    if turbo_mode == True and start_frame > 10 and start_frame % int(turbo_steps) != 0:
+      start_frame = start_frame - (start_frame % int(turbo_steps))
   else:
     start_frame = int(resume_from_frame)+1
+    if turbo_mode == True and start_frame > 10 and start_frame % int(turbo_steps) != 0:
+      start_frame = start_frame - (start_frame % int(turbo_steps))
     if retain_overwritten_frames is True:
       existing_frames = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
       frames_to_save = existing_frames - start_frame
