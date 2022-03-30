@@ -1026,30 +1026,31 @@ def do_run():
 
           ### Turbo mode - skip some diffusions, use 3d morph for clarity and to save time
           turbo_blend = False # default for non-turbo frame saving
-          if turbo_mode == True and frame_num == turbo_preroll: #start tracking oldframe
-            next_step_pil.save('oldFrameScaled.png')#stash for later blending          
-          if turbo_mode == True and frame_num > turbo_preroll:
-            #set up 2 warped image sequences, old & new, to blend toward new diff image
-            old_frame = do_3d_step('oldFrameScaled.png', frame_num, midas_model, midas_transform)
-            old_frame.save('oldFrameScaled.png')
-            if frame_num % int(turbo_steps) != 0: 
-              print('turbo skip this frame: skipping clip diffusion steps')
-              filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
-              blend_factor = ((frame_num % int(turbo_steps))+1)/int(turbo_steps)
-              print('turbo skip this frame: skipping clip diffusion steps and saving blended frame')
-              newWarpedImg = cv2.imread('prevFrameScaled.png')#this is already updated..
-              oldWarpedImg = cv2.imread('oldFrameScaled.png')
-              blendedImage = cv2.addWeighted(newWarpedImg, blend_factor, oldWarpedImg,1-blend_factor, 0.0)
-              cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
-              next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
-              turbo_blend = False
-              continue
-            else:
-              #if not a skip frame, will run diffusion and need to blend.
-              oldWarpedImg = cv2.imread('prevFrameScaled.png')
-              cv2.imwrite(f'oldFrameScaled.png',oldWarpedImg)#swap in for blending later 
-              turbo_blend = True # flag to blend frames after diff generated...
-              print('clip/diff this frame - generate clip diff image')
+          if turbo_mode:
+            if frame_num == turbo_preroll: #start tracking oldframe
+              next_step_pil.save('oldFrameScaled.png')#stash for later blending          
+            elif frame_num > turbo_preroll:
+              #set up 2 warped image sequences, old & new, to blend toward new diff image
+              old_frame = do_3d_step('oldFrameScaled.png', frame_num, midas_model, midas_transform)
+              old_frame.save('oldFrameScaled.png')
+              if frame_num % int(turbo_steps) != 0: 
+                print('turbo skip this frame: skipping clip diffusion steps')
+                filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
+                blend_factor = ((frame_num % int(turbo_steps))+1)/int(turbo_steps)
+                print('turbo skip this frame: skipping clip diffusion steps and saving blended frame')
+                newWarpedImg = cv2.imread('prevFrameScaled.png')#this is already updated..
+                oldWarpedImg = cv2.imread('oldFrameScaled.png')
+                blendedImage = cv2.addWeighted(newWarpedImg, blend_factor, oldWarpedImg,1-blend_factor, 0.0)
+                cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
+                next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
+                turbo_blend = False
+                continue
+              else:
+                #if not a skip frame, will run diffusion and need to blend.
+                oldWarpedImg = cv2.imread('prevFrameScaled.png')
+                cv2.imwrite(f'oldFrameScaled.png',oldWarpedImg)#swap in for blending later 
+                turbo_blend = True # flag to blend frames after diff generated...
+                print('clip/diff this frame - generate clip diff image')
 
           init_image = 'prevFrameScaled.png'
           init_scale = args.frames_scale
@@ -2829,11 +2830,11 @@ if resume_run:
     batchNum = int(run_to_resume)
   if resume_from_frame == 'latest':
     start_frame = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
-    if turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
+    if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
       start_frame = start_frame - (start_frame % int(turbo_steps))
   else:
     start_frame = int(resume_from_frame)+1
-    if turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
+    if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
       start_frame = start_frame - (start_frame % int(turbo_steps))
     if retain_overwritten_frames is True:
       existing_frames = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
