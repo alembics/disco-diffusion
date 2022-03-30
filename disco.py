@@ -326,14 +326,8 @@ else:
     root_path = '.'
 
 import os
-from os import path
-#Simple create paths taken with modifications from Datamosh's Batch VQGAN+CLIP notebook
 def createPath(filepath):
-    if path.exists(filepath) == False:
-      os.makedirs(filepath)
-      print(f'Made {filepath}')
-    else:
-      print(f'filepath {filepath} exists.')
+    os.makedirs(filepath, exist_ok=True)
 
 initDirPath = f'{root_path}/init_images'
 createPath(initDirPath)
@@ -357,7 +351,6 @@ else:
 # %%
 #@title ### 1.3 Install and import dependencies
 
-from os.path import exists as path_exists
 import pathlib, shutil
 
 if not is_colab:
@@ -401,9 +394,9 @@ if is_colab:
   except:
     pass
 
-if not path_exists(f'{model_path}'):
+if not os.path.exists(f'{model_path}'):
   pathlib.Path(model_path).mkdir(parents=True, exist_ok=True)
-if not path_exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
+if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
   wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
 
 import sys
@@ -500,7 +493,7 @@ warnings.filterwarnings("ignore", category=UserWarning)
 if USE_ADABINS:
   if is_colab:
     gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not path_exists(f'{model_path}/AdaBins_nyu.pt'):
+    if not os.path.exists(f'{model_path}/AdaBins_nyu.pt'):
       wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", model_path)
     pathlib.Path("pretrained").mkdir(parents=True, exist_ok=True)
     shutil.copyfile(f"{model_path}/AdaBins_nyu.pt", "pretrained/AdaBins_nyu.pt")
@@ -910,6 +903,44 @@ def range_loss(input):
 
 stop_on_next_loop = False  # Make sure GPU memory doesn't get corrupted from cancelling the run mid-way through, allow a full frame to complete
 
+def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
+  global seed
+
+  if args.key_frames:
+    translation_x = args.translation_x_series[frame_num]
+    translation_y = args.translation_y_series[frame_num]
+    translation_z = args.translation_z_series[frame_num]
+    rotation_3d_x = args.rotation_3d_x_series[frame_num]
+    rotation_3d_y = args.rotation_3d_y_series[frame_num]
+    rotation_3d_z = args.rotation_3d_z_series[frame_num]
+    print(
+        f'translation_x: {translation_x}',
+        f'translation_y: {translation_y}',
+        f'translation_z: {translation_z}',
+        f'rotation_3d_x: {rotation_3d_x}',
+        f'rotation_3d_y: {rotation_3d_y}',
+        f'rotation_3d_z: {rotation_3d_z}',
+    )
+
+  if frame_num > 0:
+    seed = seed + 1
+    if resume_run and frame_num == start_frame:
+      img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
+    else:
+      img_filepath = '/content/prevFrame.png' if is_colab else 'prevFrame.png'
+    trans_scale = 1.0/200.0
+    translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
+    rotate_xyz = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
+    print('translation:',translate_xyz)
+    print('rotation:',rotate_xyz)
+    rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+    print("rot_mat: " + str(rot_mat))
+    next_step_pil = dxf.transform_image_3d(img_filepath, midas_model, midas_transform, DEVICE,
+                                            rot_mat, translate_xyz, args.near_plane, args.far_plane,
+                                            args.fov, padding_mode=args.padding_mode,
+                                            sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
+    return next_step_pil
+
 def do_run():
   seed = args.seed
   print(range(args.start_frame, args.max_frames))
@@ -979,58 +1010,45 @@ def do_run():
           skip_steps = args.calc_frames_skip_steps
 
       if args.animation_mode == "3D":
-        if args.key_frames:
-          angle = args.angle_series[frame_num]
-          #zoom = args.zoom_series[frame_num]
-          translation_x = args.translation_x_series[frame_num]
-          translation_y = args.translation_y_series[frame_num]
-          translation_z = args.translation_z_series[frame_num]
-          rotation_3d_x = args.rotation_3d_x_series[frame_num]
-          rotation_3d_y = args.rotation_3d_y_series[frame_num]
-          rotation_3d_z = args.rotation_3d_z_series[frame_num]
-          print(
-              f'angle: {angle}',
-              #f'zoom: {zoom}',
-              f'translation_x: {translation_x}',
-              f'translation_y: {translation_y}',
-              f'translation_z: {translation_z}',
-              f'rotation_3d_x: {rotation_3d_x}',
-              f'rotation_3d_y: {rotation_3d_y}',
-              f'rotation_3d_z: {rotation_3d_z}',
-          )
-
-        if frame_num > 0:
+        if frame_num == 0:
+          turbo_blend = False
+        else:
           seed = seed + 1    
           if resume_run and frame_num == start_frame:
             img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
+            if turbo_mode and frame_num > turbo_preroll:
+              shutil.copyfile(img_filepath, 'oldFrameScaled.png')
           else:
             img_filepath = '/content/prevFrame.png' if is_colab else 'prevFrame.png'
-          trans_scale = 1.0/200.0
-          translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
-          rotate_xyz = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
-          print('translation:',translate_xyz)
-          print('rotation:',rotate_xyz)
-          rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
-          print("rot_mat: " + str(rot_mat))
-          next_step_pil = dxf.transform_image_3d(img_filepath, midas_model, midas_transform, DEVICE,
-                                                 rot_mat, translate_xyz, args.near_plane, args.far_plane,
-                                                 args.fov, padding_mode=args.padding_mode,
-                                                 sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
+
+          next_step_pil = do_3d_step(img_filepath, frame_num, midas_model, midas_transform)
           next_step_pil.save('prevFrameScaled.png')
 
-          ### Turbo mode - skip some diffusions to save time
-          turbo_blend = False # default to normal frame saving later
-          if turbo_mode and frame_num > 10: #preroll is 10 frames
-            if frame_num % int(turbo_steps) != 0:
+          ### Turbo mode - skip some diffusions, use 3d morph for clarity and to save time
+          turbo_blend = False # default for non-turbo frame saving
+          if turbo_mode == True and frame_num == turbo_preroll: #start tracking oldframe
+            next_step_pil.save('oldFrameScaled.png')#stash for later blending          
+          if turbo_mode == True and frame_num > turbo_preroll:
+            #set up 2 warped image sequences, old & new, to blend toward new diff image
+            old_frame = do_3d_step('oldFrameScaled.png', frame_num, midas_model, midas_transform)
+            old_frame.save('oldFrameScaled.png')
+            if frame_num % int(turbo_steps) != 0: 
               print('turbo skip this frame: skipping clip diffusion steps')
               filename = f'{args.batch_name}({args.batchNum})_{frame_num:04}.png'
-              next_step_pil.save(f'{batchFolder}/{filename}') #save it as this frame. done.
+              blend_factor = ((frame_num % int(turbo_steps))+1)/int(turbo_steps)
+              print('turbo skip this frame: skipping clip diffusion steps and saving blended frame')
+              newWarpedImg = cv2.imread('prevFrameScaled.png')#this is already updated..
+              oldWarpedImg = cv2.imread('oldFrameScaled.png')
+              blendedImage = cv2.addWeighted(newWarpedImg, blend_factor, oldWarpedImg,1-blend_factor, 0.0)
+              cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
               next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
-              turbo_blend = False # default to normal-frame-saving later
+              turbo_blend = False
               continue
             else:
-              if turbo_frame_blend:
-                turbo_blend = True # blend frames for smoothness..
+              #if not a skip frame, will run diffusion and need to blend.
+              oldWarpedImg = cv2.imread('prevFrameScaled.png')
+              cv2.imwrite(f'oldFrameScaled.png',oldWarpedImg)#swap in for blending later 
+              turbo_blend = True # flag to blend frames after diff generated...
               print('clip/diff this frame - generate clip diff image')
 
           init_image = 'prevFrameScaled.png'
@@ -1069,7 +1087,7 @@ def do_run():
       else:
         image_prompt = []
 
-      print(f'Frame Prompt: {frame_prompt}')
+      print(f'Frame {frame_num} Prompt: {frame_prompt}')
 
       model_stats = []
       for clip_model in clip_models:
@@ -1396,6 +1414,7 @@ def save_settings():
     'extract_nth_frame':extract_nth_frame,
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
+    'turbo_preroll':turbo_preroll,
     'turbo_frame_blend':turbo_frame_blend,
   }
   # print('Settings:', setting_list)
@@ -2398,7 +2417,16 @@ sampling_mode = 'bicubic'#@param {type:"string"}
 
 turbo_mode = True #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
+turbo_preroll = 10 # frames
 turbo_frame_blend = True #@param {type:"boolean"}
+
+#insist turbo be used only w 3d anim.
+if turbo_mode and animation_mode != '3D':
+  print('=====')
+  print('Turbo mode only available with 3D animations. Disabling Turbo.')
+  print('=====')
+  turbo_mode = False
+
 #@markdown ---
 
 #@markdown ####**Coherency Settings:**
@@ -2801,11 +2829,11 @@ if resume_run:
     batchNum = int(run_to_resume)
   if resume_from_frame == 'latest':
     start_frame = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
-    if turbo_mode == True and start_frame > 10 and start_frame % int(turbo_steps) != 0:
+    if turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
       start_frame = start_frame - (start_frame % int(turbo_steps))
   else:
     start_frame = int(resume_from_frame)+1
-    if turbo_mode == True and start_frame > 10 and start_frame % int(turbo_steps) != 0:
+    if turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
       start_frame = start_frame - (start_frame % int(turbo_steps))
     if retain_overwritten_frames is True:
       existing_frames = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
@@ -2815,7 +2843,7 @@ if resume_run:
 else:
   start_frame = 0
   batchNum = len(glob(batchFolder+"/*.txt"))
-  while path.isfile(f"{batchFolder}/{batch_name}({batchNum})_settings.txt") is True or path.isfile(f"{batchFolder}/{batch_name}-{batchNum}_settings.txt") is True:
+  while os.path.isfile(f"{batchFolder}/{batch_name}({batchNum})_settings.txt") is True or os.path.isfile(f"{batchFolder}/{batch_name}-{batchNum}_settings.txt") is True:
     batchNum += 1
 
 print(f'Starting Run: {batch_name}({batchNum}) at frame {start_frame}')
