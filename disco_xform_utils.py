@@ -1,5 +1,5 @@
 import torch, torchvision
-import pytorch3d.renderer.cameras as p3dCam
+import py3d_tools as p3d
 import midas_utils
 from PIL import Image
 import numpy as np
@@ -81,8 +81,8 @@ def transform_image_3d(img_filepath, midas_model, midas_transform, device, rot_m
     depth_tensor = torch.from_numpy(depth_map).squeeze().to(device)
 
     pixel_aspect = 1.0 # really.. the aspect of an individual pixel! (so usually 1.0)
-    persp_cam_old = p3dCam.FoVPerspectiveCameras(near, far, pixel_aspect, fov=fov_deg, degrees=True, device=device)
-    persp_cam_new = p3dCam.FoVPerspectiveCameras(near, far, pixel_aspect, fov=fov_deg, degrees=True, R=rot_mat, T=torch.tensor([translate]), device=device)
+    persp_cam_old = p3d.FoVPerspectiveCameras(near, far, pixel_aspect, fov=fov_deg, degrees=True, device=device)
+    persp_cam_new = p3d.FoVPerspectiveCameras(near, far, pixel_aspect, fov=fov_deg, degrees=True, R=rot_mat, T=torch.tensor([translate]), device=device)
 
     # range of [-1,1] is important to torch grid_sample's padding handling
     y,x = torch.meshgrid(torch.linspace(-1.,1.,h,dtype=torch.float32,device=device),torch.linspace(-1.,1.,w,dtype=torch.float32,device=device))
