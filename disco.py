@@ -916,8 +916,6 @@ def range_loss(input):
 stop_on_next_loop = False  # Make sure GPU memory doesn't get corrupted from cancelling the run mid-way through, allow a full frame to complete
 
 def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
-  global seed
-
   if args.key_frames:
     translation_x = args.translation_x_series[frame_num]
     translation_y = args.translation_y_series[frame_num]
@@ -934,25 +932,19 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
         f'rotation_3d_z: {rotation_3d_z}',
     )
 
-  if frame_num > 0:
-    seed = seed + 1
-    if resume_run and frame_num == start_frame:
-      img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
-    else:
-      img_filepath = '/content/prevFrame.png' if is_colab else 'prevFrame.png'
-    trans_scale = 1.0/200.0
-    translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
-    rotate_xyz_degrees = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
-    print('translation:',translate_xyz)
-    print('rotation:',rotate_xyz_degrees)
-    rotate_xyz = [math.radians(rotate_xyz_degrees[0]), math.radians(rotate_xyz_degrees[1]), math.radians(rotate_xyz_degrees[2])]
-    rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
-    print("rot_mat: " + str(rot_mat))
-    next_step_pil = dxf.transform_image_3d(img_filepath, midas_model, midas_transform, DEVICE,
-                                            rot_mat, translate_xyz, args.near_plane, args.far_plane,
-                                            args.fov, padding_mode=args.padding_mode,
-                                            sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
-    return next_step_pil
+  trans_scale = 1.0/200.0
+  translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
+  rotate_xyz_degrees = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
+  print('translation:',translate_xyz)
+  print('rotation:',rotate_xyz_degrees)
+  rotate_xyz = [math.radians(rotate_xyz_degrees[0]), math.radians(rotate_xyz_degrees[1]), math.radians(rotate_xyz_degrees[2])]
+  rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+  print("rot_mat: " + str(rot_mat))
+  next_step_pil = dxf.transform_image_3d(img_filepath, midas_model, midas_transform, DEVICE,
+                                          rot_mat, translate_xyz, args.near_plane, args.far_plane,
+                                          args.fov, padding_mode=args.padding_mode,
+                                          sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
+  return next_step_pil
 
 def do_run():
   seed = args.seed
@@ -996,7 +988,7 @@ def do_run():
           )
         
         if frame_num > 0:
-          seed = seed + 1          
+          seed += 1
           if resume_run and frame_num == start_frame:
             img_0 = cv2.imread(batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png")
           else:
@@ -1026,7 +1018,7 @@ def do_run():
         if frame_num == 0:
           turbo_blend = False
         else:
-          seed = seed + 1    
+          seed += 1    
           if resume_run and frame_num == start_frame:
             img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
             if turbo_mode and frame_num > turbo_preroll:
@@ -1070,7 +1062,8 @@ def do_run():
           skip_steps = args.calc_frames_skip_steps
 
       if  args.animation_mode == "Video Input":
-        seed = seed + 1  
+        if not video_init_seed_continuity:
+          seed += 1
         init_image = f'{videoFramesFolder}/{frame_num+1:04}.jpg'
         init_scale = args.frames_scale
         skip_steps = args.calc_frames_skip_steps
@@ -1426,6 +1419,7 @@ def save_settings():
     'sampling_mode': sampling_mode,
     'video_init_path':video_init_path,
     'extract_nth_frame':extract_nth_frame,
+    'video_init_seed_continuity': video_init_seed_continuity,
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
@@ -2376,7 +2370,8 @@ if is_colab:
     video_init_path = "/content/training.mp4" #@param {type: 'string'}
 else:
     video_init_path = "training.mp4" #@param {type: 'string'}
-extract_nth_frame = 2 #@param {type:"number"} 
+extract_nth_frame = 2 #@param {type: 'number'}
+video_init_seed_continuity = True #@param {type: 'boolean'}
 
 if animation_mode == "Video Input":
   if is_colab:
@@ -2900,6 +2895,7 @@ args = {
     'animation_mode': animation_mode,
     'video_init_path': video_init_path,
     'extract_nth_frame': extract_nth_frame,
+    'video_init_seed_continuity': video_init_seed_continuity,
     'key_frames': key_frames,
     'max_frames': max_frames if animation_mode != "None" else 1,
     'interp_spline': interp_spline,
