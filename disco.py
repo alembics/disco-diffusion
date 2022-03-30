@@ -5,7 +5,7 @@
 
 # %%
 """
-# Disco Diffusion v5 - Now with 3D animation
+# Disco Diffusion v5.1 - Now with Turbo
 
 In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
 
@@ -40,6 +40,8 @@ Disco:
 Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
 
 3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
+
+Turbo feature by Chris Allen (https://twitter.com/zippy731)
 """
 
 # %%
@@ -198,9 +200,15 @@ if skip_for_run_all == False:
 
       Separated transform code
 
-  v5.01 Update: Match 10th 2022 - gandamu / Adam Letts
+  v5.01 Update: March 10th 2022 - gandamu / Adam Letts
 
       IPython magic commands replaced by Python code
+
+  v5.1 Update: March 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
+
+      Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
+
+      Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
 
       '''
   )
@@ -2415,8 +2423,9 @@ sampling_mode = 'bicubic'#@param {type:"string"}
 #@markdown ####**Turbo Mode (3D anim only):**
 #@markdown (Starts after frame 10,) skips diffusion steps and just uses depth map to warp images for skipped frames.
 #@markdown Speeds up rendering by 2x-4x, and may improve image coherence between frames. frame_blend_mode smooths abrupt texture changes across 2 frames.
+#@markdown For different settings tuned for Turbo Mode, refer to the original Disco-Turbo Github: https://github.com/zippy731/disco-diffusion-turbo
 
-turbo_mode = True #@param {type:"boolean"}
+turbo_mode = False #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
 turbo_preroll = 10 # frames
 turbo_frame_blend = True #@param {type:"boolean"}
