@@ -214,6 +214,8 @@ if skip_for_run_all == False:
 
       Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
 
+      Added video_init_seed_continuity option to make init video animations more continuous
+
       '''
   )
 
