@@ -200,15 +200,19 @@ if skip_for_run_all == False:
 
       Separated transform code
 
-  v5.01 Update: March 10th 2022 - gandamu / Adam Letts
+  v5.01 Update: Mar 10th 2022 - gandamu / Adam Letts
 
       IPython magic commands replaced by Python code
 
-  v5.1 Update: March 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
+  v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
 
       Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
 
       Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
+
+      3D rotation parameter units are now degrees (rather than radians)
+
+      Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
 
       '''
   )
@@ -1224,7 +1228,7 @@ def do_run():
               return grad * magnitude.clamp(max=args.clamp_max) / magnitude  #min=-0.02, min=-clamp_max, 
           return grad
   
-      if args.sampling_mode == 'ddim':
+      if args.diffusion_sampling_mode == 'ddim':
           sample_fn = diffusion.ddim_sample_loop_progressive
       else:
           sample_fn = diffusion.plms_sample_loop_progressive
@@ -1247,7 +1251,7 @@ def do_run():
           if perlin_init:
               init = regen_perlin()
 
-          if args.sampling_mode == 'ddim':
+          if args.diffusion_sampling_mode == 'ddim':
               samples = sample_fn(
                   model,
                   (batch_size, 3, args.side_y, args.side_x),
@@ -1390,7 +1394,7 @@ def save_settings():
     'use_secondary_model': use_secondary_model,
     'steps': steps,
     'diffusion_steps': diffusion_steps,
-    'sampling_mode': sampling_mode,
+    'diffusion_sampling_mode': diffusion_sampling_mode,
     'ViTB32': ViTB32,
     'ViTB16': ViTB16,
     'ViTL14': ViTL14,
@@ -2130,7 +2134,7 @@ def do_superres(img, filepath):
 #@markdown ####**Models Settings:**
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
-sampling_mode = 'ddim' #@param ['plms','ddim']  
+diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']  
 
 timestep_respacing = '250' #@param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
 diffusion_steps = 1000 #@param {type: 'number'}
@@ -2877,7 +2881,7 @@ args = {
     'batch_size':batch_size,
     'batch_name': batch_name,
     'steps': steps,
-    'sampling_mode': sampling_mode,
+    'diffusion_sampling_mode': diffusion_sampling_mode,
     'width_height': width_height,
     'clip_guidance_scale': clip_guidance_scale,
     'tv_scale': tv_scale,
