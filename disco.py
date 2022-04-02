@@ -1018,7 +1018,7 @@ def do_run():
 
       if args.animation_mode == "3D":
         if frame_num == 0:
-          turbo_blend = False
+          pass
         else:
           seed += 1    
           if resume_run and frame_num == start_frame:
@@ -1032,7 +1032,6 @@ def do_run():
           next_step_pil.save('prevFrameScaled.png')
 
           ### Turbo mode - skip some diffusions, use 3d morph for clarity and to save time
-          turbo_blend = False # default for non-turbo frame saving
           if turbo_mode:
             if frame_num == turbo_preroll: #start tracking oldframe
               next_step_pil.save('oldFrameScaled.png')#stash for later blending          
@@ -1050,13 +1049,11 @@ def do_run():
                 blendedImage = cv2.addWeighted(newWarpedImg, blend_factor, oldWarpedImg,1-blend_factor, 0.0)
                 cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
                 next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
-                turbo_blend = False
                 continue
               else:
                 #if not a skip frame, will run diffusion and need to blend.
                 oldWarpedImg = cv2.imread('prevFrameScaled.png')
                 cv2.imwrite(f'oldFrameScaled.png',oldWarpedImg)#swap in for blending later 
-                turbo_blend = True # flag to blend frames after diff generated...
                 print('clip/diff this frame - generate clip diff image')
 
           init_image = 'prevFrameScaled.png'
@@ -1332,14 +1329,13 @@ def do_run():
                         else:
                           image.save(f'{batchFolder}/{filename}')
                           if args.animation_mode == "3D":
-                            # If turbo_blend, save a blended image
-                            if turbo_mode and turbo_blend:
+                            # If turbo, save a blended image
+                            if turbo_mode:
                               # Mix new image with prevFrameScaled
                               newFrame = cv2.imread('prevFrame.png') # This is already updated..
                               prev_frame_warped = cv2.imread('prevFrameScaled.png')
                               blendedImage = cv2.addWeighted(newFrame, 0.5, prev_frame_warped, 0.5, 0.0)
                               cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
-                              turbo_blend = False # reset to false
                             else:
                               image.save(f'{batchFolder}/{filename}')
                         # if frame_num != args.max_frames-1:
@@ -1425,7 +1421,6 @@ def save_settings():
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
-    'turbo_frame_blend':turbo_frame_blend,
   }
   # print('Settings:', setting_list)
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
@@ -2431,7 +2426,6 @@ sampling_mode = 'bicubic'#@param {type:"string"}
 turbo_mode = False #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
 turbo_preroll = 10 # frames
-turbo_frame_blend = True #@param {type:"boolean"}
 
 #insist turbo be used only w 3d anim.
 if turbo_mode and animation_mode != '3D':
