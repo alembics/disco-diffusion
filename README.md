@@ -45,6 +45,16 @@ A frankensteinian amalgamation of notebooks, models and techniques for the gener
 #### v5 Update: Feb 20th 2022 - gandamu / Adam Letts
 * Added 3D animation mode. Uses weighted combination of AdaBins and MiDaS depth estimation models. Uses pytorch3d for 3D transforms on Colab and/or Linux.
 
+#### v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts / MSFTserver aka HostsServer
+
+* Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
+* Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
+* 3D rotation parameter units are now degrees (rather than radians)
+* Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
+* Added video_init_seed_continuity option to make init video animations more continuous
+* Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
+* Remove Super Resolution
+
 
 ## Notebook Provenance 
 
