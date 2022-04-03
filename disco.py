@@ -1332,9 +1332,10 @@ def do_run():
                             # If turbo, save a blended image
                             if turbo_mode:
                               # Mix new image with prevFrameScaled
+                              blend_factor = (1)/int(turbo_steps)
                               newFrame = cv2.imread('prevFrame.png') # This is already updated..
                               prev_frame_warped = cv2.imread('prevFrameScaled.png')
-                              blendedImage = cv2.addWeighted(newFrame, 0.5, prev_frame_warped, 0.5, 0.0)
+                              blendedImage = cv2.addWeighted(newFrame, blend_factor, prev_frame_warped, (1-blend_factor), 0.0)
                               cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
                             else:
                               image.save(f'{batchFolder}/{filename}')
@@ -3049,3 +3050,4 @@ else:
   #     mp4 = open(filepath,'rb').read()
   #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
   #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
+  
