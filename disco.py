@@ -42,6 +42,8 @@ Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques,
 3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
 
 Turbo feature by Chris Allen (https://twitter.com/zippy731)
+
+NLP prompt generation feature by knylx (https://twitter.com/knylx_art)
 """
 
 # %%
@@ -468,6 +470,12 @@ sys.path.append(".")
 sys.path.append('./taming-transformers')
 from taming.models import vqgan # checking correct import from taming
 from torchvision.datasets.utils import download_url
+
+#OpenAI
+if is_colab:
+    pipi("openai")
+
+import openai
 
 if is_colab:
   os.chdir('/content/latent-diffusion')
@@ -1417,6 +1425,25 @@ def save_settings():
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
     json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
+def get_nlp_prompt(prompt, prompt_prefix, prompt_suffix, api_key, engine, max_tokens=40, temperature=1, top_p=1, frequency_penalty=1.5, presence_penalty=1.5):
+    openai.api_key = api_key
+
+    try:
+        response = openai.Completion.create(
+            engine=engine,
+            prompt=prompt,
+            temperature=temperature,
+            max_tokens=max_tokens,
+            top_p=top_p,
+            frequency_penalty=frequency_penalty,
+            presence_penalty=presence_penalty
+        )
+
+        return f"{prompt_prefix} {response['choices'][0]['text']} {prompt_suffix}".replace('.', '').replace('  ', ' ').replace('\n', '').replace('\r', '').strip().lower()
+    except BaseException as err:
+        print("get_nlp_prompt: unexpected error")
+        print(err)
+        raise
 # %%
 #@title 1.6 Define the secondary diffusion model
 
@@ -2769,6 +2796,31 @@ image_prompts = {
     # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
 }
 
+# use your OpenAI account to create prompts, careful openAI is not free, please read their guidelines before using this feature
+# more models to come like GPT-J from EleutherAI
+#@markdown ### Activate prompt generation using NLP:
+#@markdown Use your OpenAI account to create prompts, **be careful OpenAI is NOT free**, please read their [Usage Guidelines](https://beta.openai.com/docs/usage-guidelines/usage-guidelines) before using this feature:
+use_nlp_prompt = False #@param {type: 'boolean'}
+open_ai_api_key = "" #@param {type: 'string'}
+#@markdown Create your prompt for the NLP model:
+nlp_engine = "text-davinci-002" #@param ["text-davinci-001", "text-davinci-002", "text-curie-001", "text-babbage-001", "text-ada-001"]
+nlp_prompt = "create one complete sentence using few words to describe a landscape in an epic fantasy genre that includes a lot adjectives" #@param {type: 'string'}
+nlp_generated_prompt_prefix = "a beautiful painting of" #@param {type: 'string'}
+nlp_generated_prompt_suffix = "by greg rutkowski and thomas kinkade, Trending on artstation" #@param {type: 'string'}
+#@markdown Change prompt length and control randomness:
+nlp_max_tokens = 40 #@param {type:"slider", min:0, max:50, step:1}
+nlp_temperature = 0.7 #@param {type:"slider", min:0, max:1, step:0.05}
+
+
+if use_nlp_prompt and open_ai_api_key != "" and nlp_prompt != "" and nlp_engine != "":
+  nlp_generated_prompt = get_nlp_prompt(nlp_prompt, nlp_generated_prompt_prefix, nlp_generated_prompt_suffix, open_ai_api_key, nlp_engine, nlp_max_tokens, nlp_temperature)
+  print(f"This prompt will be used:\n\r\033[1m{nlp_generated_prompt}\033[0m")
+
+  # you can add more prompts here if you wish
+  text_prompts = {
+      0: [nlp_generated_prompt]
+      #100: ["This set of prompts start at frame 100","This prompt has weight five:5"]
+  }
 
 # %%
 """
