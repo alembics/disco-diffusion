@@ -391,6 +391,7 @@ if is_colab:
   #gitclone("https://github.com/facebookresearch/SLIP.git")
   gitclone("https://github.com/crowsonkb/guided-diffusion")
   gitclone("https://github.com/assafshocher/ResizeRight.git")
+  gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
   pipie("./CLIP")
   pipie("./guided-diffusion")
   multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy'], stdout=subprocess.PIPE).stdout.decode('utf-8')
@@ -416,19 +417,8 @@ if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
 import sys
 import torch
 
-#Install pytorch3d
-if is_colab:
-  pyt_version_str=torch.__version__.split("+")[0].replace(".", "")
-  version_str="".join([
-      f"py3{sys.version_info.minor}_cu",
-      torch.version.cuda.replace(".",""),
-      f"_pyt{pyt_version_str}"
-  ])
-  multipip_res = subprocess.run(['pip', 'install', 'fvcore', 'iopath'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(multipip_res)
-  subprocess.run(['pip', 'install', '--no-index', '--no-cache-dir', 'pytorch3d', '-f', f'https://dl.fbaipublicfiles.com/pytorch3d/packaging/wheels/{version_str}/download.html'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-
 # sys.path.append('./SLIP')
+sys.path.append('./pytorch3d-lite')
 sys.path.append('./ResizeRight')
 sys.path.append('./MiDaS')
 from dataclasses import dataclass
@@ -632,7 +622,7 @@ def init_midas_depth_model(midas_model_type="dpt_large", optimize=True):
 
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
 
-import pytorch3d.transforms as p3dT
+import py3d_tools as p3dT
 import disco_xform_utils as dxf
 
 def interp(t):
