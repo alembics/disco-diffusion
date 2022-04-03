@@ -2118,8 +2118,7 @@ diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_d
 use_secondary_model = True #@param {type: 'boolean'}
 diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']  
 
-timestep_respacing = '250' #@param ['25','50','100','150','250','500','1000','ddim25','ddim50', 'ddim75', 'ddim100','ddim150','ddim250','ddim500','ddim1000']  
-diffusion_steps = 1000 #@param {type: 'number'}
+
 use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
 ViTB16 = True #@param{type:"boolean"}
@@ -2211,9 +2210,9 @@ if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
     model_config.update({
         'attention_resolutions': '32, 16, 8',
         'class_cond': False,
-        'diffusion_steps': diffusion_steps,
+        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
         'rescale_timesteps': True,
-        'timestep_respacing': timestep_respacing,
+        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
         'image_size': 512,
         'learn_sigma': True,
         'noise_schedule': 'linear',
@@ -2229,9 +2228,9 @@ elif diffusion_model == '256x256_diffusion_uncond':
     model_config.update({
         'attention_resolutions': '32, 16, 8',
         'class_cond': False,
-        'diffusion_steps': diffusion_steps,
+        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
         'rescale_timesteps': True,
-        'timestep_respacing': timestep_respacing,
+        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
         'image_size': 256,
         'learn_sigma': True,
         'noise_schedule': 'linear',
