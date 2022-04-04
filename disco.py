@@ -444,11 +444,11 @@ if is_colab:
   subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 try:
-  import clip
+  import CLIP
 except:
   if os.path.exists("CLIP") is not True:
     gitclone("https://github.com/openai/CLIP")
-  sys.path.append(f'{root_path}/CLIP')
+  sys.path.append(f'{PROJECT_DIR}/CLIP')
 
 try:
   from guided_diffusion.script_util import create_model_and_diffusion
@@ -514,7 +514,7 @@ from torch.nn import functional as F
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from tqdm.notebook import tqdm
-import clip
+import CLIP
 from resize_right import resize
 from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from datetime import datetime
@@ -545,7 +545,7 @@ if USE_ADABINS:
   except:
     if os.path.exists("AdaBins") is not True:
       gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not path_exists(f'{model_path}/pretrained/AdaBins_nyu.pt'):
+    if not os.path.exists(f'{model_path}/pretrained/AdaBins_nyu.pt'):
       os.makedirs(f'{model_path}/pretrained')
       wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{model_path}/pretrained')
     sys.path.append(f'{os.getcwd()}/AdaBins')
