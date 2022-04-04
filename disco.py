@@ -2243,15 +2243,14 @@ elif diffusion_model == '256x256_diffusion_uncond':
         'use_scale_shift_norm': True,
     })
 
-secondary_model_ver = 2
 model_default = model_config['image_size']
 
 
 
-if secondary_model_ver == 2:
+if use_secondary_model:
     secondary_model = SecondaryDiffusionImageNet2()
     secondary_model.load_state_dict(torch.load(f'{model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
-secondary_model.eval().requires_grad_(False).to(device)
+    secondary_model.eval().requires_grad_(False).to(device)
 
 clip_models = []
 if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
