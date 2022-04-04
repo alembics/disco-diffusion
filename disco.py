@@ -388,13 +388,14 @@ model_secondary_downloaded = False
 
 if is_colab:
   gitclone("https://github.com/openai/CLIP")
+  gitclone("https://github.com/russelldc/AudioCLIP.git")
   #gitclone("https://github.com/facebookresearch/SLIP.git")
   gitclone("https://github.com/crowsonkb/guided-diffusion")
   gitclone("https://github.com/assafshocher/ResizeRight.git")
   gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
   pipie("./CLIP")
   pipie("./guided-diffusion")
-  multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy', 'pytorch-ignite', 'visdom'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   print(multipip_res)
   subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   gitclone("https://github.com/isl-org/MiDaS.git")
@@ -492,6 +493,9 @@ import time
 from omegaconf import OmegaConf
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
+
+sys.path.append('./AudioCLIP')
+from audioclip import AudioCLIP
 
 # AdaBins stuff
 if USE_ADABINS:
@@ -1083,6 +1087,14 @@ def do_run():
       else:
         image_prompt = []
 
+      print(args.audio_prompts_series)
+      if args.audio_prompts_series is not None and frame_num >= len(args.audio_prompts_series):
+        audio_prompt = args.audio_prompts_series[-1]
+      elif args.audio_prompts_series is not None:
+        audio_prompt = args.audio_prompts_series[frame_num]
+      else:
+        audio_prompt = []
+
       print(f'Frame {frame_num} Prompt: {frame_prompt}')
 
       model_stats = []
@@ -1090,36 +1102,50 @@ def do_run():
             cutn = 16
             model_stat = {"clip_model":None,"target_embeds":[],"make_cutouts":None,"weights":[]}
             model_stat["clip_model"] = clip_model
-            
-            
-            for prompt in frame_prompt:
-                txt, weight = parse_prompt(prompt)
-                txt = clip_model.encode_text(clip.tokenize(prompt).to(device)).float()
-                
-                if args.fuzzy_prompt:
-                    for i in range(25):
-                        model_stat["target_embeds"].append((txt + torch.randn(txt.shape).cuda() * args.rand_mag).clamp(0,1))
-                        model_stat["weights"].append(weight)
-                else:
-                    model_stat["target_embeds"].append(txt)
-                    model_stat["weights"].append(weight)
-        
-            if image_prompt:
-              model_stat["make_cutouts"] = MakeCutouts(clip_model.visual.input_resolution, cutn, skip_augs=skip_augs) 
-              for prompt in image_prompt:
+          
+            isAudio = isinstance(clip_model,AudioCLIP)
+            #If it is AudioCLIP, process the Audio prompts. Otherwise process either image or text prompts
+            if isAudio:
+              if audio_prompt:
+                for prompt in audio_prompt:
+                  torch.set_grad_enabled(False)
                   path, weight = parse_prompt(prompt)
-                  img = Image.open(fetch(path)).convert('RGB')
-                  img = TF.resize(img, min(side_x, side_y, *img.size), T.InterpolationMode.LANCZOS)
-                  batch = model_stat["make_cutouts"](TF.to_tensor(img).to(device).unsqueeze(0).mul(2).sub(1))
-                  embed = clip_model.encode_image(normalize(batch)).float()
-                  if fuzzy_prompt:
-                      for i in range(25):
-                          model_stat["target_embeds"].append((embed + torch.randn(embed.shape).cuda() * rand_mag).clamp(0,1))
-                          weights.extend([weight / cutn] * cutn)
-                  else:
-                      model_stat["target_embeds"].append(embed)
-                      model_stat["weights"].extend([weight / cutn] * cutn)
-        
+                  clip_model.eval()
+                  audio_enc = clip_model.create_audio_encoding(path)
+                  audio_enc = audio_enc / audio_enc.norm(dim=-1, keepdim=True)
+                  embed = audio_enc.float()
+                  model_stat["target_embeds"].append(embed)
+                  model_stat["weights"].append(weight)
+                  torch.set_grad_enabled(True)    
+            else:
+              for prompt in frame_prompt:
+                    txt, weight = parse_prompt(prompt)
+                    txt = clip_model.encode_text(clip.tokenize(prompt).to(device)).float()
+                    
+                    if args.fuzzy_prompt:
+                        for i in range(25):
+                            model_stat["target_embeds"].append((txt + torch.randn(txt.shape).cuda() * args.rand_mag).clamp(0,1))
+                            model_stat["weights"].append(weight)
+                    else:
+                        model_stat["target_embeds"].append(txt)
+                        model_stat["weights"].append(weight)
+            
+              if image_prompt:
+                  model_stat["make_cutouts"] = MakeCutouts(clip_model.visual.input_resolution, cutn, skip_augs=skip_augs) 
+                  for prompt in image_prompt:
+                      path, weight = parse_prompt(prompt)
+                      img = Image.open(fetch(path)).convert('RGB')
+                      img = TF.resize(img, min(side_x, side_y, *img.size), T.InterpolationMode.LANCZOS)
+                      batch = model_stat["make_cutouts"](TF.to_tensor(img).to(device).unsqueeze(0).mul(2).sub(1))
+                      embed = clip_model.encode_image(normalize(batch)).float()
+                      if fuzzy_prompt:
+                          for i in range(25):
+                              model_stat["target_embeds"].append((embed + torch.randn(embed.shape).cuda() * rand_mag).clamp(0,1))
+                              weights.extend([weight / cutn] * cutn)
+                      else:
+                          model_stat["target_embeds"].append(embed)
+                          model_stat["weights"].extend([weight / cutn] * cutn)    
+            
             model_stat["target_embeds"] = torch.cat(model_stat["target_embeds"])
             model_stat["weights"] = torch.tensor(model_stat["weights"], device=device)
             if model_stat["weights"].sum().abs() < 1e-3:
@@ -2130,6 +2156,7 @@ RN50x16 = False #@param{type:"boolean"}
 RN50x64 = False #@param{type:"boolean"}
 SLIPB16 = False #@param{type:"boolean"}
 SLIPL16 = False #@param{type:"boolean"}
+AudioCLIP_model = False #@param {type:"boolean"}
 
 #@markdown If you're having issues with model downloads, check this to compare SHA's:
 check_model_SHA = False #@param{type:"boolean"}
@@ -2289,6 +2316,15 @@ if SLIPL16:
   SLIPL16model.requires_grad_(False).eval().to(device)
 
   clip_models.append(SLIPL16model)
+
+if AudioCLIP_model:
+  torch.set_grad_enabled(False)
+  if not os.path.exists(f'{model_path}/AudioCLIP-Full-Training.pt'):
+    wget("https://github.com/AndreyGuzhov/AudioCLIP/releases/download/v0.1/AudioCLIP-Full-Training.pt", model_path)
+    
+  ac = AudioCLIP(pretrained=f'{model_path}/AudioCLIP-Full-Training.pt').cuda()
+  torch.set_grad_enabled(True)
+  clip_models.append(ac)
 
 normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 lpips_model = lpips.LPIPS(net='vgg').to(device)
@@ -2768,6 +2804,10 @@ image_prompts = {
     # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
 }
 
+#Audio prompts only work if the AudioCLIP model is activated
+audio_prompts = {    
+    #0: ['AudioCLIP/assets/bird_sounds.wav']
+}
 
 # %%
 """
@@ -2855,6 +2895,7 @@ args = {
     'batchNum': batchNum,
     'prompts_series':split_prompts(text_prompts) if text_prompts else None,
     'image_prompts_series':split_prompts(image_prompts) if image_prompts else None,
+    'audio_prompts_series':split_prompts(audio_prompts) if audio_prompts else None,
     'seed': seed,
     'display_rate':display_rate,
     'n_batches':n_batches if animation_mode == 'None' else 1,
