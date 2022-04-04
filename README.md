@@ -54,7 +54,8 @@ A frankensteinian amalgamation of notebooks, models and techniques for the gener
 * Added video_init_seed_continuity option to make init video animations more continuous
 * Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
 * Remove Super Resolution
-
+* Remove Slip Models
+* Update for crossplatform support
 
 ## Notebook Provenance 
 

@@ -345,9 +345,7 @@ else:
 # !!    "id": "PrepFolders"
 # !! }}
 #@title 1.2 Prepare Folders
-import subprocess
-import sys
-import ipykernel
+import subprocess, os, sys, ipykernel
 
 def gitclone(url):
   res = subprocess.run(['git', 'clone', url], stdout=subprocess.PIPE).stdout.decode('utf-8')
@@ -386,7 +384,7 @@ if is_colab:
     else:
         root_path = '/content'
 else:
-    root_path = '.'
+    root_path = os.getcwd()
 
 import os
 def createPath(filepath):
@@ -399,13 +397,13 @@ createPath(outDirPath)
 
 if is_colab:
     if google_drive and not save_models_to_google_drive or not google_drive:
-        model_path = '/content/model'
+        model_path = '/content/models'
         createPath(model_path)
     if google_drive and save_models_to_google_drive:
-        model_path = f'{root_path}/model'
+        model_path = f'{root_path}/models'
         createPath(model_path)
 else:
-    model_path = f'{root_path}/model'
+    model_path = f'{root_path}/models'
     createPath(model_path)
 
 # libraries = f'{root_path}/libraries'
@@ -418,7 +416,7 @@ else:
 # !! }}
 #@title ### 1.3 Install and import dependencies
 
-import pathlib, shutil
+import pathlib, shutil, os, sys
 
 if not is_colab:
   # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
@@ -432,46 +430,70 @@ if is_colab:
     root_path = f'/content'
     model_path = '/content/models' 
 else:
-  root_path = f'.'
-  model_path = f'{root_path}/model'
+  root_path = os.getcwd()
+  model_path = f'{root_path}/models'
 
 model_256_downloaded = False
 model_512_downloaded = False
 model_secondary_downloaded = False
 
+multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy', 'einops', 'pytorch-lightning', 'omegaconf'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+print(multipip_res)
+
 if is_colab:
-  gitclone("https://github.com/openai/CLIP")
-  gitclone("https://github.com/crowsonkb/guided-diffusion")
-  gitclone("https://github.com/assafshocher/ResizeRight.git")
-  gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
-  pipie("./CLIP")
-  pipie("./guided-diffusion")
-  multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(multipip_res)
   subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  gitclone("https://github.com/isl-org/MiDaS.git")
-  gitclone("https://github.com/alembics/disco-diffusion.git")
-  pipi("pytorch-lightning")
-  pipi("omegaconf")
-  pipi("einops")
+
+try:
+  import clip
+except:
+  if os.path.exists("CLIP") is not True:
+    gitclone("https://github.com/openai/CLIP")
+  sys.path.append(f'{root_path}/CLIP')
+
+try:
+  from guided_diffusion.script_util import create_model_and_diffusion
+except:
+  if os.path.exists("guided-diffusion") is not True:
+    gitclone("https://github.com/crowsonkb/guided-diffusion")
+  sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
+
+try:
+  from resize_right import resize
+except:
+  if os.path.exists("resize_right") is not True:
+    gitclone("https://github.com/assafshocher/ResizeRight.git")
+  sys.path.append(f'{PROJECT_DIR}/ResizeRight')
+
+try:
+  import py3d_tools
+except:
+  if os.path.exists('pytorch3d-lite') is not True:
+    gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
+  sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
+
+try:
+  from midas.dpt_depth import DPTDepthModel
+except:
+  if os.path.exists('MiDaS') is not True:
+    gitclone("https://github.com/isl-org/MiDaS.git")
+  if os.path.exists('MiDaS/midas_utils.py') is not True:
+    shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
+  if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
+    wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
+  sys.path.append(f'{PROJECT_DIR}/MiDaS')
+
+try:
+  sys.path.append(PROJECT_DIR)
+  import disco_xform_utils as dxf
+except:
+  if os.path.exists("disco-diffusion") is not True:
+    gitclone("https://github.com/alembics/disco-diffusion.git")
   # Rename a file to avoid a name conflict..
-  try:
-    os.rename("MiDaS/utils.py", "MiDaS/midas_utils.py")
-    shutil.copyfile("disco-diffusion/disco_xform_utils.py", "disco_xform_utils.py")
-  except:
-    pass
+  if os.path.exists('disco_xform_utils.py') is not True:
+    shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
+  sys.path.append(PROJECT_DIR)
 
-if not os.path.exists(f'{model_path}'):
-  pathlib.Path(model_path).mkdir(parents=True, exist_ok=True)
-if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
-  wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
-
-import sys
 import torch
-
-sys.path.append('./pytorch3d-lite')
-sys.path.append('./ResizeRight')
-sys.path.append('./MiDaS')
 from dataclasses import dataclass
 from functools import partial
 import cv2
@@ -492,8 +514,6 @@ from torch.nn import functional as F
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from tqdm.notebook import tqdm
-sys.path.append('./CLIP')
-sys.path.append('./guided-diffusion')
 import clip
 from resize_right import resize
 from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
@@ -520,13 +540,15 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # AdaBins stuff
 if USE_ADABINS:
-  if is_colab:
-    gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not os.path.exists(f'{model_path}/AdaBins_nyu.pt'):
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", model_path)
-    pathlib.Path("pretrained").mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(f"{model_path}/AdaBins_nyu.pt", "pretrained/AdaBins_nyu.pt")
-  sys.path.append('./AdaBins')
+  try:
+    from infer import InferenceHelper
+  except:
+    if os.path.exists("AdaBins") is not True:
+      gitclone("https://github.com/shariqfarooq123/AdaBins.git")
+    if not path_exists(f'{model_path}/pretrained/AdaBins_nyu.pt'):
+      os.makedirs(f'{model_path}/pretrained')
+      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{model_path}/pretrained')
+    sys.path.append(f'{os.getcwd()}/AdaBins')
   from infer import InferenceHelper
   MAX_ADABINS_AREA = 500000
 
