@@ -230,7 +230,7 @@ if skip_for_run_all == False:
 
       IPython magic commands replaced by Python code
 
-  v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts / MSFTserver aka HostsServer
+  v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
 
       Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
 
@@ -242,11 +242,15 @@ if skip_for_run_all == False:
 
       Added video_init_seed_continuity option to make init video animations more continuous
 
+  v5.1 Update: Apr 4th 2022 - MSFTserver aka HostsServer
+
       Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
 
       Remove Super Resolution
 
       Remove SLIP Models
+
+      Update for crossplatform support
 
       '''
   )
