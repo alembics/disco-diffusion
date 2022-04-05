@@ -1066,9 +1066,7 @@ def do_run():
           skip_steps = args.calc_frames_skip_steps
 
       if args.animation_mode == "3D":
-        if frame_num == 0:
-          pass
-        else:
+        if frame_num > 0:
           seed += 1    
           if resume_run and frame_num == start_frame:
             img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
@@ -1373,7 +1371,7 @@ def do_run():
                         image.save(f'{batchFolder}/{filename}')
                         if args.animation_mode == "3D":
                           # If turbo, save a blended image
-                          if turbo_mode:
+                          if turbo_mode and frame_num > 0:
                             # Mix new image with prevFrameScaled
                             blend_factor = (1)/int(turbo_steps)
                             newFrame = cv2.imread('prevFrame.png') # This is already updated..
@@ -1774,15 +1772,14 @@ elif diffusion_model == '256x256_diffusion_uncond':
         'use_scale_shift_norm': True,
     })
 
-secondary_model_ver = 2
 model_default = model_config['image_size']
 
 
 
-if secondary_model_ver == 2:
+if use_secondary_model:
     secondary_model = SecondaryDiffusionImageNet2()
     secondary_model.load_state_dict(torch.load(f'{model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
-secondary_model.eval().requires_grad_(False).to(device)
+    secondary_model.eval().requires_grad_(False).to(device)
 
 clip_models = []
 if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
