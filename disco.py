@@ -549,10 +549,10 @@ if USE_ADABINS:
   except:
     if os.path.exists("AdaBins") is not True:
       gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not os.path.exists(f'{model_path}/pretrained/AdaBins_nyu.pt'):
-      os.makedirs(f'{model_path}/pretrained')
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{model_path}/pretrained')
-    sys.path.append(f'{os.getcwd()}/AdaBins')
+    if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
+      createPath(f'{PROJECT_DIR}/pretrained')
+      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
+    sys.path.append(f'{PROJECT_DIR}/AdaBins')
   from infer import InferenceHelper
   MAX_ADABINS_AREA = 500000
 
