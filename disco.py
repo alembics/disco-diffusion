@@ -1007,9 +1007,7 @@ def do_run():
           skip_steps = args.calc_frames_skip_steps
 
       if args.animation_mode == "3D":
-        if frame_num == 0:
-          pass
-        else:
+        if frame_num > 0:
           seed += 1    
           if resume_run and frame_num == start_frame:
             img_filepath = batchFolder+f"/{batch_name}({batchNum})_{start_frame-1:04}.png"
@@ -1320,7 +1318,7 @@ def do_run():
                           image.save(f'{batchFolder}/{filename}')
                           if args.animation_mode == "3D":
                             # If turbo, save a blended image
-                            if turbo_mode:
+                            if turbo_mode and frame_num > 0:
                               # Mix new image with prevFrameScaled
                               blend_factor = (1)/int(turbo_steps)
                               newFrame = cv2.imread('prevFrame.png') # This is already updated..
