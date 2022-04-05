@@ -448,7 +448,7 @@ if is_colab:
   subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 try:
-  import CLIP
+  from CLIP import clip
 except:
   if os.path.exists("CLIP") is not True:
     gitclone("https://github.com/openai/CLIP")
@@ -518,7 +518,7 @@ from torch.nn import functional as F
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from tqdm.notebook import tqdm
-import CLIP
+from CLIP import clip
 from resize_right import resize
 from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from datetime import datetime
