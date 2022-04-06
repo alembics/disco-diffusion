@@ -450,52 +450,49 @@ if is_colab:
 try:
   from CLIP import clip
 except:
-  if os.path.exists("CLIP") is not True:
+  if not os.path.exists("CLIP"):
     gitclone("https://github.com/openai/CLIP")
   sys.path.append(f'{PROJECT_DIR}/CLIP')
 
 try:
   from guided_diffusion.script_util import create_model_and_diffusion
 except:
-  if os.path.exists("guided-diffusion") is not True:
+  if not os.path.exists("guided-diffusion"):
     gitclone("https://github.com/crowsonkb/guided-diffusion")
   sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 
 try:
   from resize_right import resize
 except:
-  if os.path.exists("resize_right") is not True:
+  if not os.path.exists("ResizeRight"):
     gitclone("https://github.com/assafshocher/ResizeRight.git")
   sys.path.append(f'{PROJECT_DIR}/ResizeRight')
 
 try:
   import py3d_tools
 except:
-  if os.path.exists('pytorch3d-lite') is not True:
+  if not os.path.exists('pytorch3d-lite'):
     gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
   sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
 
 try:
   from midas.dpt_depth import DPTDepthModel
 except:
-  if os.path.exists('MiDaS') is not True:
+  if not os.path.exists('MiDaS'):
     gitclone("https://github.com/isl-org/MiDaS.git")
-  if os.path.exists('MiDaS/midas_utils.py') is not True:
+  if not os.path.exists('MiDaS/midas_utils.py'):
     shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
   if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
     wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
   sys.path.append(f'{PROJECT_DIR}/MiDaS')
 
 try:
-  sys.path.append(PROJECT_DIR)
+  sys.path.append(f'{PROJECT_DIR}/disco-diffusion')
   import disco_xform_utils as dxf
 except:
-  if os.path.exists("disco-diffusion") is not True:
+  if not os.path.exists("disco-diffusion"):
     gitclone("https://github.com/alembics/disco-diffusion.git")
-  # Rename a file to avoid a name conflict..
-  if os.path.exists('disco_xform_utils.py') is not True:
-    shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
-  sys.path.append(PROJECT_DIR)
+  sys.path.append(f'{PROJECT_DIR}/disco-diffusion')
 
 import torch
 from dataclasses import dataclass
@@ -1884,7 +1881,7 @@ if animation_mode == "Video Input":
       f.unlink()
   except:
     print('')
-  vf = f'"select=not(mod(n\,{extract_nth_frame}))"'
+  vf = f'select=not(mod(n\,{extract_nth_frame}))'
   subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
 
