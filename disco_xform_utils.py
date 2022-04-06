@@ -12,6 +12,7 @@ except:
     sys.exit()
 
 MAX_ADABINS_AREA = 500000
+MIN_ADABINS_AREA = 448*448
 
 @torch.no_grad()
 def transform_image_3d(img_filepath, midas_model, midas_transform, device, rot_mat=torch.eye(3).unsqueeze(0), translate=(0.,0.,-0.04), near=2000, far=20000, fov_deg=60, padding_mode='border', sampling_mode='bicubic', midas_weight = 0.3):
@@ -33,11 +34,17 @@ def transform_image_3d(img_filepath, midas_model, midas_transform, device, rot_m
         if image_pil_area > MAX_ADABINS_AREA:
             scale = math.sqrt(MAX_ADABINS_AREA) / math.sqrt(image_pil_area)
             depth_input = img_pil.resize((int(w*scale), int(h*scale)), Image.LANCZOS) # LANCZOS is supposed to be good for downsampling.
+        elif image_pil_area < MIN_ADABINS_AREA:
+            scale = math.sqrt(MIN_ADABINS_AREA) / math.sqrt(image_pil_area)
+            depth_input = img_pil.resize((int(w*scale), int(h*scale)), Image.BICUBIC)
         else:
             depth_input = img_pil
         try:
             _, adabins_depth = infer_helper.predict_pil(depth_input)
-            adabins_depth = torchvision.transforms.functional.resize(torch.from_numpy(adabins_depth), image_tensor.shape[-2:], interpolation=torchvision.transforms.functional.InterpolationMode.BICUBIC).squeeze().to(device)
+            if image_pil_area != MAX_ADABINS_AREA:
+                adabins_depth = torchvision.transforms.functional.resize(torch.from_numpy(adabins_depth), image_tensor.shape[-2:], interpolation=torchvision.transforms.functional.InterpolationMode.BICUBIC).squeeze().to(device)
+            else:
+                adabins_depth = torch.from_numpy(adabins_depth).squeeze().to(device)
             adabins_depth_np = adabins_depth.cpu().numpy()
         except:
             pass
