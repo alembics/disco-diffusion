@@ -487,12 +487,14 @@ except:
   sys.path.append(f'{PROJECT_DIR}/MiDaS')
 
 try:
-  sys.path.append(f'{PROJECT_DIR}/disco-diffusion')
+  sys.path.append(PROJECT_DIR)
   import disco_xform_utils as dxf
 except:
   if not os.path.exists("disco-diffusion"):
     gitclone("https://github.com/alembics/disco-diffusion.git")
-  sys.path.append(f'{PROJECT_DIR}/disco-diffusion')
+  if os.path.exists('disco_xform_utils.py') is not True:
+    shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
+  sys.path.append(PROJECT_DIR)
 
 import torch
 from dataclasses import dataclass
