@@ -271,8 +271,13 @@ if skip_for_run_all == False:
 """
 **Diffusion settings (Defaults are heavily outdated)**
 ---
+Disco Diffusion is complex, and continually evolving with new features.  The most current documentation on on Disco Diffusion settings can be found in the unofficial guidebook:
 
-This section is outdated as of v2
+[Zippy's Disco Diffusion Cheatsheet](https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit)
+
+We also encourage users to join the [Disco Diffusion User Discord](https://discord.gg/XGZrFFCRfN) to learn from the active user community.
+
+This section below is outdated as of v2
 
 Setting | Description | Default
 --- | --- | ---
