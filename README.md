@@ -64,6 +64,10 @@ A frankensteinian amalgamation of notebooks, models and techniques for the gener
 * Remove Slip Models
 * Update for crossplatform support
 
+#### v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
+
+* VR Mode
+
 ## Notebook Provenance 
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
