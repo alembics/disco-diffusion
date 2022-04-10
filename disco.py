@@ -1987,12 +1987,11 @@ frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'st
 #@markdown Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
 #@markdown The command to get ffmpeg to concat your frames for each eye is in the form: ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4 (repeat for r)
 
-# TODO(VR): vr_eye_angle and vr_ipd lines had syntax errors in initial PR. Are they OK?
-vr_mode = False
-vr_eye_angle = 0.5 #@param{type: 'number'}
-#@markdown eye_angle is the y-axis rotation of the eyes towards the center
-vr_ipd = 5.0
+vr_mode = False #@param {type:"boolean"}
+#@markdown `vr_eye_angle` is the y-axis rotation of the eyes towards the center
+vr_eye_angle = 0.5 #@param{type:"number"}
 #@markdown interpupillary distance (between the eyes)
+vr_ipd = 5.0 #@param{type:"number"}
 
 #insist turbo be used only w 3d anim.
 if vr_mode and animation_mode != '3D':
