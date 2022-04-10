@@ -1384,10 +1384,31 @@ def do_run():
                             cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
                           else:
                             image.save(f'{batchFolder}/{filename}')
+
+                          # TODO(VR): trans_scale wasn't set in the PR. This needs to be set to a reasonable value!
+                          trans_scale = 1.0
+                          if vr_mode:
+                            generate_eye_views(trans_scale, batchFolder, filename, frame_num, midas_model, midas_transform)
+
                         # if frame_num != args.max_frames-1:
                         #   display.clear_output()
           
           plt.plot(np.array(loss_values), 'r')
+
+def generate_eye_views(trans_scale,batchFolder,filename,frame_num,midas_model, midas_transform):
+   for i in range(2):
+      theta = vr_eye_angle * (math.pi/180)
+      ray_origin = math.cos(theta) * vr_ipd / 2 * (-1.0 if i==0 else 1.0)
+      ray_rotation = (theta if i==0 else -theta)
+      translate_xyz = [-(ray_origin)*trans_scale, 0,0]
+      rotate_xyz = [0, (ray_rotation), 0]
+      rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+      transformed_image = dxf.transform_image_3d(f'{batchFolder}/{filename}', midas_model, midas_transform, DEVICE,
+                                                      rot_mat, translate_xyz, args.near_plane, args.far_plane,
+                                                      args.fov, padding_mode=args.padding_mode,
+                                                      sampling_mode=args.sampling_mode, midas_weight=args.midas_weight,spherical=True)
+      eye_file_path = batchFolder+f"/frame_{frame_num-1:04}" + ('_l' if i==0 else '_r')+'.png'
+      transformed_image.save(eye_file_path)
 
 def save_settings():
   setting_list = {
@@ -1947,6 +1968,32 @@ if turbo_mode and animation_mode != '3D':
 frames_scale = 1500 #@param{type: 'integer'}
 #@markdown `frame_skip_steps` will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
 frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'string'}
+
+#======= VR MODE
+#@markdown ---
+#@markdown ####**VR Mode (3D anim only):**
+#@markdown EXPERIMENTAL ALPHA: Need to look into trans_scale value
+#@markdown Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
+#@markdown Note the images you're prompting will work better if they have some inherent wide-angle aspect
+#@markdown The generated images will need to be combined into left/right videos. These can then be stitched into the VR180 format.
+#@markdown Google made the VR180 Creator tool but subsequently stopped supporting it. It's available for download in a few places including https://www.patrickgrunwald.de/vr180-creator-download
+#@markdown The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
+#@markdown Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
+#@markdown The command to get ffmpeg to concat your frames for each eye is in the form: ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4 (repeat for r)
+
+# TODO(VR): vr_eye_angle and vr_ipd lines had syntax errors in initial PR. Are they OK?
+vr_mode = False
+vr_eye_angle = 0.5 #@param{type: 'number'}
+#@markdown eye_angle is the y-axis rotation of the eyes towards the center
+vr_ipd = 5.0
+#@markdown interpupillary distance (between the eyes)
+
+#insist turbo be used only w 3d anim.
+if vr_mode and animation_mode != '3D':
+  print('=====')
+  print('VR mode only available with 3D animations. Disabling VR.')
+  print('=====')
+  turbo_mode = False
 
 
 def parse_key_frames(string, prompt_parser=None):
