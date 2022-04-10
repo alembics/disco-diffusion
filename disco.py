@@ -52,9 +52,14 @@ Disco:
 
 Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
 
-3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
+3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai. Creation of disco.py and ongoing maintenance.
 
 Turbo feature by Chris Allen (https://twitter.com/zippy731)
+
+Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
+
+VR Mode by Tom Mason (https://twitter.com/nin_artificial)
+
 """
 
 # %%
@@ -251,6 +256,10 @@ if skip_for_run_all == False:
       Remove SLIP Models
 
       Update for crossplatform support
+
+  v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
+
+      VR Mode
 
       '''
   )
