@@ -12,7 +12,7 @@
 # !!    "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.1 - Now with Turbo
+# Disco Diffusion v5.2 - Now with VR Mode
 
 In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
 
@@ -1985,7 +1985,8 @@ frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'st
 #@markdown Google made the VR180 Creator tool but subsequently stopped supporting it. It's available for download in a few places including https://www.patrickgrunwald.de/vr180-creator-download
 #@markdown The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
 #@markdown Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
-#@markdown The command to get ffmpeg to concat your frames for each eye is in the form: ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4 (repeat for r)
+#@markdown 
+#@markdown The command to get ffmpeg to concat your frames for each eye is in the form: `ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4` (repeat for r)
 
 vr_mode = False #@param {type:"boolean"}
 #@markdown `vr_eye_angle` is the y-axis rotation of the eyes towards the center
