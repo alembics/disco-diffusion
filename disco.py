@@ -969,6 +969,7 @@ def range_loss(input):
     return (input - input.clamp(-1, 1)).pow(2).mean([1, 2, 3])
 
 stop_on_next_loop = False  # Make sure GPU memory doesn't get corrupted from cancelling the run mid-way through, allow a full frame to complete
+TRANSLATION_SCALE = 1.0/200.0
 
 def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
   if args.key_frames:
@@ -987,8 +988,7 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
         f'rotation_3d_z: {rotation_3d_z}',
     )
 
-  trans_scale = 1.0/200.0
-  translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
+  translate_xyz = [-translation_x*TRANSLATION_SCALE, translation_y*TRANSLATION_SCALE, -translation_z*TRANSLATION_SCALE]
   rotate_xyz_degrees = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
   print('translation:',translate_xyz)
   print('rotation:',rotate_xyz_degrees)
@@ -1385,10 +1385,8 @@ def do_run():
                           else:
                             image.save(f'{batchFolder}/{filename}')
 
-                          # TODO(VR): trans_scale wasn't set in the PR. This needs to be set to a reasonable value!
-                          trans_scale = 1.0
                           if vr_mode:
-                            generate_eye_views(trans_scale, batchFolder, filename, frame_num, midas_model, midas_transform)
+                            generate_eye_views(TRANSLATION_SCALE, batchFolder, filename, frame_num, midas_model, midas_transform)
 
                         # if frame_num != args.max_frames-1:
                         #   display.clear_output()
@@ -1972,7 +1970,6 @@ frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'st
 #======= VR MODE
 #@markdown ---
 #@markdown ####**VR Mode (3D anim only):**
-#@markdown EXPERIMENTAL ALPHA: Need to look into trans_scale value
 #@markdown Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
 #@markdown Note the images you're prompting will work better if they have some inherent wide-angle aspect
 #@markdown The generated images will need to be combined into left/right videos. These can then be stitched into the VR180 format.
