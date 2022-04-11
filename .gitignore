@@ -10,6 +10,7 @@ disco-diffusion
 ResizeRight
 AdaBins
 CLIP
+guided-diffusion
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
