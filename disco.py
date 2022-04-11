@@ -344,8 +344,15 @@ Setting | Description | Default
 # !!    "id": "CheckGPU"
 # !! }}
 #@title 1.1 Check GPU Status
+def get_param(key, fallback):
+  import os
+  if(os.getenv(key, None) != None):
+    return json.loads(os.getenv(key))
+  return fallback
+
 import subprocess
-simple_nvidia_smi_display = False#@param {type:"boolean"}
+simple_nvidia_smi_display = False #@param {type:"boolean"}
+simple_nvidia_smi_display = get_param("simple_nvidia_smi_display", simple_nvidia_smi_display)
 if simple_nvidia_smi_display:
   #!nvidia-smi
   nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
@@ -1707,6 +1714,10 @@ model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
 model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
 model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA"]:
+  globals()[param]=get_param(param,globals()[param])
+
 # Download the diffusion model
 if diffusion_model == '256x256_diffusion_uncond':
   if os.path.exists(model_256_path) and check_model_SHA:
@@ -1850,12 +1861,21 @@ sat_scale =   0#@param{type: 'number'}
 cutn_batches = 4  #@param{type: 'number'}
 skip_augs = False#@param{type: 'boolean'}
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", "range_scale", "sat_scale", "cutn_batches", "skip_augs"]:
+  globals()[param]=get_param(param,globals()[param])
+
 #@markdown ---
 
 #@markdown ####**Init Settings:**
 init_image = None #@param{type: 'string'}
 init_scale = 1000 #@param{type: 'integer'}
 skip_steps = 10 #@param{type: 'integer'}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["init_image", "init_scale", "skip_steps"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 #@markdown *Make sure you set skip_steps to ~50% of your steps if you want to use an init image.*
 
 #Get corrected sizes
@@ -1891,6 +1911,11 @@ createPath(batchFolder)
 # !! }}
 #@markdown ####**Animation Mode:**
 animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["animation_mode"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 #@markdown *For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.*
 
 
@@ -1904,6 +1929,10 @@ else:
 extract_nth_frame = 2 #@param {type: 'number'}
 video_init_seed_continuity = True #@param {type: 'boolean'}
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["extract_nth_frame", "video_init_seed_continuity"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 if animation_mode == "Video Input":
   if is_colab:
       videoFramesFolder = f'/content/videoFrames'
@@ -1930,6 +1959,10 @@ if animation_mode == "Video Input":
 key_frames = True #@param {type:"boolean"}
 max_frames = 10000#@param {type:"number"}
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["key_frames", "max_frames"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 if animation_mode == "Video Input":
   max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
 
@@ -1950,6 +1983,11 @@ fov = 40#@param {type:"number"}
 padding_mode = 'border'#@param {type:"string"}
 sampling_mode = 'bicubic'#@param {type:"string"}
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["interp_spline", "angle", "zoom", "translation_x", "translation_y", "translation_z", "rotation_3d_x", "rotation_3d_y",
+  "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov", "padding_mode", "sampling_mode"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 #======= TURBO MODE
 #@markdown ---
 #@markdown ####**Turbo Mode (3D anim only):**
@@ -1960,6 +1998,10 @@ sampling_mode = 'bicubic'#@param {type:"string"}
 turbo_mode = False #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
 turbo_preroll = 10 # frames
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["turbo_mode", "turbo_steps", "turbo_preroll"]:
+  globals()[param]=get_param(param,globals()[param])
 
 #insist turbo be used only w 3d anim.
 if turbo_mode and animation_mode != '3D':
@@ -1976,6 +2018,10 @@ frames_scale = 1500 #@param{type: 'integer'}
 #@markdown `frame_skip_steps` will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
 frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'string'}
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["frames_scale", "frames_skip_steps"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 #======= VR MODE
 #@markdown ---
 #@markdown ####**VR Mode (3D anim only):**
@@ -1993,6 +2039,10 @@ vr_mode = False #@param {type:"boolean"}
 vr_eye_angle = 0.5 #@param{type:"number"}
 #@markdown interpupillary distance (between the eyes)
 vr_ipd = 5.0 #@param{type:"number"}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["vr_mode", "vr_eye_angle", "vr_ipd"]:
+  globals()[param]=get_param(param,globals()[param])
 
 #insist turbo be used only w 3d anim.
 if vr_mode and animation_mode != '3D':
@@ -2260,6 +2310,11 @@ else:
 
 intermediate_saves = 0#@param{type: 'raw'}
 intermediates_in_subfolder = True #@param{type: 'boolean'}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["intermediate_saves", "intermediates_in_subfolder"]:
+  globals()[param]=get_param(param,globals()[param])
+
 #@markdown Intermediate steps will save a copy at your specified intervals. You can either format it as a single integer or a list of specific steps 
 
 #@markdown A value of `2` will save a copy at 33% and 66%. 0 will save none.
@@ -2315,7 +2370,12 @@ cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}
 cut_ic_pow = 1#@param {type: 'number'}  
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
-
+# Override Notebook defaults if external parameters were provided.
+for param in ["perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "clamp_max",
+              "randomize_class", "clip_denoised", "fuzzy_prompt", "rand_mag",
+              "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p"]:
+  globals()[param]=get_param(param,globals()[param])
+  
 # %%
 # !! {"metadata": {
 # !!    "id": "PromptsTop"
@@ -2338,6 +2398,9 @@ image_prompts = {
     # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
 }
 
+# Override Notebook defaults if external parameters were provided.
+for param in ["text_prompts", "image_prompts"]:
+  globals()[param]=get_param(param,globals()[param])
 
 # %%
 # !! {"metadata": {
@@ -2355,6 +2418,10 @@ image_prompts = {
 #@markdown `n_batches` ignored with animation modes.
 display_rate =  50 #@param{type: 'number'}
 n_batches =  50 #@param{type: 'number'}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["display_rate", "n_batches"]:
+  globals()[param]=get_param(param,globals()[param])
 
 #Update Model Settings
 timestep_respacing = f'ddim{steps}'
@@ -2379,6 +2446,11 @@ resume_run = False #@param{type: 'boolean'}
 run_to_resume = 'latest' #@param{type: 'string'}
 resume_from_frame = 'latest' #@param{type: 'string'}
 retain_overwritten_frames = False #@param{type: 'boolean'}
+
+# Override Notebook defaults if external parameters were provided.
+for param in ["resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames"]:
+  globals()[param]=get_param(param,globals()[param])
+
 if retain_overwritten_frames is True:
   retainFolder = f'{batchFolder}/retained'
   createPath(retainFolder)
