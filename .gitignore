@@ -5,6 +5,9 @@ MiDaS/
 models/
 pretrained/*
 settings.json
+pytorch3d-lite
+disco-diffusion
+ResizeRight
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
