@@ -8,6 +8,8 @@ settings.json
 pytorch3d-lite
 disco-diffusion
 ResizeRight
+AdaBins
+CLIP
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
