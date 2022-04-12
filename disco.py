@@ -1,522 +1,7 @@
-# %%
-# !! {"metadata": {
-# !!   "id": "view-in-github",
-# !!   "colab_type": "text"
-# !! }}
-"""
-<a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-"""
-
-# %%
-# !! {"metadata": {
-# !!    "id": "TitleTop"
-# !! }}
-"""
-# Disco Diffusion v5.2 - Now with VR Mode
-
-In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
-
-For issues, join the [Disco Diffusion Discord](https://discord.gg/msEZBy4HxA) or message us on twitter at [@somnai_dreams](https://twitter.com/somnai_dreams) or [@gandamu](https://twitter.com/gandamu_ml)
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "CreditsChTop"
-# !! }}
-"""
-### Credits & Changelog ⬇️
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "Credits"
-# !! }}
-"""
-#### Credits
-
-Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
-
-Modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
-
-Further improvements from Dango233 and nsheppard helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
-
-Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may greatly improve accuracy.
-
-The latest zoom, pan, rotation, and keyframes features were taken from Chigozie Nri's VQGAN Zoom Notebook (https://github.com/chigozienri, https://twitter.com/chigozienri)
-
-Advanced DangoCutn Cutout method is also from Dango223.
-
---
-
-Disco:
-
-Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
-
-3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai. Creation of disco.py and ongoing maintenance.
-
-Turbo feature by Chris Allen (https://twitter.com/zippy731)
-
-Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
-
-VR Mode by Tom Mason (https://twitter.com/nin_artificial)
-
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "LicenseTop"
-# !! }}
-"""
-#### License
-"""
-
-# %%
-# !! {"metadata": {
-# !!  "id": "License"
-# !!  }}
-"""
-Licensed under the MIT License
-
-Copyright (c) 2021 Katherine Crowson 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
---
-
-MIT License
-
-Copyright (c) 2019 Intel ISL (Intel Intelligent Systems Lab)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---
-
-Licensed under the MIT License
-
-Copyright (c) 2021 Maxwell Ingham
-
-Copyright (c) 2022 Adam Letts 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "ChangelogTop"
-# !! }}
-"""
-#### Changelog
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "cellView": "form",
-# !!    "id": "Changelog"
-# !! }}
-#@title <- View Changelog
-skip_for_run_all = True #@param {type: 'boolean'}
-
-if skip_for_run_all == False:
-  print(
-      '''
-  v1 Update: Oct 29th 2021 - Somnai
-
-      QoL improvements added by Somnai (@somnai_dreams), including user friendly UI, settings+prompt saving and improved google drive folder organization.
-
-  v1.1 Update: Nov 13th 2021 - Somnai
-
-      Now includes sizing options, intermediate saves and fixed image prompts and perlin inits. unexposed batch option since it doesn't work
-
-  v2 Update: Nov 22nd 2021 - Somnai
-
-      Initial addition of Katherine Crowson's Secondary Model Method (https://colab.research.google.com/drive/1mpkrhOjoyzPeSWy2r7T8EYRaU7amYOOi#scrollTo=X5gODNAMEUCR)
-
-      Noticed settings were saving with the wrong name so corrected it. Let me know if you preferred the old scheme.
-
-  v3 Update: Dec 24th 2021 - Somnai
-
-      Implemented Dango's advanced cutout method
-
-      Added SLIP models, thanks to NeuralDivergent
-
-      Fixed issue with NaNs resulting in black images, with massive help and testing from @Softology
-
-      Perlin now changes properly within batches (not sure where this perlin_regen code came from originally, but thank you)
-
-  v4 Update: Jan 2021 - Somnai
-
-      Implemented Diffusion Zooming
-
-      Added Chigozie keyframing
-
-      Made a bunch of edits to processes
-  
-  v4.1 Update: Jan  14th 2021 - Somnai
-
-      Added video input mode
-
-      Added license that somehow went missing
-
-      Added improved prompt keyframing, fixed image_prompts and multiple prompts
-
-      Improved UI
-
-      Significant under the hood cleanup and improvement
-
-      Refined defaults for each mode
-
-      Added latent-diffusion SuperRes for sharpening
-
-      Added resume run mode
-
-  v4.9 Update: Feb 5th 2022 - gandamu / Adam Letts
-
-      Added 3D
-
-      Added brightness corrections to prevent animation from steadily going dark over time
-
-  v4.91 Update: Feb 19th 2022 - gandamu / Adam Letts
-
-      Cleaned up 3D implementation and made associated args accessible via Colab UI elements
-
-  v4.92 Update: Feb 20th 2022 - gandamu / Adam Letts
-
-      Separated transform code
-
-  v5.01 Update: Mar 10th 2022 - gandamu / Adam Letts
-
-      IPython magic commands replaced by Python code
-
-  v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
-
-      Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
-
-      Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
-
-      3D rotation parameter units are now degrees (rather than radians)
-
-      Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
-
-      Added video_init_seed_continuity option to make init video animations more continuous
-
-  v5.1 Update: Apr 4th 2022 - MSFTserver aka HostsServer
-
-      Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
-
-      Remove Super Resolution
-
-      Remove SLIP Models
-
-      Update for crossplatform support
-
-  v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
-
-      VR Mode
-
-      '''
-  )
-
-
-# %%
-# !! {"metadata": {
-# !!   "id": "TutorialTop"
-# !! }}
-"""
-# Tutorial
-"""
-
-# %%
-# !! {"metadata": {
-# !!  "id": "DiffusionSet"
-# !! }}
-"""
-**Diffusion settings (Defaults are heavily outdated)**
----
-Disco Diffusion is complex, and continually evolving with new features.  The most current documentation on on Disco Diffusion settings can be found in the unofficial guidebook:
-
-[Zippy's Disco Diffusion Cheatsheet](https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit)
-
-We also encourage users to join the [Disco Diffusion User Discord](https://discord.gg/XGZrFFCRfN) to learn from the active user community.
-
-This section below is outdated as of v2
-
-Setting | Description | Default
---- | --- | ---
-**Your vision:**
-`text_prompts` | A description of what you'd like the machine to generate. Think of it like writing the caption below your image on a website. | N/A
-`image_prompts` | Think of these images more as a description of their contents. | N/A
-**Image quality:**
-`clip_guidance_scale`  | Controls how much the image should look like the prompt. | 1000
-`tv_scale` | Controls the smoothness of the final output. | 150
-`range_scale` | Controls how far out of range RGB values are allowed to be. | 150
-`sat_scale` | Controls how much saturation is allowed. From nshepperd's JAX notebook. | 0
-`cutn` | Controls how many crops to take from the image. | 16
-`cutn_batches` | Accumulate CLIP gradient from multiple batches of cuts. | 2
-**Init settings:**
-`init_image` | URL or local path | None
-`init_scale` | This enhances the effect of the init image, a good value is 1000 | 0
-`skip_steps` | Controls the starting point along the diffusion timesteps | 0
-`perlin_init` | Option to start with random perlin noise | False
-`perlin_mode` | ('gray', 'color') | 'mixed'
-**Advanced:**
-`skip_augs` | Controls whether to skip torchvision augmentations | False
-`randomize_class` | Controls whether the imagenet class is randomly changed each iteration | True
-`clip_denoised` | Determines whether CLIP discriminates a noisy or denoised image | False
-`clamp_grad` | Experimental: Using adaptive clip grad in the cond_fn | True
-`seed`  | Choose a random seed and print it at end of run for reproduction | random_seed
-`fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
-`rand_mag` | Controls the magnitude of the random noise | 0.1
-`eta` | DDIM hyperparameter | 0.5
-
-..
-
-**Model settings**
----
-
-Setting | Description | Default
---- | --- | ---
-**Diffusion:**
-`timestep_respacing` | Modify this value to decrease the number of timesteps. | ddim100
-`diffusion_steps` || 1000
-**Diffusion:**
-`clip_models` | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
-"""
-
-# %%
-# !! {"metadata": {
-# !!  "id": "SetupTop"
-# !! }}
-"""
-# 1. Set Up
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "cellView": "form",
-# !!    "id": "CheckGPU"
-# !! }}
-#@title 1.1 Check GPU Status
-def get_param(key, fallback):
-  import os
-  if(os.getenv(key, None) != None):
-    return json.loads(os.getenv(key))
-  return fallback
-
-import subprocess
-simple_nvidia_smi_display = False #@param {type:"boolean"}
-simple_nvidia_smi_display = get_param("simple_nvidia_smi_display", simple_nvidia_smi_display)
-if simple_nvidia_smi_display:
-  #!nvidia-smi
-  nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_output)
-else:
-  #!nvidia-smi -i 0 -e 0
-  nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_output)
-  nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0', '-e', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_ecc_note)
-
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "PrepFolders"
-# !! }}
-#@title 1.2 Prepare Folders
-import subprocess, os, sys, ipykernel
-
-def gitclone(url):
-  res = subprocess.run(['git', 'clone', url], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
-
-def pipi(modulestr):
-  res = subprocess.run(['pip', 'install', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
-
-def pipie(modulestr):
-  res = subprocess.run(['git', 'install', '-e', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
-
-def wget(url, outputdir):
-  res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
-
-try:
-    from google.colab import drive
-    print("Google Colab detected. Using Google Drive.")
-    is_colab = True
-    #@markdown If you connect your Google Drive, you can save the final image of each run on your drive.
-    google_drive = True #@param {type:"boolean"}
-    #@markdown Click here if you'd like to save the diffusion model checkpoint file to (and/or load from) your Google Drive:
-    save_models_to_google_drive = True #@param {type:"boolean"}
-except:
-    is_colab = False
-    google_drive = False
-    save_models_to_google_drive = False
-    print("Google Colab not detected.")
-
-if is_colab:
-    if google_drive is True:
-        drive.mount('/content/drive')
-        root_path = '/content/drive/MyDrive/AI/Disco_Diffusion'
-    else:
-        root_path = '/content'
-else:
-    root_path = os.getcwd()
-
 import os
-def createPath(filepath):
-    os.makedirs(filepath, exist_ok=True)
-
-initDirPath = f'{root_path}/init_images'
-createPath(initDirPath)
-outDirPath = f'{root_path}/images_out'
-createPath(outDirPath)
-
-if is_colab:
-    if google_drive and not save_models_to_google_drive or not google_drive:
-        model_path = '/content/models'
-        createPath(model_path)
-    if google_drive and save_models_to_google_drive:
-        model_path = f'{root_path}/models'
-        createPath(model_path)
-else:
-    model_path = f'{root_path}/models'
-    createPath(model_path)
-
-# libraries = f'{root_path}/libraries'
-# createPath(libraries)
-
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "InstallDeps"
-# !! }}
-#@title ### 1.3 Install and import dependencies
-
-import pathlib, shutil, os, sys
-
-if not is_colab:
-  # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
-  os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
-
-PROJECT_DIR = os.path.abspath(os.getcwd())
-USE_ADABINS = True
-
-if is_colab:
-  if google_drive is not True:
-    root_path = f'/content'
-    model_path = '/content/models' 
-else:
-  root_path = os.getcwd()
-  model_path = f'{root_path}/models'
-
-model_256_downloaded = False
-model_512_downloaded = False
-model_secondary_downloaded = False
-
-multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy', 'einops', 'pytorch-lightning', 'omegaconf'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-print(multipip_res)
-
-if is_colab:
-  subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-
-try:
-  from CLIP import clip
-except:
-  if not os.path.exists("CLIP"):
-    gitclone("https://github.com/openai/CLIP")
-  sys.path.append(f'{PROJECT_DIR}/CLIP')
-
-try:
-  from guided_diffusion.script_util import create_model_and_diffusion
-except:
-  if not os.path.exists("guided-diffusion"):
-    gitclone("https://github.com/crowsonkb/guided-diffusion")
-  sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
-
-try:
-  from resize_right import resize
-except:
-  if not os.path.exists("ResizeRight"):
-    gitclone("https://github.com/assafshocher/ResizeRight.git")
-  sys.path.append(f'{PROJECT_DIR}/ResizeRight')
-
-try:
-  import py3d_tools
-except:
-  if not os.path.exists('pytorch3d-lite'):
-    gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
-  sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
-
-try:
-  from midas.dpt_depth import DPTDepthModel
-except:
-  if not os.path.exists('MiDaS'):
-    gitclone("https://github.com/isl-org/MiDaS.git")
-  if not os.path.exists('MiDaS/midas_utils.py'):
-    shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
-  if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
-    wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
-  sys.path.append(f'{PROJECT_DIR}/MiDaS')
-
-try:
-  sys.path.append(PROJECT_DIR)
-  import disco_xform_utils as dxf
-except:
-  if not os.path.exists("disco-diffusion"):
-    gitclone("https://github.com/alembics/disco-diffusion.git")
-  if os.path.exists('disco_xform_utils.py') is not True:
-    shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
-  sys.path.append(PROJECT_DIR)
-
+import subprocess, os, sys, ipykernel
+import subprocess
+import pathlib, shutil, sys
 import torch
 from dataclasses import dataclass
 from functools import partial
@@ -538,9 +23,6 @@ from torch.nn import functional as F
 import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from tqdm.notebook import tqdm
-from CLIP import clip
-from resize_right import resize
-from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from datetime import datetime
 import numpy as np
 import matplotlib.pyplot as plt
@@ -548,11 +30,6 @@ import random
 from ipywidgets import Output
 import hashlib
 from functools import partial
-if is_colab:
-  os.chdir('/content')
-  from google.colab import files
-else:
-  os.chdir(f'{PROJECT_DIR}')
 from IPython.display import Image as ipyimg
 from numpy import asarray
 from einops import rearrange, repeat
@@ -560,7 +37,93 @@ import torch, torchvision
 import time
 from omegaconf import OmegaConf
 import warnings
+from base64 import b64encode
+# import py3d_tools as p3dT
+
 warnings.filterwarnings("ignore", category=UserWarning)
+
+def get_param(key, fallback):
+  if(os.getenv(key, None) != None):
+    return json.loads(os.getenv(key))
+  return fallback
+
+def createPath(filepath):
+    os.makedirs(filepath, exist_ok=True)
+    
+simple_nvidia_smi_display = False #@param {type:"boolean"}
+simple_nvidia_smi_display = get_param("simple_nvidia_smi_display", simple_nvidia_smi_display)
+if simple_nvidia_smi_display:
+  nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(nvidiasmi_output)
+else:
+  nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(nvidiasmi_output)
+  nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(nvidiasmi_ecc_note)
+
+def gitclone(url):
+  res = subprocess.run(['git', 'clone', url], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(res)
+
+def pipi(modulestr):
+  res = subprocess.run(['pip', 'install', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(res)
+
+def pipie(modulestr):
+  res = subprocess.run(['git', 'install', '-e', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(res)
+
+def wget(url, outputdir):
+  res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  print(res)
+
+is_colab = False
+google_drive = False
+save_models_to_google_drive = False
+root_path = os.getcwd()
+initDirPath = f'{root_path}/init_images'
+createPath(initDirPath)
+outDirPath = f'{root_path}/images_out'
+createPath(outDirPath)
+model_path = f'{root_path}/models'
+createPath(model_path)
+
+os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
+
+PROJECT_DIR = os.path.abspath(os.getcwd())
+USE_ADABINS = True
+
+root_path = os.getcwd()
+model_path = f'{root_path}/models'
+
+model_512_downloaded = False
+model_secondary_downloaded = False
+
+sys.path.append(f'{PROJECT_DIR}')
+sys.path.append(f'{PROJECT_DIR}/CLIP')
+sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
+sys.path.append(f'{PROJECT_DIR}/ResizeRight')
+sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
+sys.path.append(f'{PROJECT_DIR}/MiDaS')
+sys.path.append(f'{PROJECT_DIR}/AdaBins')
+
+if not os.path.exists('MiDaS/midas_utils.py'):
+  shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
+if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
+  wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
+
+shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
+
+import disco_xform_utils as dxf
+from CLIP import clip
+from resize_right import resize
+from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
+from midas.dpt_depth import DPTDepthModel
+from midas.midas_net import MidasNet
+from midas.midas_net_custom import MidasNet_small
+from midas.transforms import Resize, NormalizeImage, PrepareForNet
+
+os.chdir(f'{PROJECT_DIR}')
 
 # AdaBins stuff
 if USE_ADABINS:
@@ -576,7 +139,6 @@ if USE_ADABINS:
   from infer import InferenceHelper
   MAX_ADABINS_AREA = 500000
 
-import torch
 DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
@@ -584,18 +146,6 @@ device = DEVICE # At least one of the modules expects this name..
 if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
   print('Disabling CUDNN for A100 gpu', file=sys.stderr)
   torch.backends.cudnn.enabled = False
-
-# %%
-# !! {"metadata": {
-# !!  "cellView": "form",
-# !!    "id": "DefMidasFns"
-# !! }}
-#@title ### 1.4 Define Midas functions
-
-from midas.dpt_depth import DPTDepthModel
-from midas.midas_net import MidasNet
-from midas.midas_net_custom import MidasNet_small
-from midas.transforms import Resize, NormalizeImage, PrepareForNet
 
 # Initialize MiDaS depth model.
 # It remains resident in VRAM and likely takes around 2GB VRAM.
@@ -692,17 +242,7 @@ def init_midas_depth_model(midas_model_type="dpt_large", optimize=True):
     print(f"MiDaS '{midas_model_type}' depth model initialized.")
     return midas_model, midas_transform, net_w, net_h, resize_mode, normalization
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefFns"
-# !! }}
-#@title 1.5 Define necessary functions
-
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
-
-import py3d_tools as p3dT
-import disco_xform_utils as dxf
 
 def interp(t):
     return 3 * t**2 - 2 * t ** 3
@@ -1207,7 +747,7 @@ def do_run():
       init = None
       if init_image is not None:
           init = Image.open(fetch(init_image)).convert('RGB')
-          init = init.resize((args.side_x, args.side_y), Image.LANCZOS)
+          init = init.resize((args.side_x, args.side_y), Image.Resampling.LANCZOS)
           init = TF.to_tensor(init).to(device).unsqueeze(0).mul(2).sub(1)
       
       if args.perlin_init:
@@ -1501,13 +1041,6 @@ def save_settings():
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
     json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefSecModel"
-# !! }}
-#@title 1.6 Define the secondary diffusion model
-
 def append_dims(x, n):
     return x[(Ellipsis, *(None,) * (n - x.ndim))]
 
@@ -1670,24 +1203,9 @@ class SecondaryDiffusionImageNet2(nn.Module):
         eps = input * sigmas + v * alphas
         return DiffusionOutput(v, pred, eps)
 
-
-# %%
-# !! {"metadata": {
-# !!    "id": "DiffClipSetTop"
-# !! }}
-"""
-# 2. Diffusion and CLIP model settings
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "ModelSettings"
-# !!  }}
-#@markdown ####**Models Settings:**
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
 diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']  
-
 
 use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
@@ -1699,7 +1217,6 @@ RN50x4 = False #@param{type:"boolean"}
 RN50x16 = False #@param{type:"boolean"}
 RN50x64 = False #@param{type:"boolean"}
 
-#@markdown If you're having issues with model downloads, check this to compare SHA's:
 check_model_SHA = False #@param{type:"boolean"}
 
 model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
@@ -1718,64 +1235,6 @@ model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
 for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA"]:
   globals()[param]=get_param(param,globals()[param])
 
-# Download the diffusion model
-if diffusion_model == '256x256_diffusion_uncond':
-  if os.path.exists(model_256_path) and check_model_SHA:
-    print('Checking 256 Diffusion File')
-    with open(model_256_path,"rb") as f:
-        bytes = f.read() 
-        hash = hashlib.sha256(bytes).hexdigest();
-    if hash == model_256_SHA:
-      print('256 Model SHA matches')
-      model_256_downloaded = True
-    else: 
-      print("256 Model SHA doesn't match, redownloading...")
-      wget(model_256_link, model_path)
-      model_256_downloaded = True
-  elif os.path.exists(model_256_path) and not check_model_SHA or model_256_downloaded == True:
-    print('256 Model already downloaded, check check_model_SHA if the file is corrupt')
-  else:  
-    wget(model_256_link, model_path)
-    model_256_downloaded = True
-elif diffusion_model == '512x512_diffusion_uncond_finetune_008100':
-  if os.path.exists(model_512_path) and check_model_SHA:
-    print('Checking 512 Diffusion File')
-    with open(model_512_path,"rb") as f:
-        bytes = f.read() 
-        hash = hashlib.sha256(bytes).hexdigest();
-    if hash == model_512_SHA:
-      print('512 Model SHA matches')
-      model_512_downloaded = True
-    else:  
-      print("512 Model SHA doesn't match, redownloading...")
-      wget(model_512_link, model_path)
-      model_512_downloaded = True
-  elif os.path.exists(model_512_path) and not check_model_SHA or model_512_downloaded == True:
-    print('512 Model already downloaded, check check_model_SHA if the file is corrupt')
-  else:  
-    wget(model_512_link, model_path)
-    model_512_downloaded = True
-
-
-# Download the secondary diffusion model v2
-if use_secondary_model == True:
-  if os.path.exists(model_secondary_path) and check_model_SHA:
-    print('Checking Secondary Diffusion File')
-    with open(model_secondary_path,"rb") as f:
-        bytes = f.read() 
-        hash = hashlib.sha256(bytes).hexdigest();
-    if hash == model_secondary_SHA:
-      print('Secondary Model SHA matches')
-      model_secondary_downloaded = True
-    else:  
-      print("Secondary Model SHA doesn't match, redownloading...")
-      wget(model_secondary_link, model_path)
-      model_secondary_downloaded = True
-  elif os.path.exists(model_secondary_path) and not check_model_SHA or model_secondary_downloaded == True:
-    print('Secondary Model already downloaded, check check_model_SHA if the file is corrupt')
-  else:  
-    wget(model_secondary_link, model_path)
-    model_secondary_downloaded = True
 
 model_config = model_and_diffusion_defaults()
 if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
@@ -1838,19 +1297,7 @@ normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.2686295
 lpips_model = lpips.LPIPS(net='vgg').to(device)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "SettingsTop"
-# !! }}
-"""
-# 3. Settings
-"""
-
-# %%
-# !! {"metadata": {
-# !!    "id": "BasicSettings"
-# !!  }}
-#@markdown ####**Basic Settings:**
+# **Basic Settings:**
 batch_name = 'TimeToDisco' #@param{type: 'string'}
 steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
 width_height = [1280, 768]#@param{type: 'raw'}
@@ -1865,9 +1312,7 @@ skip_augs = False#@param{type: 'boolean'}
 for param in ["batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", "range_scale", "sat_scale", "cutn_batches", "skip_augs"]:
   globals()[param]=get_param(param,globals()[param])
 
-#@markdown ---
-
-#@markdown ####**Init Settings:**
+# **Init Settings:**
 init_image = None #@param{type: 'string'}
 init_scale = 1000 #@param{type: 'integer'}
 skip_steps = 10 #@param{type: 'integer'}
@@ -1876,15 +1321,15 @@ skip_steps = 10 #@param{type: 'integer'}
 for param in ["init_image", "init_scale", "skip_steps"]:
   globals()[param]=get_param(param,globals()[param])
   
-#@markdown *Make sure you set skip_steps to ~50% of your steps if you want to use an init image.*
+# *Make sure you set skip_steps to ~50% of your steps if you want to use an init image.*
 
-#Get corrected sizes
+# Get corrected sizes
 side_x = (width_height[0]//64)*64;
 side_y = (width_height[1]//64)*64;
 if side_x != width_height[0] or side_y != width_height[1]:
   print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
 
-#Update Model Settings
+# Update Model Settings
 timestep_respacing = f'ddim{steps}'
 diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
 model_config.update({
@@ -1892,40 +1337,21 @@ model_config.update({
     'diffusion_steps': diffusion_steps,
 })
 
-#Make folder for batch
+# Make folder for batch
 batchFolder = f'{outDirPath}/{batch_name}'
 createPath(batchFolder)
 
-
-# %%
-# !! {"metadata": {
-# !!    "id": "AnimSetTop"
-# !! }}
-"""
-### Animation Settings
-"""
-
-# %%
-# !! {"metadata": {
-# !!    "id": "AnimSettings"
-# !! }}
-#@markdown ####**Animation Mode:**
+# Animation Mode:
 animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
 
 # Override Notebook defaults if external parameters were provided.
 for param in ["animation_mode"]:
   globals()[param]=get_param(param,globals()[param])
   
-#@markdown *For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.*
+# For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.
+# Video Input Settings:
 
-
-#@markdown ---
-
-#@markdown ####**Video Input Settings:**
-if is_colab:
-    video_init_path = "/content/training.mp4" #@param {type: 'string'}
-else:
-    video_init_path = "training.mp4" #@param {type: 'string'}
+video_init_path = "training.mp4" #@param {type: 'string'}
 extract_nth_frame = 2 #@param {type: 'number'}
 video_init_seed_continuity = True #@param {type: 'boolean'}
 
@@ -1934,10 +1360,7 @@ for param in ["extract_nth_frame", "video_init_seed_continuity"]:
   globals()[param]=get_param(param,globals()[param])
   
 if animation_mode == "Video Input":
-  if is_colab:
-      videoFramesFolder = f'/content/videoFrames'
-  else:
-      videoFramesFolder = f'videoFrames'
+  videoFramesFolder = f'videoFrames'
   createPath(videoFramesFolder)
   print(f"Exporting Video Frames (1 every {extract_nth_frame})...")
   try:
@@ -1950,11 +1373,9 @@ if animation_mode == "Video Input":
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
 
 
-#@markdown ---
-
-#@markdown ####**2D Animation Settings:**
-#@markdown `zoom` is a multiplier of dimensions, 1 is no zoom.
-#@markdown All rotations are provided in degrees.
+# 2D Animation Settings:
+# zoom is a multiplier of dimensions, 1 is no zoom.
+# All rotations are provided in degrees.
 
 key_frames = True #@param {type:"boolean"}
 max_frames = 10000#@param {type:"number"}
@@ -1988,12 +1409,11 @@ for param in ["interp_spline", "angle", "zoom", "translation_x", "translation_y"
   "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov", "padding_mode", "sampling_mode"]:
   globals()[param]=get_param(param,globals()[param])
   
-#======= TURBO MODE
-#@markdown ---
-#@markdown ####**Turbo Mode (3D anim only):**
-#@markdown (Starts after frame 10,) skips diffusion steps and just uses depth map to warp images for skipped frames.
-#@markdown Speeds up rendering by 2x-4x, and may improve image coherence between frames. frame_blend_mode smooths abrupt texture changes across 2 frames.
-#@markdown For different settings tuned for Turbo Mode, refer to the original Disco-Turbo Github: https://github.com/zippy731/disco-diffusion-turbo
+# TURBO MODE
+# Turbo Mode (3D anim only):
+# (Starts after frame 10,) skips diffusion steps and just uses depth map to warp images for skipped frames.
+# Speeds up rendering by 2x-4x, and may improve image coherence between frames. frame_blend_mode smooths abrupt texture changes across 2 frames.
+# For different settings tuned for Turbo Mode, refer to the original Disco-Turbo Github: https://github.com/zippy731/disco-diffusion-turbo
 
 turbo_mode = False #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
@@ -2010,34 +1430,33 @@ if turbo_mode and animation_mode != '3D':
   print('=====')
   turbo_mode = False
 
-#@markdown ---
-
-#@markdown ####**Coherency Settings:**
-#@markdown `frame_scale` tries to guide the new frame to looking like the old one. A good default is 1500.
+# Coherency Settings:**
+# 'frame_scale' tries to guide the new frame to looking like the old one. A good default is 1500.
 frames_scale = 1500 #@param{type: 'integer'}
-#@markdown `frame_skip_steps` will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
+
+# 'frame_skip_steps' will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
 frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'string'}
 
 # Override Notebook defaults if external parameters were provided.
 for param in ["frames_scale", "frames_skip_steps"]:
   globals()[param]=get_param(param,globals()[param])
   
-#======= VR MODE
-#@markdown ---
-#@markdown ####**VR Mode (3D anim only):**
-#@markdown Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
-#@markdown Note the images you're prompting will work better if they have some inherent wide-angle aspect
-#@markdown The generated images will need to be combined into left/right videos. These can then be stitched into the VR180 format.
-#@markdown Google made the VR180 Creator tool but subsequently stopped supporting it. It's available for download in a few places including https://www.patrickgrunwald.de/vr180-creator-download
-#@markdown The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
-#@markdown Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
-#@markdown 
-#@markdown The command to get ffmpeg to concat your frames for each eye is in the form: `ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4` (repeat for r)
+# VR MODE
+# VR Mode (3D anim only):
+# Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
+# Note the images you're prompting will work better if they have some inherent wide-angle aspect
+# The generated images will need to be combined into left/right videos. These can then be stitched into the VR180 format.
+# Google made the VR180 Creator tool but subsequently stopped supporting it. It's available for download in a few places including https://www.patrickgrunwald.de/vr180-creator-download
+# The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
+# Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
+# The command to get ffmpeg to concat your frames for each eye is in the form: `ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4` (repeat for r)
 
 vr_mode = False #@param {type:"boolean"}
-#@markdown `vr_eye_angle` is the y-axis rotation of the eyes towards the center
+
+# 'vr_eye_angle' is the y-axis rotation of the eyes towards the center
 vr_eye_angle = 0.5 #@param{type:"number"}
-#@markdown interpupillary distance (between the eyes)
+
+# interpupillary distance (between the eyes)
 vr_ipd = 5.0 #@param{type:"number"}
 
 # Override Notebook defaults if external parameters were provided.
@@ -2293,20 +1712,11 @@ else:
     rotation_3d_z = float(rotation_3d_z)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "ExtraSetTop"
-# !! }}
-"""
-### Extra Settings
- Partial Saves, Advanced Settings, Cutn Scheduling
-"""
+# Saving:
 
-# %%
-# !! {"metadata": {
-# !!   "id": "ExtraSettings"
-# !! }}
-#@markdown ####**Saving:**
+# Intermediate steps will save a copy at your specified intervals. You can either format it as a single integer or a list of specific steps 
+# A value of `2` will save a copy at 33% and 66%. 0 will save none.
+# A value of `[5, 9, 34, 45]` will save at steps 5, 9, 34, and 45. (Make sure to include the brackets)
 
 intermediate_saves = 0#@param{type: 'raw'}
 intermediates_in_subfolder = True #@param{type: 'boolean'}
@@ -2314,13 +1724,6 @@ intermediates_in_subfolder = True #@param{type: 'boolean'}
 # Override Notebook defaults if external parameters were provided.
 for param in ["intermediate_saves", "intermediates_in_subfolder"]:
   globals()[param]=get_param(param,globals()[param])
-
-#@markdown Intermediate steps will save a copy at your specified intervals. You can either format it as a single integer or a list of specific steps 
-
-#@markdown A value of `2` will save a copy at 33% and 66%. 0 will save none.
-
-#@markdown A value of `[5, 9, 34, 45]` will save at steps 5, 9, 34, and 45. (Make sure to include the brackets)
-
 
 if type(intermediate_saves) is not list:
   if intermediate_saves:
@@ -2336,12 +1739,9 @@ if intermediate_saves and intermediates_in_subfolder is True:
   partialFolder = f'{batchFolder}/partials'
   createPath(partialFolder)
 
-  #@markdown ---
-
-#@markdown ####**Advanced Settings:**
-#@markdown *There are a few extra advanced settings available if you double click this cell.*
-
-#@markdown *Perlin init will replace your init, so uncheck if using one.*
+# Advanced Settings:
+# There are a few extra advanced settings available if you double click this cell.
+# Perlin init will replace your init, so uncheck if using one.
 
 perlin_init = False  #@param{type: 'boolean'}
 perlin_mode = 'mixed' #@param ['mixed', 'color', 'gray']
@@ -2350,20 +1750,16 @@ eta = 0.8#@param{type: 'number'}
 clamp_grad = True #@param{type: 'boolean'}
 clamp_max = 0.05 #@param{type: 'number'}
 
-
 ### EXTRA ADVANCED SETTINGS:
 randomize_class = True
 clip_denoised = False
 fuzzy_prompt = False
 rand_mag = 0.05
 
-
- #@markdown ---
-
-#@markdown ####**Cutn Scheduling:**
-#@markdown Format: `[40]*400+[20]*600` = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
-
-#@markdown cut_overview and cut_innercut are cumulative for total cutn on any given step. Overview cuts see the entire image and are good for early structure, innercuts are your standard cutn.
+# Cutn Scheduling:
+# Format: '[40]*400+[20]*600' = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
+# 'cut_overview' and 'cut_innercut' are cumulative for total cutn on any given step. Overview cuts see the entire image and are good for early structure,
+# innercuts are your standard cutn.
 
 cut_overview = "[12]*400+[4]*600" #@param {type: 'string'}       
 cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}  
@@ -2376,19 +1772,10 @@ for param in ["perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "cl
               "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p"]:
   globals()[param]=get_param(param,globals()[param])
   
-# %%
-# !! {"metadata": {
-# !!    "id": "PromptsTop"
-# !! }}
-"""
-### Prompts
-`animation_mode: None` will only use the first set. `animation_mode: 2D / Video` will run through them per the set frames and hold on the last one.
-"""
+# Prompts
+# 'animation_mode' = None will only use the first set. 
+# 'animation_mode' = '2D / Video' will run through them per the set frames and hold on the last one.
 
-# %%
-# !! {"metadata": {
-# !!    "id": "Prompts"
-# !! }}
 text_prompts = {
     0: ["A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.", "yellow color scheme"],
     100: ["This set of prompts start at frame 100","This prompt has weight five:5"],
@@ -2402,20 +1789,9 @@ image_prompts = {
 for param in ["text_prompts", "image_prompts"]:
   globals()[param]=get_param(param,globals()[param])
 
-# %%
-# !! {"metadata": {
-# !!    "id": "DiffuseTop"
-# !! }}
-"""
-# 4. Diffuse!
-"""
-
-# %%
-# !! {"metadata": {
-# !!    "id": "DoTheRun"
-# !!  }}
-#@title Do the Run!
-#@markdown `n_batches` ignored with animation modes.
+# Diffuse
+# Do the Run!
+# 'n_batches' (ignored with animation modes.)
 display_rate =  50 #@param{type: 'number'}
 n_batches =  50 #@param{type: 'number'}
 
@@ -2423,7 +1799,7 @@ n_batches =  50 #@param{type: 'number'}
 for param in ["display_rate", "n_batches"]:
   globals()[param]=get_param(param,globals()[param])
 
-#Update Model Settings
+# Update Model Settings
 timestep_respacing = f'ddim{steps}'
 diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
 model_config.update({
@@ -2439,9 +1815,6 @@ def move_files(start_num, end_num, old_folder, new_folder):
         new_file = new_folder + f'/{batch_name}({batchNum})_{i:04}.png'
         os.rename(old_file, new_file)
 
-#@markdown ---
-
-
 resume_run = False #@param{type: 'boolean'}
 run_to_resume = 'latest' #@param{type: 'string'}
 resume_from_frame = 'latest' #@param{type: 'string'}
@@ -2455,10 +1828,8 @@ if retain_overwritten_frames is True:
   retainFolder = f'{batchFolder}/retained'
   createPath(retainFolder)
 
-
 skip_step_ratio = int(frames_skip_steps.rstrip("%")) / 100
 calc_frames_skip_steps = math.floor(steps * skip_step_ratio)
-
 
 if steps <= calc_frames_skip_steps:
   sys.exit("ERROR: You can't skip more steps than your total steps")
@@ -2495,7 +1866,7 @@ print(f'Starting Run: {batch_name}({batchNum}) at frame {start_frame}')
 if set_seed == 'random_seed':
     random.seed()
     seed = random.randint(0, 2**32)
-    # print(f'Using seed: {seed}')
+    print(f'Using seed: {seed}')
 else:
     seed = int(set_seed)
 
@@ -2604,20 +1975,8 @@ finally:
     torch.cuda.empty_cache()
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "CreateVidTop"
-# !! }}
-"""
-# 5. Create the video
-"""
-
-# %%
-# !! {"metadata": {
-# !!    "id": "CreateVid"
-# !! }}
-# @title ### **Create video**
-#@markdown Video file will save in the same folder as your images.
+# Create the video
+# Video file will save in the same folder as your images.
 
 skip_video_for_run_all = True #@param {type: 'boolean'}
 
@@ -2625,16 +1984,11 @@ if skip_video_for_run_all == True:
   print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
 
 else:
-  # import subprocess in case this cell is run without the above cells
-  import subprocess
-  from base64 import b64encode
-
+  
   latest_run = batchNum
-
   folder = batch_name #@param
   run = latest_run #@param
   final_frame = 'final_frame'
-
 
   init_frame = 1#@param {type:"number"} This is the frame where the video will start
   last_frame = final_frame#@param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
@@ -2650,7 +2004,6 @@ else:
 
   image_path = f"{outDirPath}/{folder}/{folder}({run})_%04d.png"
   filepath = f"{outDirPath}/{folder}/{folder}({run}).mp4"
-
 
   cmd = [
       'ffmpeg',
@@ -2685,9 +2038,4 @@ else:
       raise RuntimeError(stderr)
   else:
       print("The video is ready and saved to the images folder")
-
-  # if view_video_in_cell:
-  #     mp4 = open(filepath,'rb').read()
-  #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-  #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
-  
+      
