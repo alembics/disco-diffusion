@@ -1996,12 +1996,12 @@ vr_eye_angle = 0.5 #@param{type:"number"}
 #@markdown interpupillary distance (between the eyes)
 vr_ipd = 5.0 #@param{type:"number"}
 
-#insist turbo be used only w 3d anim.
+#insist VR be used only w 3d anim.
 if vr_mode and animation_mode != '3D':
   print('=====')
   print('VR mode only available with 3D animations. Disabling VR.')
   print('=====')
-  turbo_mode = False
+  vr_mode = False
 
 
 def parse_key_frames(string, prompt_parser=None):
