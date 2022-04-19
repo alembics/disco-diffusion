@@ -38,4 +38,4 @@ RUN git clone https://github.com/openai/CLIP && \
     git clone https://github.com/crowsonkb/guided-diffusion.git && \
     git clone https://github.com/shariqfarooq123/AdaBins.git &&\
     git clone https://github.com/entmike/disco-diffusion-1.git && \
-    cd disco-diffusion-1 && \ git checkout no-notebook
+    cd disco-diffusion-1 && git checkout no-notebook
