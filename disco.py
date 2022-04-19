@@ -112,7 +112,7 @@ if not os.path.exists('MiDaS/midas_utils.py'):
 if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
   wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
 
-shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
+shutil.move('disco-diffusion-1/disco_xform_utils.py', 'disco_xform_utils.py')
 
 import disco_xform_utils as dxf
 from CLIP import clip
