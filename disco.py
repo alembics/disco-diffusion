@@ -38,8 +38,9 @@ warnings.filterwarnings("ignore", category=UserWarning)
 console_preview=False #@param {type:"boolean"}
 console_preview_width=80
 simple_nvidia_smi_display = False #@param {type:"boolean"}
+cuda_device='cuda:0'
 # Override Notebook defaults if external parameters were provided.
-for param in ["simple_nvidia_smi_display", "console_preview", "console_preview_width"]:
+for param in ["cuda_device", "simple_nvidia_smi_display", "console_preview", "console_preview_width"]:
   globals()[param]=get_param(param,globals()[param])
 
 is_colab = False
@@ -102,7 +103,7 @@ else:
   nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   print(nvidiasmi_ecc_note)
   
-DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device(cuda_device if torch.cuda.is_available() else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
 if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
