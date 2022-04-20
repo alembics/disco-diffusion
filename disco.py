@@ -116,7 +116,11 @@ TRANSLATION_SCALE = 1.0/200.0
 
 def do_run():
   seed = args.seed
-  print(range(args.start_frame, args.max_frames))
+  angle = None
+  zoom = None
+  translation_x = None
+  translation_y = None
+  # print(range(args.start_frame, args.max_frames))
 
   if (args.animation_mode == "3D") and (args.midas_weight > 0.0):
       midas_model, midas_transform, midas_net_w, midas_net_h, midas_resize_mode, midas_normalization = init_midas_depth_model(args.midas_depth_model, model_path=model_path, device=device)
