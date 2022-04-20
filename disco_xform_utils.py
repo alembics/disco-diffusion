@@ -1,6 +1,6 @@
 import torch, torchvision
 import py3d_tools as p3d
-import midas_utils
+from MiDaS import utils as midas_utils
 from PIL import Image
 import numpy as np
 import sys, math

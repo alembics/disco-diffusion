@@ -25,6 +25,7 @@ COPY --from=modelprep /scratch/pretrained /workspace/code/pretrained
 
 # Install Python packages
 RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0 lpips datetime timm ipywidgets omegaconf>=2.0.0 pytorch-lightning>=1.0.8 torch-fidelity einops wandb pandas ftfy
+RUN pip install pytorch3d climage
 
 # Precache other big files
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip

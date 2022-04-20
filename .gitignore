@@ -2,15 +2,17 @@
 init_images/*
 images_out/*
 MiDaS/
-models/
+models/*
 pretrained/*
 settings.json
 pytorch3d-lite
 disco-diffusion
+disco-diffusion-1
 ResizeRight
 AdaBins
 CLIP
 guided-diffusion
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
