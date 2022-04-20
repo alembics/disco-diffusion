@@ -10,6 +10,10 @@ This is a Docker build file that will preinstall dependencies, packages, Git rep
 
 ## Change Log
 
+- `1.1`
+
+  Added support for passing parameters via environment variables
+
 - `1.0`
 
   Initial build file created based on the DD 5.1 Git repo.  This initial build is deliberately meant to work touch-free of any of the existing Python code written.  It does handle some of the pre-setup tasks already done in the Python code such as pip packages, Git clones, and even pre-caching the model files for faster launch speed.
@@ -39,9 +43,12 @@ docker run --rm -it \
     --gpus=all \
     --name="disco-diffusion" --ipc=host \
     --user $(id -u):$(id -g) \
+    -e text_prompts='{"0":["cybernetic organism, artstation, Art by Beksinski, unreal engine"]}' \
+    -e steps=500 \
 disco-diffusion:5.1 python disco-diffusion/disco.py
 ```
 
 ## Passing Parameters
 
-This will be added after conferring with repo authors.
+- As of change 1.1, parameters can be optionally specified with environment variables passed in the Docker command.  See example above for `text_prompts` and `steps` for an example.
+- TODO: Optionally pass parameters via JSON/CSV file
