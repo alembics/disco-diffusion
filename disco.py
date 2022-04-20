@@ -12,7 +12,7 @@
 # !!    "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.1 - Now with Turbo
+# Disco Diffusion v5.2 - Now with VR Mode
 
 In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
 
@@ -52,9 +52,14 @@ Disco:
 
 Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
 
-3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
+3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai. Creation of disco.py and ongoing maintenance.
 
 Turbo feature by Chris Allen (https://twitter.com/zippy731)
+
+Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
+
+VR Mode by Tom Mason (https://twitter.com/nin_artificial)
+
 """
 
 # %%
@@ -252,6 +257,10 @@ if skip_for_run_all == False:
 
       Update for crossplatform support
 
+  v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
+
+      VR Mode
+
       '''
   )
 
@@ -271,8 +280,13 @@ if skip_for_run_all == False:
 """
 **Diffusion settings (Defaults are heavily outdated)**
 ---
+Disco Diffusion is complex, and continually evolving with new features.  The most current documentation on on Disco Diffusion settings can be found in the unofficial guidebook:
 
-This section is outdated as of v2
+[Zippy's Disco Diffusion Cheatsheet](https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit)
+
+We also encourage users to join the [Disco Diffusion User Discord](https://discord.gg/XGZrFFCRfN) to learn from the active user community.
+
+This section below is outdated as of v2
 
 Setting | Description | Default
 --- | --- | ---
@@ -281,25 +295,25 @@ Setting | Description | Default
 `image_prompts` | Think of these images more as a description of their contents. | N/A
 **Image quality:**
 `clip_guidance_scale`  | Controls how much the image should look like the prompt. | 1000
-`tv_scale` |  Controls the smoothness of the final output. | 150
-`range_scale` |  Controls how far out of range RGB values are allowed to be. | 150
+`tv_scale` | Controls the smoothness of the final output. | 150
+`range_scale` | Controls how far out of range RGB values are allowed to be. | 150
 `sat_scale` | Controls how much saturation is allowed. From nshepperd's JAX notebook. | 0
 `cutn` | Controls how many crops to take from the image. | 16
-`cutn_batches` | Accumulate CLIP gradient from multiple batches of cuts  | 2
+`cutn_batches` | Accumulate CLIP gradient from multiple batches of cuts. | 2
 **Init settings:**
-`init_image` |   URL or local path | None
-`init_scale` |  This enhances the effect of the init image, a good value is 1000 | 0
-`skip_steps Controls the starting point along the diffusion timesteps | 0
-`perlin_init` |  Option to start with random perlin noise | False
-`perlin_mode` |  ('gray', 'color') | 'mixed'
+`init_image` | URL or local path | None
+`init_scale` | This enhances the effect of the init image, a good value is 1000 | 0
+`skip_steps` | Controls the starting point along the diffusion timesteps | 0
+`perlin_init` | Option to start with random perlin noise | False
+`perlin_mode` | ('gray', 'color') | 'mixed'
 **Advanced:**
-`skip_augs` |Controls whether to skip torchvision augmentations | False
-`randomize_class` |Controls whether the imagenet class is randomly changed each iteration | True
-`clip_denoised` |Determines whether CLIP discriminates a noisy or denoised image | False
-`clamp_grad` |Experimental: Using adaptive clip grad in the cond_fn | True
+`skip_augs` | Controls whether to skip torchvision augmentations | False
+`randomize_class` | Controls whether the imagenet class is randomly changed each iteration | True
+`clip_denoised` | Determines whether CLIP discriminates a noisy or denoised image | False
+`clamp_grad` | Experimental: Using adaptive clip grad in the cond_fn | True
 `seed`  | Choose a random seed and print it at end of run for reproduction | random_seed
 `fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
-`rand_mag` |Controls the magnitude of the random noise | 0.1
+`rand_mag` | Controls the magnitude of the random noise | 0.1
 `eta` | DDIM hyperparameter | 0.5
 
 ..
@@ -310,10 +324,10 @@ Setting | Description | Default
 Setting | Description | Default
 --- | --- | ---
 **Diffusion:**
-`timestep_respacing`  | Modify this value to decrease the number of timesteps. | ddim100
+`timestep_respacing` | Modify this value to decrease the number of timesteps. | ddim100
 `diffusion_steps` || 1000
 **Diffusion:**
-`clip_models`  | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
+`clip_models` | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
 """
 
 # %%
@@ -450,37 +464,37 @@ if is_colab:
 try:
   from CLIP import clip
 except:
-  if os.path.exists("CLIP") is not True:
+  if not os.path.exists("CLIP"):
     gitclone("https://github.com/openai/CLIP")
   sys.path.append(f'{PROJECT_DIR}/CLIP')
 
 try:
   from guided_diffusion.script_util import create_model_and_diffusion
 except:
-  if os.path.exists("guided-diffusion") is not True:
+  if not os.path.exists("guided-diffusion"):
     gitclone("https://github.com/crowsonkb/guided-diffusion")
   sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 
 try:
   from resize_right import resize
 except:
-  if os.path.exists("resize_right") is not True:
+  if not os.path.exists("ResizeRight"):
     gitclone("https://github.com/assafshocher/ResizeRight.git")
   sys.path.append(f'{PROJECT_DIR}/ResizeRight')
 
 try:
   import py3d_tools
 except:
-  if os.path.exists('pytorch3d-lite') is not True:
+  if not os.path.exists('pytorch3d-lite'):
     gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
   sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
 
 try:
   from midas.dpt_depth import DPTDepthModel
 except:
-  if os.path.exists('MiDaS') is not True:
+  if not os.path.exists('MiDaS'):
     gitclone("https://github.com/isl-org/MiDaS.git")
-  if os.path.exists('MiDaS/midas_utils.py') is not True:
+  if not os.path.exists('MiDaS/midas_utils.py'):
     shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
   if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
     wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
@@ -490,9 +504,8 @@ try:
   sys.path.append(PROJECT_DIR)
   import disco_xform_utils as dxf
 except:
-  if os.path.exists("disco-diffusion") is not True:
+  if not os.path.exists("disco-diffusion"):
     gitclone("https://github.com/alembics/disco-diffusion.git")
-  # Rename a file to avoid a name conflict..
   if os.path.exists('disco_xform_utils.py') is not True:
     shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
   sys.path.append(PROJECT_DIR)
@@ -549,10 +562,10 @@ if USE_ADABINS:
   except:
     if os.path.exists("AdaBins") is not True:
       gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not os.path.exists(f'{model_path}/pretrained/AdaBins_nyu.pt'):
-      os.makedirs(f'{model_path}/pretrained')
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{model_path}/pretrained')
-    sys.path.append(f'{os.getcwd()}/AdaBins')
+    if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
+      createPath(f'{PROJECT_DIR}/pretrained')
+      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
+    sys.path.append(f'{PROJECT_DIR}/AdaBins')
   from infer import InferenceHelper
   MAX_ADABINS_AREA = 500000
 
@@ -965,6 +978,7 @@ def range_loss(input):
     return (input - input.clamp(-1, 1)).pow(2).mean([1, 2, 3])
 
 stop_on_next_loop = False  # Make sure GPU memory doesn't get corrupted from cancelling the run mid-way through, allow a full frame to complete
+TRANSLATION_SCALE = 1.0/200.0
 
 def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
   if args.key_frames:
@@ -983,8 +997,7 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
         f'rotation_3d_z: {rotation_3d_z}',
     )
 
-  trans_scale = 1.0/200.0
-  translate_xyz = [-translation_x*trans_scale, translation_y*trans_scale, -translation_z*trans_scale]
+  translate_xyz = [-translation_x*TRANSLATION_SCALE, translation_y*TRANSLATION_SCALE, -translation_z*TRANSLATION_SCALE]
   rotate_xyz_degrees = [rotation_3d_x, rotation_3d_y, rotation_3d_z]
   print('translation:',translate_xyz)
   print('rotation:',rotate_xyz_degrees)
@@ -1096,6 +1109,8 @@ def do_run():
                 blendedImage = cv2.addWeighted(newWarpedImg, blend_factor, oldWarpedImg,1-blend_factor, 0.0)
                 cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
                 next_step_pil.save(f'{img_filepath}') # save it also as prev_frame to feed next iteration
+                if vr_mode:
+                  generate_eye_views(TRANSLATION_SCALE,batchFolder,filename,frame_num,midas_model, midas_transform)
                 continue
               else:
                 #if not a skip frame, will run diffusion and need to blend.
@@ -1380,10 +1395,29 @@ def do_run():
                             cv2.imwrite(f'{batchFolder}/{filename}',blendedImage)
                           else:
                             image.save(f'{batchFolder}/{filename}')
+
+                          if vr_mode:
+                            generate_eye_views(TRANSLATION_SCALE, batchFolder, filename, frame_num, midas_model, midas_transform)
+
                         # if frame_num != args.max_frames-1:
                         #   display.clear_output()
           
           plt.plot(np.array(loss_values), 'r')
+
+def generate_eye_views(trans_scale,batchFolder,filename,frame_num,midas_model, midas_transform):
+   for i in range(2):
+      theta = vr_eye_angle * (math.pi/180)
+      ray_origin = math.cos(theta) * vr_ipd / 2 * (-1.0 if i==0 else 1.0)
+      ray_rotation = (theta if i==0 else -theta)
+      translate_xyz = [-(ray_origin)*trans_scale, 0,0]
+      rotate_xyz = [0, (ray_rotation), 0]
+      rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+      transformed_image = dxf.transform_image_3d(f'{batchFolder}/{filename}', midas_model, midas_transform, DEVICE,
+                                                      rot_mat, translate_xyz, args.near_plane, args.far_plane,
+                                                      args.fov, padding_mode=args.padding_mode,
+                                                      sampling_mode=args.sampling_mode, midas_weight=args.midas_weight,spherical=True)
+      eye_file_path = batchFolder+f"/frame_{frame_num:04}" + ('_l' if i==0 else '_r')+'.png'
+      transformed_image.save(eye_file_path)
 
 def save_settings():
   setting_list = {
@@ -1884,7 +1918,7 @@ if animation_mode == "Video Input":
       f.unlink()
   except:
     print('')
-  vf = f'"select=not(mod(n\,{extract_nth_frame}))"'
+  vf = f'select=not(mod(n\,{extract_nth_frame}))'
   subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
 
@@ -1943,6 +1977,31 @@ if turbo_mode and animation_mode != '3D':
 frames_scale = 1500 #@param{type: 'integer'}
 #@markdown `frame_skip_steps` will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
 frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'string'}
+
+#======= VR MODE
+#@markdown ---
+#@markdown ####**VR Mode (3D anim only):**
+#@markdown Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
+#@markdown Note the images you're prompting will work better if they have some inherent wide-angle aspect
+#@markdown The generated images will need to be combined into left/right videos. These can then be stitched into the VR180 format.
+#@markdown Google made the VR180 Creator tool but subsequently stopped supporting it. It's available for download in a few places including https://www.patrickgrunwald.de/vr180-creator-download
+#@markdown The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
+#@markdown Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
+#@markdown 
+#@markdown The command to get ffmpeg to concat your frames for each eye is in the form: `ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4` (repeat for r)
+
+vr_mode = False #@param {type:"boolean"}
+#@markdown `vr_eye_angle` is the y-axis rotation of the eyes towards the center
+vr_eye_angle = 0.5 #@param{type:"number"}
+#@markdown interpupillary distance (between the eyes)
+vr_ipd = 5.0 #@param{type:"number"}
+
+#insist VR be used only w 3d anim.
+if vr_mode and animation_mode != '3D':
+  print('=====')
+  print('VR mode only available with 3D animations. Disabling VR.')
+  print('=====')
+  vr_mode = False
 
 
 def parse_key_frames(string, prompt_parser=None):
