@@ -27,7 +27,11 @@ import pytorch3d.transforms as p3dT
 
 def get_param(key, fallback):
   if(os.getenv(key, None) != None):
-    return json.loads(os.getenv(key))
+    try:
+        return json.loads(os.getenv(key))
+    except:
+        print(f'Could not parse parameter "{key}".  Check you quotes and special characters.')
+        return fallback
   return fallback
 
 def createPath(filepath):
