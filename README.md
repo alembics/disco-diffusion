@@ -30,7 +30,10 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     conda init powershell
     exit
     ```
+
 2. From your **VS Code Powershell prompt**:
+
+    **Note:** These commands should be run from the working directory of this cloned repository.
 
     This command will pull all dependencies needed by Disco Diffusion into a conda environment called `discodiffusion`
     ```
@@ -39,7 +42,9 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     ```
 
 3. Compile `pytorch3d`
-
+    
+    **Note:** These commands should be run from the working directory of this cloned repository.
+    
     For reason I'm not 100% clear on, `pytorch3d` must be compiled in Windows.  (Hence the requirement for C++ tool mentioned in Pre-requisties...)
     ```
     git clone https://github.com/facebookresearch/pytorch3d.git
