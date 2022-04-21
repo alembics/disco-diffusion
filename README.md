@@ -4,10 +4,56 @@
 
 A frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
 
-[to be updated with further info soon]
+<img src="images_out/TimeToDisco/TimeToDisco(0)_0.png" />
 
+## Changes in this Fork
 
+- Focus on running from Windows or Linux CLI instead of keeping Notebook parity in the short term
+- Move all functions possible out of the main `disco.py` module into `dd.py` so that `disco.py` can become readable.  (Ongoing work in progress here)
+- Instead changing parameters directly in `disco.py`, parameters can be controlled by environment variables
+- **TODO:** Allow JSON/CSV/YAML parameter files to be used as inputs
 
+## Windows First-time Setup (Anaconda)
+
+Follow these steps for the first time that you are running Disco Diffusion from Windows.
+
+### Pre-requisites
+
+- Anaconda installed
+- Nvidia CUDA Toolkit Installed
+- MS VS Community Installed with C++ checkmarked
+
+1. From **Anaconda Powershell Prompt**:
+    
+    This command will allow you to use `conda` from a "regular" powershell session.
+    ```
+    conda init powershell
+    exit
+    ```
+2. From your **VS Code Powershell prompt**:
+
+    This command will pull all dependencies needed by Disco Diffusion into a conda environment called `discodiffusion`
+    ```
+    conda env create -f environment.yml
+    conda activate discodiffusion
+    ```
+
+3. Compile `pytorch3d`
+
+    For reason I'm not 100% clear on, `pytorch3d` must be compiled in Windows.  (Hence the requirement for C++ tool mentioned in Pre-requisties...)
+    ```
+    git clone https://github.com/facebookresearch/pytorch3d.git
+    cd pytorch3d
+    python setup.py install
+    cd ..
+    ```
+4. Execute a test run:
+
+    The following test run will run with all defaults (so "the lighthouse run" as it is coined.)  Image output and current image progress (`progress.png`) will be stored in `images_out`.
+    ```
+    conda activate discodiffusion
+    python disco.py
+    ```
 
 ## Changelog
 #### v1 Oct 29th 2021 - Somnai  

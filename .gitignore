@@ -1,17 +1,31 @@
-# Disco-specfic ignores
+### Disco-specfic ignores ###
+
+# Ignore any images
 init_images/*
 images_out/*
+!images_out/TimeToDisco
+images_out/TimeToDisco/*
+
+# Allow a few sample images for sake of GitHub visibility for new users:
+!images_out/TimeToDisco/TimeToDisco(0)_0.png
+!images_out/TimeToDisco/TimeToDisco(0)_settings.txt
+!init_images/mr_incredible.png
+
+# Ignore clones Git repos (they will be cloned on first run)
 MiDaS/
-models/*
-pretrained/*
-settings.json
 pytorch3d-lite
+pytorch3d
 disco-diffusion
 disco-diffusion-1
 ResizeRight
 AdaBins
 CLIP
 guided-diffusion
+
+# Ignore model files (they will be DLed on first run)
+models/*
+pretrained/*
+settings.json
 .vscode
 
 # Byte-compiled / optimized / DLL files

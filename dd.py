@@ -49,9 +49,9 @@ def pipie(modulestr):
   res = subprocess.run(['git', 'install', '-e', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
   print(res)
 
-def wget(url, outputdir):
-  res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
+# def wget(url, outputdir):
+#  res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+#  print(res)
   
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
 
