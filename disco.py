@@ -353,7 +353,7 @@ def do_run():
       init = None
       if init_image is not None:
           init = Image.open(fetch(init_image)).convert('RGB')
-          init = init.resize((args.side_x, args.side_y), Image.Resampling.LANCZOS)
+          init = init.resize((args.side_x, args.side_y), resample=Image.LANCZOS)
           init = TF.to_tensor(init).to(device).unsqueeze(0).mul(2).sub(1)
       
       if args.perlin_init:
