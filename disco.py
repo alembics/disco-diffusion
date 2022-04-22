@@ -36,9 +36,6 @@ sys.path.append(f'{PROJECT_DIR}')
 if not os.path.exists(f'{PROJECT_DIR}/MiDaS'):
   git_output = subprocess.run('git clone https://github.com/isl-org/MiDaS.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
-if not os.path.exists(f'{PROJECT_DIR}/ResizeRight'):
-  git_output = subprocess.run('git clone https://github.com/assafshocher/ResizeRight.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
-
 if not os.path.exists(f'{PROJECT_DIR}/pytorch3d-lite'):
   git_output = subprocess.run('git clone https://github.com/MSFTserver/pytorch3d-lite.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
@@ -50,7 +47,6 @@ if not os.path.exists('MiDaS/midas_utils.py'):
       shutil.copy('MiDaS/utils.py', 'MiDaS/midas_utils.py')
 
 sys.path.append(f'{PROJECT_DIR}/MiDaS')
-sys.path.append(f'{PROJECT_DIR}/ResizeRight')
 sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
 sys.path.append(f'{PROJECT_DIR}/AdaBins')
 
