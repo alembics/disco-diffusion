@@ -761,6 +761,28 @@ retain_overwritten_frames = False #@param{type: 'boolean'}
 # Video file will save in the same folder as your images.
 skip_video_for_run_all = True #@param {type: 'boolean'}
 check_model_SHA = False #@param{type:"boolean"}
+#
+# Override Notebook defaults if external parameters were provided.
+#
+for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", 
+              "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA",
+              "batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
+              "range_scale", "sat_scale", "cutn_batches", "skip_augs",
+              "init_image", "init_scale", "skip_steps",
+              "animation_mode","extract_nth_frame", "video_init_seed_continuity",
+              "key_frames", "max_frames","interp_spline", "angle", "zoom",
+              "translation_x", "translation_y", "translation_z", "rotation_3d_x", "rotation_3d_y",
+              "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov",
+              "padding_mode", "sampling_mode","turbo_mode", "turbo_steps", "turbo_preroll",
+              "frames_scale", "frames_skip_steps","vr_mode", "vr_eye_angle", "vr_ipd",
+              "intermediate_saves", "intermediates_in_subfolder",
+              "perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "clamp_max",
+              "randomize_class", "clip_denoised", "fuzzy_prompt", "rand_mag",
+              "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p",
+              "text_prompts", "image_prompts","display_rate", "n_batches",
+              "resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames",
+              "skip_video_for_run_all"]:
+  globals()[param]=get_param(param,globals()[param])
 
 model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
 model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
@@ -831,27 +853,6 @@ if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().req
 
 normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 lpips_model = lpips.LPIPS(net='vgg').to(device)
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", 
-              "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA",
-              "batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
-              "range_scale", "sat_scale", "cutn_batches", "skip_augs",
-              "init_image", "init_scale", "skip_steps",
-              "animation_mode","extract_nth_frame", "video_init_seed_continuity",
-              "key_frames", "max_frames","interp_spline", "angle", "zoom",
-              "translation_x", "translation_y", "translation_z", "rotation_3d_x", "rotation_3d_y",
-              "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov",
-              "padding_mode", "sampling_mode","turbo_mode", "turbo_steps", "turbo_preroll",
-              "frames_scale", "frames_skip_steps","vr_mode", "vr_eye_angle", "vr_ipd",
-              "intermediate_saves", "intermediates_in_subfolder",
-              "perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "clamp_max",
-              "randomize_class", "clip_denoised", "fuzzy_prompt", "rand_mag",
-              "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p",
-              "text_prompts", "image_prompts","display_rate", "n_batches",
-              "resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames",
-              "skip_video_for_run_all"]:
-  globals()[param]=get_param(param,globals()[param])
 
 # Make folder for batch
 batchFolder = f'{outDirPath}/{batch_name}'
