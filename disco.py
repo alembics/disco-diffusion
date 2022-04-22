@@ -640,85 +640,6 @@ RN50 = True #@param{type:"boolean"}
 RN50x4 = False #@param{type:"boolean"}
 RN50x16 = False #@param{type:"boolean"}
 RN50x64 = False #@param{type:"boolean"}
-
-check_model_SHA = False #@param{type:"boolean"}
-
-model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
-model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
-model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
-
-model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
-model_512_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt'
-model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
-
-model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
-model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
-model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", 
-              "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA"]:
-  globals()[param]=get_param(param,globals()[param])
-
-model_config = model_and_diffusion_defaults()
-if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
-    model_config.update({
-        'attention_resolutions': '32, 16, 8',
-        'class_cond': False,
-        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
-        'rescale_timesteps': True,
-        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
-        'image_size': 512,
-        'learn_sigma': True,
-        'noise_schedule': 'linear',
-        'num_channels': 256,
-        'num_head_channels': 64,
-        'num_res_blocks': 2,
-        'resblock_updown': True,
-        'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
-        'use_scale_shift_norm': True,
-    })
-elif diffusion_model == '256x256_diffusion_uncond':
-    model_config.update({
-        'attention_resolutions': '32, 16, 8',
-        'class_cond': False,
-        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
-        'rescale_timesteps': True,
-        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
-        'image_size': 256,
-        'learn_sigma': True,
-        'noise_schedule': 'linear',
-        'num_channels': 256,
-        'num_head_channels': 64,
-        'num_res_blocks': 2,
-        'resblock_updown': True,
-        'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
-        'use_scale_shift_norm': True,
-    })
-
-model_default = model_config['image_size']
-
-if use_secondary_model:
-    secondary_model = SecondaryDiffusionImageNet2()
-    secondary_model.load_state_dict(torch.load(f'{model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
-    secondary_model.eval().requires_grad_(False).to(device)
-
-clip_models = []
-if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if ViTB16 is True: clip_models.append(clip.load('ViT-B/16', jit=False)[0].eval().requires_grad_(False).to(device) ) 
-if ViTL14 is True: clip_models.append(clip.load('ViT-L/14', jit=False)[0].eval().requires_grad_(False).to(device) ) 
-if RN50 is True: clip_models.append(clip.load('RN50', jit=False)[0].eval().requires_grad_(False).to(device))
-if RN50x4 is True: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN50x16 is True: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN50x64 is True: clip_models.append(clip.load('RN50x64', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().requires_grad_(False).to(device)) 
-
-normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
-lpips_model = lpips.LPIPS(net='vgg').to(device)
-
-
 # Basic Settings:
 batch_name = 'TimeToDisco' #@param{type: 'string'}
 steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
@@ -839,9 +760,82 @@ retain_overwritten_frames = False #@param{type: 'boolean'}
 # Create the video
 # Video file will save in the same folder as your images.
 skip_video_for_run_all = True #@param {type: 'boolean'}
+check_model_SHA = False #@param{type:"boolean"}
+
+model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
+model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+
+model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
+model_512_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt'
+model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
+
+model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
+model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
+model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
+
+model_config = model_and_diffusion_defaults()
+if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
+    model_config.update({
+        'attention_resolutions': '32, 16, 8',
+        'class_cond': False,
+        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
+        'rescale_timesteps': True,
+        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
+        'image_size': 512,
+        'learn_sigma': True,
+        'noise_schedule': 'linear',
+        'num_channels': 256,
+        'num_head_channels': 64,
+        'num_res_blocks': 2,
+        'resblock_updown': True,
+        'use_checkpoint': use_checkpoint,
+        'use_fp16': True,
+        'use_scale_shift_norm': True,
+    })
+elif diffusion_model == '256x256_diffusion_uncond':
+    model_config.update({
+        'attention_resolutions': '32, 16, 8',
+        'class_cond': False,
+        'diffusion_steps': 1000, #No need to edit this, it is taken care of later.
+        'rescale_timesteps': True,
+        'timestep_respacing': 250, #No need to edit this, it is taken care of later.
+        'image_size': 256,
+        'learn_sigma': True,
+        'noise_schedule': 'linear',
+        'num_channels': 256,
+        'num_head_channels': 64,
+        'num_res_blocks': 2,
+        'resblock_updown': True,
+        'use_checkpoint': use_checkpoint,
+        'use_fp16': True,
+        'use_scale_shift_norm': True,
+    })
+
+model_default = model_config['image_size']
+
+if use_secondary_model:
+    secondary_model = SecondaryDiffusionImageNet2()
+    secondary_model.load_state_dict(torch.load(f'{model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
+    secondary_model.eval().requires_grad_(False).to(device)
+
+clip_models = []
+if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
+if ViTB16 is True: clip_models.append(clip.load('ViT-B/16', jit=False)[0].eval().requires_grad_(False).to(device) ) 
+if ViTL14 is True: clip_models.append(clip.load('ViT-L/14', jit=False)[0].eval().requires_grad_(False).to(device) ) 
+if RN50 is True: clip_models.append(clip.load('RN50', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN50x4 is True: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_grad_(False).to(device)) 
+if RN50x16 is True: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device)) 
+if RN50x64 is True: clip_models.append(clip.load('RN50x64', jit=False)[0].eval().requires_grad_(False).to(device)) 
+if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().requires_grad_(False).to(device)) 
+
+normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
+lpips_model = lpips.LPIPS(net='vgg').to(device)
 
 # Override Notebook defaults if external parameters were provided.
-for param in ["batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
+for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", 
+              "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA",
+              "batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
               "range_scale", "sat_scale", "cutn_batches", "skip_augs",
               "init_image", "init_scale", "skip_steps",
               "animation_mode","extract_nth_frame", "video_init_seed_continuity",
@@ -874,13 +868,14 @@ timestep_respacing = f'ddim{steps}'
 diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
 model_config.update({
     'timestep_respacing': timestep_respacing,
-    'diffusion_steps': diffusion_steps,
+    'diffusion_steps': diffusion_steps
 })
   
 if animation_mode == "Video Input":
   videoFramesFolder = f'videoFrames'
   createPath(videoFramesFolder)
   print(f"Exporting Video Frames (1 every {extract_nth_frame})...")
+  max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
   try:
     for f in pathlib.Path(f'{videoFramesFolder}').glob('*.jpg'):
       f.unlink()
@@ -889,10 +884,7 @@ if animation_mode == "Video Input":
   vf = f'select=not(mod(n\,{extract_nth_frame}))'
   subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
-
-if animation_mode == "Video Input":
-  max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
-
+  
 #insist turbo be used only w 3d anim.
 if turbo_mode and animation_mode != '3D':
   print('=====')
@@ -1005,7 +997,6 @@ if key_frames:
         )
         rotation_3d_y = f"0: ({rotation_3d_y})"
         rotation_3d_y_series = get_inbetweens(parse_key_frames(rotation_3d_y), max_frames=max_frames, interp_spline=interp_spline)
-
     try:
         rotation_3d_z_series = get_inbetweens(parse_key_frames(rotation_3d_z), max_frames=max_frames, interp_spline=interp_spline)
     except RuntimeError as e:
@@ -1206,9 +1197,7 @@ finally:
 
 if skip_video_for_run_all == True:
   print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
-
 else:
-  
   latest_run = batchNum
   folder = batch_name #@param
   run = latest_run #@param
@@ -1218,10 +1207,8 @@ else:
   last_frame = final_frame#@param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
   fps = 12#@param {type:"number"}
   # view_video_in_cell = True #@param {type: 'boolean'}
-
   frames = []
   # tqdm.write('Generating video...')
-
   if last_frame == 'final_frame':
     last_frame = len(glob(batchFolder+f"/{folder}({run})_*.png"))
     print(f'Total frames: {last_frame}')
