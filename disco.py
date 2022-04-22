@@ -1031,7 +1031,7 @@ def do_run():
       
       # Inits if not video frames
       if args.animation_mode != "Video Input":
-        if args.init_image == '' or args.init_image.lower() == 'none':
+        if args.init_image in ['','none', 'None', 'NONE']:
           init_image = None
         else:
           init_image = args.init_image
