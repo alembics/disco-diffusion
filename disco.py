@@ -571,6 +571,7 @@ def do_run():
                               'ViTB32': ViTB32,
                               'ViTB16': ViTB16,
                               'ViTL14': ViTL14,
+                              'ViTL14_336': ViTL14_336,
                               'RN101': RN101,
                               'RN50': RN50,
                               'RN50x4': RN50x4,
@@ -635,6 +636,7 @@ use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
 ViTB16 = True #@param{type:"boolean"}
 ViTL14 = False #@param{type:"boolean"}
+ViTL14_336 = False #@param{type:"boolean"}
 RN101 = False #@param{type:"boolean"}
 RN50 = True #@param{type:"boolean"}
 RN50x4 = False #@param{type:"boolean"}
@@ -764,7 +766,7 @@ check_model_SHA = False #@param{type:"boolean"}
 #
 # Override Notebook defaults if external parameters were provided.
 #
-for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", 
+for param in ["diffusion_model", "use_secondary_model", "ViTB32", "ViTB16", "ViTL14", "ViTL14_336",
               "RN101", "RN50", "RN50x4", "RN50x64", "check_model_SHA",
               "batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
               "range_scale", "sat_scale", "cutn_batches", "skip_augs",
@@ -845,6 +847,7 @@ clip_models = []
 if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
 if ViTB16 is True: clip_models.append(clip.load('ViT-B/16', jit=False)[0].eval().requires_grad_(False).to(device) ) 
 if ViTL14 is True: clip_models.append(clip.load('ViT-L/14', jit=False)[0].eval().requires_grad_(False).to(device) ) 
+if ViTL14_336 is True: clip_models.append(clip.load('ViT-L/14@336px', jit=False)[0].eval().requires_grad_(False).to(device) ) 
 if RN50 is True: clip_models.append(clip.load('RN50', jit=False)[0].eval().requires_grad_(False).to(device))
 if RN50x4 is True: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_grad_(False).to(device)) 
 if RN50x16 is True: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device)) 
