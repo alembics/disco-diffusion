@@ -6,7 +6,7 @@ This is a Docker build file that will preinstall dependencies, packages, Git rep
 
 ## TO-DO:
 
-- Make container actually accept parameters on run.  Right now you'll just be seeing lighthouses.
+- Accept parameters via files, currently works off env vars.
 
 ## Change Log
 
