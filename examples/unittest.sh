@@ -10,7 +10,7 @@ docker run --rm -it \
     --gpus device=all --cpus=2.0 --name="unittest-disco" --ipc=host --user $(id -u):$(id -g) \
     -v /home/mike/ai/disco5/images_out:/workspace/code/images_out \
     -v /home/mike/ai/disco5/init_images:/workspace/code/init_images \
-    -v /home/mike/code/other/disco-diffusion:/workspace/scratch \
+    -v /home/mike/disco-diffusion-1:/workspace/scratch \
     -e cuda_device='"cuda:0"' \
     -e simple_nvidia_smi_display='true' \
     -e batch_name='"unit-test"' \
@@ -22,4 +22,4 @@ docker run --rm -it \
     -e console_preview_width=120 \
     -e set_seed=8675309 \
     -e text_prompts='{"0":["robots testing continuous integration, github, devops and automated testing"]}' \
-    disco-diffusion:dev bash -c "python disco-diffusion-1/disco.py"
+    disco-diffusion:dev bash -c "cp -r /workspace/scratch/* /workspace/code/disco-diffusion-1/ && python disco-diffusion-1/disco.py"
