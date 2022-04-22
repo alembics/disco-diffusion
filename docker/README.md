@@ -45,7 +45,7 @@ docker run --rm -it \
     --user $(id -u):$(id -g) \
     -e text_prompts='{"0":["cybernetic organism, artstation, Art by Beksinski, unreal engine"]}' \
     -e steps=500 \
-disco-diffusion:5.1 python disco-diffusion/disco.py
+disco-diffusion:5.1 python disco-diffusion-1/disco.py
 ```
 
 ## Passing Parameters
