@@ -1,0 +1,1 @@
+This folder is the target output folder for `disco.py` runs.

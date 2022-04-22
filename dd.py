@@ -22,7 +22,7 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from resize_right import resize
 import disco_xform_utils as dxf
-import pytorch3d.transforms as p3dT
+# import pytorch3d.transforms as p3dT
 
 
 def get_param(key, fallback):

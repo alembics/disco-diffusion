@@ -41,6 +41,10 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     conda activate discodiffusion
     ```
 
+      - **Note:** If you have already activated a `discodiffusion` conda environment, you can refresh it if this repo has changed by typing:
+
+        `conda env update --prefix discodiffusion --file environment.yml  --prune`
+
 3. Compile `pytorch3d`
     
     **Note:** These commands should be run from the working directory of this cloned repository.

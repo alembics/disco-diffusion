@@ -23,15 +23,16 @@ import torch
 import warnings
 import climage
 import wget
+import guided_diffusion
+import clip
+from clip import clip
+from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 
 # Set base project directory to current working directory
 PROJECT_DIR = os.path.abspath(os.getcwd())
 sys.path.append(f'{PROJECT_DIR}')
 
 # Install any missing Git deps
-if not os.path.exists(f'{PROJECT_DIR}/CLIP'):
-  git_output = subprocess.run('git clone https://github.com/openai/CLIP'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
-
 if not os.path.exists(f'{PROJECT_DIR}/MiDaS'):
   git_output = subprocess.run('git clone https://github.com/isl-org/MiDaS.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
@@ -44,19 +45,13 @@ if not os.path.exists(f'{PROJECT_DIR}/pytorch3d-lite'):
 if not os.path.exists(f'{PROJECT_DIR}/AdaBins'):
   git_output = subprocess.run('git clone https://github.com/shariqfarooq123/AdaBins.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
-if not os.path.exists(f'{PROJECT_DIR}/guided-diffusion'):
-  git_output = subprocess.run('git clone https://github.com/crowsonkb/guided-diffusion.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
-
-
 # WTF tho
 if not os.path.exists('MiDaS/midas_utils.py'):
       shutil.copy('MiDaS/utils.py', 'MiDaS/midas_utils.py')
 
-sys.path.append(f'{PROJECT_DIR}/CLIP')
 sys.path.append(f'{PROJECT_DIR}/MiDaS')
 sys.path.append(f'{PROJECT_DIR}/ResizeRight')
 sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
-sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 sys.path.append(f'{PROJECT_DIR}/AdaBins')
 
 from dd import *
@@ -115,8 +110,6 @@ if not os.path.exists(f'{model_path}/secondary_model_imagenet_2.pth'):
 # WTF tho
 # shutil.move('disco-diffusion-1/disco_xform_utils.py', 'disco_xform_utils.py')
 
-from CLIP import clip
-from guided_diffusion.script_util import create_model_and_diffusion, model_and_diffusion_defaults
 from midas.dpt_depth import DPTDepthModel
 from midas.midas_net import MidasNet
 from midas.midas_net_custom import MidasNet_small

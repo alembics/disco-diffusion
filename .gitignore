@@ -5,6 +5,7 @@ init_images/*
 images_out/*
 !images_out/TimeToDisco
 images_out/TimeToDisco/*
+!images_out/README.md
 
 # Allow a few sample images for sake of GitHub visibility for new users:
 !images_out/TimeToDisco/TimeToDisco(0)_0.png
@@ -19,8 +20,6 @@ disco-diffusion
 disco-diffusion-1
 ResizeRight
 AdaBins
-CLIP
-guided-diffusion
 
 # Ignore model files (they will be DLed on first run)
 models/*
