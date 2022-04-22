@@ -729,87 +729,22 @@ range_scale =   150#@param{type: 'number'}
 sat_scale =   0#@param{type: 'number'}
 cutn_batches = 4  #@param{type: 'number'}
 skip_augs = False#@param{type: 'boolean'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
-              "range_scale", "sat_scale", "cutn_batches", "skip_augs"]:
-  globals()[param]=get_param(param,globals()[param])
-
 # **Init Settings:**
 init_image = None #@param{type: 'string'}
 init_scale = 1000 #@param{type: 'integer'}
 skip_steps = 10 #@param{type: 'integer'}
-
-# Make sure you set skip_steps to ~50% of your steps if you want to use an init image.
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["init_image", "init_scale", "skip_steps"]:
-  globals()[param]=get_param(param,globals()[param])
-  
-# Get corrected sizes
-side_x = (width_height[0]//64)*64;
-side_y = (width_height[1]//64)*64;
-if side_x != width_height[0] or side_y != width_height[1]:
-  print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
-
-# Update Model Settings
-timestep_respacing = f'ddim{steps}'
-diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
-model_config.update({
-    'timestep_respacing': timestep_respacing,
-    'diffusion_steps': diffusion_steps,
-})
-
-# Make folder for batch
-batchFolder = f'{outDirPath}/{batch_name}'
-createPath(batchFolder)
-
 # Animation Mode:
 animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["animation_mode"]:
-  globals()[param]=get_param(param,globals()[param])
-  
 # For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.
 # Video Input Settings:
-
 video_init_path = "training.mp4" #@param {type: 'string'}
 extract_nth_frame = 2 #@param {type: 'number'}
 video_init_seed_continuity = True #@param {type: 'boolean'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["extract_nth_frame", "video_init_seed_continuity"]:
-  globals()[param]=get_param(param,globals()[param])
-  
-if animation_mode == "Video Input":
-  videoFramesFolder = f'videoFrames'
-  createPath(videoFramesFolder)
-  print(f"Exporting Video Frames (1 every {extract_nth_frame})...")
-  try:
-    for f in pathlib.Path(f'{videoFramesFolder}').glob('*.jpg'):
-      f.unlink()
-  except:
-    print('')
-  vf = f'select=not(mod(n\,{extract_nth_frame}))'
-  subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
-
-
 # 2D Animation Settings:
 # zoom is a multiplier of dimensions, 1 is no zoom.
 # All rotations are provided in degrees.
-
 key_frames = True #@param {type:"boolean"}
 max_frames = 10000#@param {type:"number"}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["key_frames", "max_frames"]:
-  globals()[param]=get_param(param,globals()[param])
-
-if animation_mode == "Video Input":
-  max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
-
 interp_spline = 'Linear' #Do not change, currently will not look good. param ['Linear','Quadratic','Cubic']{type:"string"}
 angle = "0:(0)"#@param {type:"string"}
 zoom = "0: (1), 10: (1.05)"#@param {type:"string"}
@@ -826,44 +761,19 @@ far_plane = 10000#@param {type:"number"}
 fov = 40#@param {type:"number"}
 padding_mode = 'border'#@param {type:"string"}
 sampling_mode = 'bicubic'#@param {type:"string"}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["interp_spline", "angle", "zoom", "translation_x", "translation_y", "translation_z", "rotation_3d_x", "rotation_3d_y",
-  "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov", "padding_mode", "sampling_mode"]:
-  globals()[param]=get_param(param,globals()[param])
-  
 # TURBO MODE
 # Turbo Mode (3D anim only):
 # (Starts after frame 10,) skips diffusion steps and just uses depth map to warp images for skipped frames.
 # Speeds up rendering by 2x-4x, and may improve image coherence between frames. frame_blend_mode smooths abrupt texture changes across 2 frames.
 # For different settings tuned for Turbo Mode, refer to the original Disco-Turbo Github: https://github.com/zippy731/disco-diffusion-turbo
-
 turbo_mode = False #@param {type:"boolean"}
 turbo_steps = "3" #@param ["2","3","4","5","6"] {type:"string"}
 turbo_preroll = 10 # frames
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["turbo_mode", "turbo_steps", "turbo_preroll"]:
-  globals()[param]=get_param(param,globals()[param])
-
-#insist turbo be used only w 3d anim.
-if turbo_mode and animation_mode != '3D':
-  print('=====')
-  print('Turbo mode only available with 3D animations. Disabling Turbo.')
-  print('=====')
-  turbo_mode = False
-
 # Coherency Settings:**
 # 'frame_scale' tries to guide the new frame to looking like the old one. A good default is 1500.
 frames_scale = 1500 #@param{type: 'integer'}
-
 # 'frame_skip_steps' will blur the previous frame - higher values will flicker less but struggle to add enough new detail to zoom into.
 frames_skip_steps = '60%' #@param ['40%', '50%', '60%', '70%', '80%'] {type: 'string'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["frames_scale", "frames_skip_steps"]:
-  globals()[param]=get_param(param,globals()[param])
-  
 # VR MODE
 # VR Mode (3D anim only):
 # Enables stereo rendering of left/right eye views (supporting Turbo) which use a different (fish-eye) camera projection matrix.   
@@ -873,18 +783,122 @@ for param in ["frames_scale", "frames_skip_steps"]:
 # The tool is not only good for stitching (videos and photos) but also for adding the correct metadata into existing videos, which is needed for services like YouTube to identify the format correctly.
 # Watching YouTube VR videos isn't necessarily the easiest depending on your headset. For instance Oculus have a dedicated media studio and store which makes the files easier to access on a Quest https://creator.oculus.com/manage/mediastudio/
 # The command to get ffmpeg to concat your frames for each eye is in the form: `ffmpeg -framerate 15 -i frame_%4d_l.png l.mp4` (repeat for r)
-
 vr_mode = False #@param {type:"boolean"}
-
 # 'vr_eye_angle' is the y-axis rotation of the eyes towards the center
 vr_eye_angle = 0.5 #@param{type:"number"}
-
 # interpupillary distance (between the eyes)
 vr_ipd = 5.0 #@param{type:"number"}
+# Saving:
+# Intermediate steps will save a copy at your specified intervals. You can either format it as a single integer or a list of specific steps 
+# A value of `2` will save a copy at 33% and 66%. 0 will save none.
+# A value of `[5, 9, 34, 45]` will save at steps 5, 9, 34, and 45. (Make sure to include the brackets)
+intermediate_saves = 0#@param{type: 'raw'}
+intermediates_in_subfolder = True #@param{type: 'boolean'}
+# Advanced Settings:
+# There are a few extra advanced settings available if you double click this cell.
+# Perlin init will replace your init, so uncheck if using one.
+perlin_init = False  #@param{type: 'boolean'}
+perlin_mode = 'mixed' #@param ['mixed', 'color', 'gray']
+set_seed = 'random_seed' #@param{type: 'string'}
+eta = 0.8#@param{type: 'number'}
+clamp_grad = True #@param{type: 'boolean'}
+clamp_max = 0.05 #@param{type: 'number'}
+### EXTRA ADVANCED SETTINGS:
+randomize_class = True
+clip_denoised = False
+fuzzy_prompt = False
+rand_mag = 0.05
+# Cutn Scheduling:
+# Format: '[40]*400+[20]*600' = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
+# 'cut_overview' and 'cut_innercut' are cumulative for total cutn on any given step. Overview cuts see the entire image and are good for early structure,
+# innercuts are your standard cutn.
+cut_overview = "[12]*400+[4]*600" #@param {type: 'string'}       
+cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}  
+cut_ic_pow = 1#@param {type: 'number'}  
+cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
+# Prompts
+# 'animation_mode' = None will only use the first set. 
+# 'animation_mode' = '2D / Video' will run through them per the set frames and hold on the last one.
+text_prompts = {
+    0: ["A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.", "yellow color scheme"],
+    100: ["This set of prompts start at frame 100","This prompt has weight five:5"],
+}
+image_prompts = {
+    # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
+}
+# Diffuse
+# Do the Run!
+# 'n_batches' (ignored with animation modes.)
+display_rate =  50 #@param{type: 'number'}
+n_batches =  50 #@param{type: 'number'}
+batch_size = 1 
+resume_run = False #@param{type: 'boolean'}
+run_to_resume = 'latest' #@param{type: 'string'}
+resume_from_frame = 'latest' #@param{type: 'string'}
+retain_overwritten_frames = False #@param{type: 'boolean'}
+# Create the video
+# Video file will save in the same folder as your images.
+skip_video_for_run_all = True #@param {type: 'boolean'}
 
 # Override Notebook defaults if external parameters were provided.
-for param in ["vr_mode", "vr_eye_angle", "vr_ipd"]:
+for param in ["batch_name", "steps", "width_height", "clip_guidance_scale", "tv_scale", 
+              "range_scale", "sat_scale", "cutn_batches", "skip_augs",
+              "init_image", "init_scale", "skip_steps",
+              "animation_mode","extract_nth_frame", "video_init_seed_continuity",
+              "key_frames", "max_frames","interp_spline", "angle", "zoom",
+              "translation_x", "translation_y", "translation_z", "rotation_3d_x", "rotation_3d_y",
+              "rotation_3d_z", "midas_depth_model", "midas_weight", "near_plane", "far_plane", "fov",
+              "padding_mode", "sampling_mode","turbo_mode", "turbo_steps", "turbo_preroll",
+              "frames_scale", "frames_skip_steps","vr_mode", "vr_eye_angle", "vr_ipd",
+              "intermediate_saves", "intermediates_in_subfolder",
+              "perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "clamp_max",
+              "randomize_class", "clip_denoised", "fuzzy_prompt", "rand_mag",
+              "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p",
+              "text_prompts", "image_prompts","display_rate", "n_batches",
+              "resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames",
+              "skip_video_for_run_all"]:
   globals()[param]=get_param(param,globals()[param])
+
+# Make folder for batch
+batchFolder = f'{outDirPath}/{batch_name}'
+createPath(batchFolder)
+  
+# Get corrected sizes
+side_x = (width_height[0]//64)*64;
+side_y = (width_height[1]//64)*64;
+if side_x != width_height[0] or side_y != width_height[1]:
+  print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
+
+# Update Model Settings
+timestep_respacing = f'ddim{steps}'
+diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
+model_config.update({
+    'timestep_respacing': timestep_respacing,
+    'diffusion_steps': diffusion_steps,
+})
+  
+if animation_mode == "Video Input":
+  videoFramesFolder = f'videoFrames'
+  createPath(videoFramesFolder)
+  print(f"Exporting Video Frames (1 every {extract_nth_frame})...")
+  try:
+    for f in pathlib.Path(f'{videoFramesFolder}').glob('*.jpg'):
+      f.unlink()
+  except:
+    print('')
+  vf = f'select=not(mod(n\,{extract_nth_frame}))'
+  subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+  #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
+
+if animation_mode == "Video Input":
+  max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
+
+#insist turbo be used only w 3d anim.
+if turbo_mode and animation_mode != '3D':
+  print('=====')
+  print('Turbo mode only available with 3D animations. Disabling Turbo.')
+  print('=====')
+  turbo_mode = False
 
 #insist turbo be used only w 3d anim.
 if vr_mode and animation_mode != '3D':
@@ -1016,20 +1030,6 @@ else:
     rotation_3d_y = float(rotation_3d_y)
     rotation_3d_z = float(rotation_3d_z)
 
-
-# Saving:
-
-# Intermediate steps will save a copy at your specified intervals. You can either format it as a single integer or a list of specific steps 
-# A value of `2` will save a copy at 33% and 66%. 0 will save none.
-# A value of `[5, 9, 34, 45]` will save at steps 5, 9, 34, and 45. (Make sure to include the brackets)
-
-intermediate_saves = 0#@param{type: 'raw'}
-intermediates_in_subfolder = True #@param{type: 'boolean'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["intermediate_saves", "intermediates_in_subfolder"]:
-  globals()[param]=get_param(param,globals()[param])
-
 if type(intermediate_saves) is not list:
   if intermediate_saves:
     steps_per_checkpoint = math.floor((steps - skip_steps - 1) // (intermediate_saves+1))
@@ -1043,67 +1043,7 @@ else:
 if intermediate_saves and intermediates_in_subfolder is True:
   partialFolder = f'{batchFolder}/partials'
   createPath(partialFolder)
-
-# Advanced Settings:
-# There are a few extra advanced settings available if you double click this cell.
-# Perlin init will replace your init, so uncheck if using one.
-
-perlin_init = False  #@param{type: 'boolean'}
-perlin_mode = 'mixed' #@param ['mixed', 'color', 'gray']
-set_seed = 'random_seed' #@param{type: 'string'}
-eta = 0.8#@param{type: 'number'}
-clamp_grad = True #@param{type: 'boolean'}
-clamp_max = 0.05 #@param{type: 'number'}
-
-### EXTRA ADVANCED SETTINGS:
-randomize_class = True
-clip_denoised = False
-fuzzy_prompt = False
-rand_mag = 0.05
-
-# Cutn Scheduling:
-# Format: '[40]*400+[20]*600' = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
-# 'cut_overview' and 'cut_innercut' are cumulative for total cutn on any given step. Overview cuts see the entire image and are good for early structure,
-# innercuts are your standard cutn.
-
-cut_overview = "[12]*400+[4]*600" #@param {type: 'string'}       
-cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}  
-cut_ic_pow = 1#@param {type: 'number'}  
-cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["perlin_init", "perlin_mode", "set_seed", "eta", "clamp_grad", "clamp_max",
-              "randomize_class", "clip_denoised", "fuzzy_prompt", "rand_mag",
-              "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p"]:
-  globals()[param]=get_param(param,globals()[param])
   
-# Prompts
-# 'animation_mode' = None will only use the first set. 
-# 'animation_mode' = '2D / Video' will run through them per the set frames and hold on the last one.
-
-text_prompts = {
-    0: ["A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.", "yellow color scheme"],
-    100: ["This set of prompts start at frame 100","This prompt has weight five:5"],
-}
-
-image_prompts = {
-    # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
-}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["text_prompts", "image_prompts"]:
-  globals()[param]=get_param(param,globals()[param])
-
-# Diffuse
-# Do the Run!
-# 'n_batches' (ignored with animation modes.)
-display_rate =  50 #@param{type: 'number'}
-n_batches =  50 #@param{type: 'number'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["display_rate", "n_batches"]:
-  globals()[param]=get_param(param,globals()[param])
-
 # Update Model Settings
 timestep_respacing = f'ddim{steps}'
 diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
@@ -1111,17 +1051,6 @@ model_config.update({
     'timestep_respacing': timestep_respacing,
     'diffusion_steps': diffusion_steps,
 })
-
-batch_size = 1 
-
-resume_run = False #@param{type: 'boolean'}
-run_to_resume = 'latest' #@param{type: 'string'}
-resume_from_frame = 'latest' #@param{type: 'string'}
-retain_overwritten_frames = False #@param{type: 'boolean'}
-
-# Override Notebook defaults if external parameters were provided.
-for param in ["resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames"]:
-  globals()[param]=get_param(param,globals()[param])
 
 if retain_overwritten_frames is True:
   retainFolder = f'{batchFolder}/retained'
@@ -1274,12 +1203,6 @@ except KeyboardInterrupt:
 finally:
     gc.collect()
     torch.cuda.empty_cache()
-
-
-# Create the video
-# Video file will save in the same folder as your images.
-
-skip_video_for_run_all = True #@param {type: 'boolean'}
 
 if skip_video_for_run_all == True:
   print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')

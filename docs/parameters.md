@@ -68,7 +68,7 @@ Just know that the render time is directly related to the number of steps, and m
 
 Consider the chart shown here.  Noise scheduling (denoise strength) starts very high and progressively gets lower and lower as diffusion steps progress. The noise levels in the first few steps are very high, so images change dramatically in early steps. 
 
-![Diffusion De-Noising Curve Chart](docs/images/dd_curve.png)
+![Diffusion De-Noising Curve Chart](/docs/images/dd_curve.png)
  
 As DD moves along the curve, noise levels (and thus the amount an image changes per step) declines, and image coherence from one step to the next increases.
  
