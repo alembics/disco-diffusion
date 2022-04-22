@@ -27,7 +27,9 @@ COPY --from=modelprep /scratch/pretrained /workspace/code/pretrained
 RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0 lpips datetime timm ipywidgets omegaconf>=2.0.0 pytorch-lightning>=1.0.8 torch-fidelity einops wandb pandas ftfy
 RUN pip install pytorch3d climage wget
 RUN pip install git+https://github.com/openai/CLIP && \
-    pip install git+https://github.com/entmike/guided-diffusion.git
+    pip install git+https://github.com/entmike/guided-diffusion.git && \
+    pip install git+https://github.com/ahupp/ResizeRight@packagify
+    
 # Precache other big files
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip
 COPY --chown=disco --from=modelprep /scratch/model-lpips/vgg16-397923af.pth /home/disco/.cache/torch/hub/checkpoints/vgg16-397923af.pth
