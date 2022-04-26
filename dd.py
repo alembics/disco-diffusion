@@ -30,7 +30,7 @@ def get_param(key, fallback):
     try:
         return json.loads(os.getenv(key))
     except:
-        print(f'Could not parse parameter "{key}".  Check you quotes and special characters.')
+        print(f'Could not parse parameter "{key}".  Check your quotation marks and special characters.')
         return fallback
   return fallback
 
