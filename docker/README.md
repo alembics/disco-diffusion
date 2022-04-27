@@ -25,9 +25,9 @@ From a terminal in the `docker/prep` directory, run:
 ```sh
 docker build -t disco-diffusion-prep:5.1 .
 ```
-From a terminal in the `docker/main` directory, run:
 ## Build the Image
-From a terminal, run:
+
+From a terminal in the `docker/main` directory, run:
 
 ```sh
 docker build -t disco-diffusion:5.1 .
