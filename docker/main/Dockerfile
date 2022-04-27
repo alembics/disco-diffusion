@@ -34,6 +34,8 @@ RUN pip install git+https://github.com/openai/CLIP && \
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip
 COPY --chown=disco --from=modelprep /scratch/model-lpips/vgg16-397923af.pth /home/disco/.cache/torch/hub/checkpoints/vgg16-397923af.pth
 
+ARG BUILD_DATE=unknown
+
 # Clone Git repositories
 RUN git clone https://github.com/assafshocher/ResizeRight.git && \
     git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
