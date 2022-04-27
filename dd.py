@@ -379,9 +379,7 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform, translatio
   return next_step_pil
 
 def save_settings(setting_list=None, batchFolder=None, batch_name=None, batchNum=None):
-  
-  # print('Settings:', setting_list)
-  with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
+  with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:
     json.dump(pydot(setting_list), f, ensure_ascii=False, indent=4)
 
 def append_dims(x, n):
@@ -1254,7 +1252,7 @@ def do_run(args, device=None, is_colab=False, model_config=None):
       for i in range(args.n_batches):
           if args.animation_mode == 'None':
             display.clear_output(wait=True)
-            batchBar = tqdm(range(args.n_batches), desc ="🖼️ Batches")
+            batchBar = tqdm(range(args.n_batches), desc ="Batches")
             batchBar.n = i
             batchBar.refresh()
           # print('')
