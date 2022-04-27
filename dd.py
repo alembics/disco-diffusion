@@ -762,3 +762,118 @@ def move_files(start_num, end_num, old_folder, new_folder, batch_name=None, batc
         old_file = old_folder + f'/{batch_name}({batchNum})_{i:04}.png'
         new_file = new_folder + f'/{batch_name}({batchNum})_{i:04}.png'
         os.rename(old_file, new_file)
+        
+def processKeyFrameProperties(max_frames, interp_spline, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z):
+    try:
+        angle_series = get_inbetweens(parse_key_frames(angle), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `angle` correctly for key frames.\n"
+            "Attempting to interpret `angle` as "
+            f'"0: ({angle})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        angle = f"0: ({angle})"
+        angle_series = get_inbetweens(parse_key_frames(angle), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        zoom_series = get_inbetweens(parse_key_frames(zoom), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `zoom` correctly for key frames.\n"
+            "Attempting to interpret `zoom` as "
+            f'"0: ({zoom})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        zoom = f"0: ({zoom})"
+        zoom_series = get_inbetweens(parse_key_frames(zoom), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        translation_x_series = get_inbetweens(parse_key_frames(translation_x), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `translation_x` correctly for key frames.\n"
+            "Attempting to interpret `translation_x` as "
+            f'"0: ({translation_x})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        translation_x = f"0: ({translation_x})"
+        translation_x_series = get_inbetweens(parse_key_frames(translation_x), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        translation_y_series = get_inbetweens(parse_key_frames(translation_y), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `translation_y` correctly for key frames.\n"
+            "Attempting to interpret `translation_y` as "
+            f'"0: ({translation_y})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        translation_y = f"0: ({translation_y})"
+        translation_y_series = get_inbetweens(parse_key_frames(translation_y), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        translation_z_series = get_inbetweens(parse_key_frames(translation_z), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `translation_z` correctly for key frames.\n"
+            "Attempting to interpret `translation_z` as "
+            f'"0: ({translation_z})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        translation_z = f"0: ({translation_z})"
+        translation_z_series = get_inbetweens(parse_key_frames(translation_z), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        rotation_3d_x_series = get_inbetweens(parse_key_frames(rotation_3d_x), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `rotation_3d_x` correctly for key frames.\n"
+            "Attempting to interpret `rotation_3d_x` as "
+            f'"0: ({rotation_3d_x})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        rotation_3d_x = f"0: ({rotation_3d_x})"
+        rotation_3d_x_series = get_inbetweens(parse_key_frames(rotation_3d_x), max_frames=max_frames, interp_spline=interp_spline)
+
+    try:
+        rotation_3d_y_series = get_inbetweens(parse_key_frames(rotation_3d_y), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `rotation_3d_y` correctly for key frames.\n"
+            "Attempting to interpret `rotation_3d_y` as "
+            f'"0: ({rotation_3d_y})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        rotation_3d_y = f"0: ({rotation_3d_y})"
+        rotation_3d_y_series = get_inbetweens(parse_key_frames(rotation_3d_y), max_frames=max_frames, interp_spline=interp_spline)
+    try:
+        rotation_3d_z_series = get_inbetweens(parse_key_frames(rotation_3d_z), max_frames=max_frames, interp_spline=interp_spline)
+    except RuntimeError as e:
+        print(
+            "WARNING: You have selected to use key frames, but you have not "
+            "formatted `rotation_3d_z` correctly for key frames.\n"
+            "Attempting to interpret `rotation_3d_z` as "
+            f'"0: ({rotation_3d_z})"\n'
+            "Please read the instructions to find out how to use key frames "
+            "correctly.\n"
+        )
+        rotation_3d_z = f"0: ({rotation_3d_z})"
+        rotation_3d_z_series = get_inbetweens(parse_key_frames(rotation_3d_z), max_frames=max_frames, interp_spline=interp_spline)
+    return (angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, 
+            angle_series, zoom_series, translation_x_series, translation_y_series, translation_z_series, 
+            rotation_3d_x_series, rotation_3d_y_series, rotation_3d_z_series)

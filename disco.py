@@ -302,8 +302,7 @@ def do_run():
             cutn = 16
             model_stat = {"clip_model":None,"target_embeds":[],"make_cutouts":None,"weights":[]}
             model_stat["clip_model"] = clip_model
-            
-            
+                        
             for prompt in frame_prompt:
                 txt, weight = parse_prompt(prompt)
                 txt = clip_model.encode_text(clip.tokenize(prompt).to(device)).float()
@@ -890,130 +889,15 @@ if animation_mode == "Video Input":
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
   
 #insist turbo be used only w 3d anim.
-if turbo_mode and animation_mode != '3D':
-  print('=====')
-  print('Turbo mode only available with 3D animations. Disabling Turbo.')
-  print('=====')
+if animation_mode != '3D' and (turbo_mode or vr_mode):
+  print('=====\nTurbo/VR modes only available with 3D animations. Disabling...\n=====')
   turbo_mode = False
-
-#insist turbo be used only w 3d anim.
-if vr_mode and animation_mode != '3D':
-  print('=====')
-  print('VR mode only available with 3D animations. Disabling VR.')
-  print('=====')
-  turbo_mode = False
+  vr_mode = False
 
 if key_frames:
-    try:
-        angle_series = get_inbetweens(parse_key_frames(angle), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `angle` correctly for key frames.\n"
-            "Attempting to interpret `angle` as "
-            f'"0: ({angle})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        angle = f"0: ({angle})"
-        angle_series = get_inbetweens(parse_key_frames(angle), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        zoom_series = get_inbetweens(parse_key_frames(zoom), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `zoom` correctly for key frames.\n"
-            "Attempting to interpret `zoom` as "
-            f'"0: ({zoom})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        zoom = f"0: ({zoom})"
-        zoom_series = get_inbetweens(parse_key_frames(zoom), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        translation_x_series = get_inbetweens(parse_key_frames(translation_x), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `translation_x` correctly for key frames.\n"
-            "Attempting to interpret `translation_x` as "
-            f'"0: ({translation_x})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        translation_x = f"0: ({translation_x})"
-        translation_x_series = get_inbetweens(parse_key_frames(translation_x), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        translation_y_series = get_inbetweens(parse_key_frames(translation_y), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `translation_y` correctly for key frames.\n"
-            "Attempting to interpret `translation_y` as "
-            f'"0: ({translation_y})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        translation_y = f"0: ({translation_y})"
-        translation_y_series = get_inbetweens(parse_key_frames(translation_y), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        translation_z_series = get_inbetweens(parse_key_frames(translation_z), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `translation_z` correctly for key frames.\n"
-            "Attempting to interpret `translation_z` as "
-            f'"0: ({translation_z})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        translation_z = f"0: ({translation_z})"
-        translation_z_series = get_inbetweens(parse_key_frames(translation_z), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        rotation_3d_x_series = get_inbetweens(parse_key_frames(rotation_3d_x), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `rotation_3d_x` correctly for key frames.\n"
-            "Attempting to interpret `rotation_3d_x` as "
-            f'"0: ({rotation_3d_x})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        rotation_3d_x = f"0: ({rotation_3d_x})"
-        rotation_3d_x_series = get_inbetweens(parse_key_frames(rotation_3d_x), max_frames=max_frames, interp_spline=interp_spline)
-
-    try:
-        rotation_3d_y_series = get_inbetweens(parse_key_frames(rotation_3d_y), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `rotation_3d_y` correctly for key frames.\n"
-            "Attempting to interpret `rotation_3d_y` as "
-            f'"0: ({rotation_3d_y})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        rotation_3d_y = f"0: ({rotation_3d_y})"
-        rotation_3d_y_series = get_inbetweens(parse_key_frames(rotation_3d_y), max_frames=max_frames, interp_spline=interp_spline)
-    try:
-        rotation_3d_z_series = get_inbetweens(parse_key_frames(rotation_3d_z), max_frames=max_frames, interp_spline=interp_spline)
-    except RuntimeError as e:
-        print(
-            "WARNING: You have selected to use key frames, but you have not "
-            "formatted `rotation_3d_z` correctly for key frames.\n"
-            "Attempting to interpret `rotation_3d_z` as "
-            f'"0: ({rotation_3d_z})"\n'
-            "Please read the instructions to find out how to use key frames "
-            "correctly.\n"
-        )
-        rotation_3d_z = f"0: ({rotation_3d_z})"
-        rotation_3d_z_series = get_inbetweens(parse_key_frames(rotation_3d_z), max_frames=max_frames, interp_spline=interp_spline)
+    (angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z, 
+    angle_series, zoom_series, translation_x_series, translation_y_series, translation_z_series,
+    rotation_3d_x_series, rotation_3d_y_series, rotation_3d_z_series) = processKeyFrameProperties(max_frames, interp_spline, angle, zoom, translation_x, translation_y, translation_z, rotation_3d_x, rotation_3d_y, rotation_3d_z)
 
 else:
     angle = float(angle)
@@ -1193,11 +1077,11 @@ try:
   print('Seed used:', seed)
   do_run()
 except KeyboardInterrupt:
-    print('Run interrupted by user.')
-    pass
+  print('Run interrupted by user.')
+  pass
 finally:
-    gc.collect()
-    torch.cuda.empty_cache()
+  gc.collect()
+  torch.cuda.empty_cache()
 
 if skip_video_for_run_all == True:
   print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
