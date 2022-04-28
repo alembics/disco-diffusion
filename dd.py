@@ -40,7 +40,7 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from resize_right import resize
 import disco_xform_utils as dxf
-import pytorch3dlite as p3d
+import pytorch3dlite.pytorch3dlite as p3d
 
 from clip import clip
 from ipywidgets import Output

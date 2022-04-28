@@ -1,5 +1,5 @@
 import torch, torchvision
-import pytorch3dlite as p3d
+import pytorch3dlite.pytorch3dlite as p3d
 from midas import utils as midas_utils
 from PIL import Image
 import numpy as np
