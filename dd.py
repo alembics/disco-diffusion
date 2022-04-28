@@ -800,7 +800,7 @@ def generate_eye_views(
         ray_rotation = theta if i == 0 else -theta
         translate_xyz = [-(ray_origin) * trans_scale, 0, 0]
         rotate_xyz = [0, (ray_rotation), 0]
-        rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+        rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
         transformed_image = dxf.transform_image_3d(
             f"{batchFolder}/{filename}",
             midas_model,
