@@ -1,4 +1,5 @@
-FROM nvcr.io/nvidia/pytorch:21.08-py3 AS prep
+# https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel_22-03.html#rel_22-03
+FROM nvcr.io/nvidia/pytorch:22.03-py3
     RUN mkdir -p /scratch/models && \
         mkdir -p /scratch/models/superres && \
         mkdir -p /scratch/models/slip && \

@@ -2,7 +2,8 @@
 # are large and prone to take long to copy...
 FROM disco-diffusion-prep:5.1 AS modelprep
 
-FROM nvcr.io/nvidia/pytorch:21.08-py3
+# https://docs.nvidia.com/deeplearning/frameworks/pytorch-release-notes/rel_22-03.html#rel_22-03
+FROM nvcr.io/nvidia/pytorch:22.03-py3
 
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
@@ -25,10 +26,12 @@ COPY --from=modelprep /scratch/pretrained /workspace/code/pretrained
 
 # Install Python packages
 RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0 lpips datetime timm ipywidgets omegaconf>=2.0.0 pytorch-lightning>=1.0.8 torch-fidelity einops wandb pandas ftfy
-RUN pip install pytorch3d climage wget pydotted
+RUN pip install pytorch3d climage wget pydotted loguru gdown
 RUN pip install git+https://github.com/openai/CLIP && \
-    pip install git+https://github.com/entmike/guided-diffusion.git && \
-    pip install git+https://github.com/ahupp/ResizeRight@packagify
+    pip install git+https://github.com/ahupp/guided-diffusion@packagify && \
+    pip install git+https://github.com/ahupp/ResizeRight@packagify && \
+    pip install git+https://github.com/ahupp/MiDaS@packagify && \
+    pip install git+https://github.com/pytti-tools/AdaBins@installable
     
 # Precache other big files
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip
@@ -37,9 +40,6 @@ COPY --chown=disco --from=modelprep /scratch/model-lpips/vgg16-397923af.pth /hom
 ARG BUILD_DATE=unknown
 
 # Clone Git repositories
-RUN git clone https://github.com/assafshocher/ResizeRight.git && \
-    git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
-    git clone https://github.com/isl-org/MiDaS.git && \ 
-    git clone https://github.com/shariqfarooq123/AdaBins.git &&\
+RUN git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
     git clone https://github.com/entmike/disco-diffusion-1.git && \
     cd disco-diffusion-1

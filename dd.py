@@ -234,9 +234,6 @@ class MakeCutouts(nn.Module):
         cutouts = torch.cat(cutouts, dim=0)
         return cutouts
 
-cutout_debug = False
-padargs = {}
-
 class MakeCutoutsDango(nn.Module):
     def __init__(self,
             cut_size,
@@ -252,6 +249,8 @@ class MakeCutoutsDango(nn.Module):
         self.InnerCrop = InnerCrop
         self.IC_Size_Pow = IC_Size_Pow
         self.IC_Grey_P = IC_Grey_P
+        self.cutout_debug = args.cutout_debug
+        self.debug_folder = f'{args.batchFolder}/debug'
         if args.animation_mode == 'None':
           self.augs = T.Compose([
               T.RandomHorizontalFlip(p=0.5),
@@ -295,6 +294,7 @@ class MakeCutoutsDango(nn.Module):
         l_size = max(sideX, sideY)
         output_shape = [1,3,self.cut_size,self.cut_size] 
         output_shape_2 = [1,3,self.cut_size+2,self.cut_size+2]
+        padargs = {}
         pad_input = F.pad(input,((sideY-max_size)//2,(sideY-max_size)//2,(sideX-max_size)//2,(sideX-max_size)//2), **padargs)
         cutout = resize(pad_input, out_shape=output_shape)
 
@@ -313,10 +313,9 @@ class MakeCutoutsDango(nn.Module):
                 for _ in range(self.Overview):
                     cutouts.append(cutout)
 
-            if cutout_debug:
-                TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save("cutout_overview0.jpg",quality=99)
-
-                              
+            if self.cutout_debug:
+                TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save(f'{self.debug_folder}/cutout_overview0.jpg',quality=99)
+     
         if self.InnerCrop >0:
             for i in range(self.InnerCrop):
                 size = int(torch.rand([])**self.IC_Size_Pow * (max_size - min_size) + min_size)
@@ -327,8 +326,8 @@ class MakeCutoutsDango(nn.Module):
                     cutout = gray(cutout)
                 cutout = resize(cutout, out_shape=output_shape)
                 cutouts.append(cutout)
-            if cutout_debug:
-                TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save("cutout_InnerCrop.jpg",quality=99)
+            if self.cutout_debug:
+                TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save(f'{self.debug_folder}/cutout_InnerCrop.jpg',quality=99)
         cutouts = torch.cat(cutouts)
         if skip_augs is not True: cutouts=self.augs(cutouts)
         return cutouts
@@ -1078,7 +1077,7 @@ def do_run(args, device=None, is_colab=False, model_config=None):
           init_scale = args.frames_scale
           skip_steps = args.calc_frames_skip_steps
 
-      if  args.animation_mode == "Video Input":
+      if args.animation_mode == "Video Input":
         if not args.video_init_seed_continuity:
           seed += 1
         init_image = f'{args.videoFramesFolder}/{frame_num+1:04}.jpg'

@@ -17,26 +17,15 @@ PROJECT_DIR = os.path.abspath(os.getcwd())
 sys.path.append(f'{PROJECT_DIR}')
 
 # Install any missing Git deps
-if not os.path.exists(f'{PROJECT_DIR}/MiDaS'):
-  git_output = subprocess.run('git clone https://github.com/isl-org/MiDaS.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 if not os.path.exists(f'{PROJECT_DIR}/pytorch3d-lite'):
   git_output = subprocess.run('git clone https://github.com/MSFTserver/pytorch3d-lite.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
 
-if not os.path.exists(f'{PROJECT_DIR}/AdaBins'):
-  git_output = subprocess.run('git clone https://github.com/shariqfarooq123/AdaBins.git'.split(), stdout=subprocess.PIPE).stdout.decode('utf-8')
-
-# WTF tho
-if not os.path.exists('MiDaS/midas_utils.py'):
-      shutil.copy('MiDaS/utils.py', 'MiDaS/midas_utils.py')
-
-sys.path.append(f'{PROJECT_DIR}/MiDaS')
 sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
-sys.path.append(f'{PROJECT_DIR}/AdaBins')
 
 from dd import *
 
-warnings.filterwarnings("ignore", category=UserWarning)
+# warnings.filterwarnings("ignore", category=UserWarning)
 console_preview=False #@param {type:"boolean"}
 console_preview_width=80
 simple_nvidia_smi_display = False #@param {type:"boolean"}
@@ -89,17 +78,11 @@ if not os.path.exists(f'{model_path}/secondary_model_imagenet_2.pth'):
 os.chdir(f'{PROJECT_DIR}')
 
 # AdaBins stuff
+if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
+  createPath(f'{PROJECT_DIR}/pretrained')
+  wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
+  
 if USE_ADABINS:
-  try:
-    from infer import InferenceHelper
-  except:
-    if os.path.exists("AdaBins") is not True:
-      gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
-      createPath(f'{PROJECT_DIR}/pretrained')
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
-    sys.path.append(f'{PROJECT_DIR}/AdaBins')
-  from infer import InferenceHelper
   MAX_ADABINS_AREA = 500000
 
 if simple_nvidia_smi_display:
@@ -128,6 +111,7 @@ diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_d
 use_secondary_model = True #@param {type: 'boolean'}
 diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']  
 
+cutout_debug = False #@param {type: 'boolean'}
 use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
 ViTB16 = True #@param{type:"boolean"}
@@ -231,7 +215,7 @@ for param in ["cuda_device", "simple_nvidia_smi_display", "console_preview", "co
               "cut_overview", "cut_innercut", "cut_ic_pow", "cut_icgray_p",
               "text_prompts", "image_prompts","display_rate", "n_batches",
               "resume_run", "run_to_resume", "resume_from_frame", "retain_overwritten_frames",
-              "skip_video_for_run_all"]:
+              "skip_video_for_run_all","cutout_debug"]:
   globals()[param]=get_param(param,globals()[param])
 
 # Diffuse
@@ -346,6 +330,10 @@ if retain_overwritten_frames is True:
   retainFolder = f'{batchFolder}/retained'
   createPath(retainFolder)
 
+if cutout_debug is True:
+  cutoutDebugFolder = f'{batchFolder}/debug'
+  createPath(cutoutDebugFolder)
+
 skip_step_ratio = int(frames_skip_steps.rstrip("%")) / 100
 calc_frames_skip_steps = math.floor(steps * skip_step_ratio)
 
@@ -390,6 +378,7 @@ else:
 
 try:
   args = {
+    'cutout_debug':cutout_debug,
     'ViTB32':ViTB32,
     'ViTB16':ViTB16,
     'ViTL14':ViTL14,

@@ -1,12 +1,13 @@
 import torch, torchvision
 import py3d_tools as p3d
-from MiDaS import utils as midas_utils
+from midas import utils as midas_utils
 from PIL import Image
 import numpy as np
 import sys, math
+from adabins.infer import InferenceHelper
 
 try:
-    from infer import InferenceHelper
+    from adabins.infer import InferenceHelper
 except:
     print("disco_xform_utils.py failed to import InferenceHelper. Please ensure that AdaBins directory is in the path (i.e. via sys.path.append('./AdaBins') or other means).")
     sys.exit()
