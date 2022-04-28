@@ -988,8 +988,8 @@ def do_run(args, device=None, is_colab=False, model_config=None):
 
       if args.animation_mode == "2D":
         if args.key_frames:
-          angle = args.angle_series[frame_num]
-          zoom = args.zoom_series[frame_num]
+          angle = angle_series[frame_num]
+          zoom = zoom_series[frame_num]
           translation_x = translation_x_series[frame_num]
           translation_y = translation_y_series[frame_num]
           print(
