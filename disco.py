@@ -224,8 +224,6 @@ else:
   while os.path.isfile(f"{batchFolder}/{pargs.batch_name}({batchNum})_settings.txt") is True or os.path.isfile(f"{batchFolder}/{pargs.batch_name}-{batchNum}_settings.txt") is True:
     batchNum += 1
 
-print(f'💻 Starting Run: {pargs.batch_name}({batchNum}) at frame {start_frame}')
-
 if pargs.set_seed == 'random_seed':
     random.seed()
     seed = random.randint(0, 2**32)
@@ -333,12 +331,14 @@ try:
     'resume_run': pargs.resume_run
   }
   # args = SimpleNamespace(**args)
-  args = pydot(args)
-  # print(args)
-  do_run(args, 
+  args = pydot(args) # Thx Zippy
+  
+  do_run(args=args, 
     device=device,
     is_colab=is_colab,
-    model_config=model_config)
+    model_config=model_config,
+    batchNum=batchNum,
+    start_frame=start_frame)
 except KeyboardInterrupt:
   print('🛑 Run interrupted by user.')
   pass

@@ -909,7 +909,8 @@ def processKeyFrameProperties(max_frames, interp_spline, angle, zoom, translatio
             angle_series, zoom_series, translation_x_series, translation_y_series, translation_z_series, 
             rotation_3d_x_series, rotation_3d_y_series, rotation_3d_z_series)
     
-def do_run(args, device=None, is_colab=False, model_config=None):
+def do_run(args=None, device=None, is_colab=False, model_config=None, batchNum=None, start_frame=None):
+  print(f'💻 Starting Run: {args.batch_name}({batchNum}) at frame {start_frame}')
   print('Prepping models...')
   model, diffusion = create_model_and_diffusion(**model_config)
   model.load_state_dict(torch.load(f'{args.model_path}/{args.diffusion_model}.pt', map_location='cpu'))
