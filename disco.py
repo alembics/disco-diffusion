@@ -40,6 +40,7 @@ outDirPath = f'{root_path}/images_out'
 createPath(outDirPath)
 model_path = f'{root_path}/models'
 createPath(model_path)
+createPath(f'{PROJECT_DIR}/pretrained')
 
 os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 
@@ -52,38 +53,17 @@ model_512_downloaded = False
 model_secondary_downloaded = False
 
 # Download models if not present
-if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
-  url = "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt"
-  print(f'(First time setup): Downloading model from {url}...')
-  wget.download(url, model_path)
-
-if not os.path.exists(f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'):
-  url = "https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt"
-  print(f'(First time setup): Downloading model from {url}...')
-  wget.download(url, model_path)
-
-if not os.path.exists(f'{model_path}/256x256_diffusion_uncond.pt'):
-  url = "https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt"
-  print(f'(First time setup): Downloading model from {url}...')
-  wget.download(url, model_path)
-
-if not os.path.exists(f'{model_path}/secondary_model_imagenet_2.pth'):
-  url = "https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth"
-  print(f'(First time setup): Downloading model from {url}...')
-  wget.download(url, model_path)
-
-# WTF tho
-# shutil.move('disco-diffusion-1/disco_xform_utils.py', 'disco_xform_utils.py')
+for m in [{'file' :f'{model_path}/dpt_large-midas-2f21e586.pt', 'url':'https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt'},
+          {'file' :f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt', 'url':'https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt'},
+          {'file' :f'{model_path}/256x256_diffusion_uncond.pt', 'url':'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'},
+          {'file' :f'{model_path}/secondary_model_imagenet_2.pth', 'url':'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'},
+          {'file' :f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt', 'url':'https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt'}
+]:
+  if not os.path.exists(f'{m["file"]}'):
+    print(f'🌍 (First time setup): Downloading model from {m["url"]} to {m["file"]}')
+    wget.download(m["url"], model_path)
 
 os.chdir(f'{PROJECT_DIR}')
-
-# AdaBins stuff
-if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
-  createPath(f'{PROJECT_DIR}/pretrained')
-  wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
-  
-if USE_ADABINS:
-  MAX_ADABINS_AREA = 500000
 
 if simple_nvidia_smi_display:
   nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
@@ -101,11 +81,10 @@ if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
   print('Disabling CUDNN for A100 gpu', file=sys.stderr)
   torch.backends.cudnn.enabled = False
 
-# https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
-
 # stop_on_next_loop = False  # Make sure GPU memory doesn't get corrupted from cancelling the run mid-way through, allow a full frame to complete
 
 TRANSLATION_SCALE = 1.0/200.0
+MAX_ADABINS_AREA = 500000
 
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
