@@ -40,13 +40,31 @@ import disco_xform_utils as dxf
 # import pytorch3d.transforms as p3dT
 from clip import clip
 from ipywidgets import Output
+import argparse
 
-def get_param(key, fallback):
+def str2bool(v):
+    if isinstance(v, bool):
+       return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def str2json(v):
+    try:
+        j = json.loads(v)
+        return j
+    except:
+        raise argparse.ArgumentTypeError(f'⚠️ Could not parse CLI parameter.  Check your quotation marks and special characters. ⚠️ Value:\n{v}')
+
+def get_param(key, fallback=None):
   if(os.getenv(key, None) != None):
     try:
         return json.loads(os.getenv(key))
     except:
-        print(f'⚠️ Could not parse parameter "{key}".  Check your quotation marks and special characters. ⚠️')
+        print(f'⚠️ Could not parse environment parameter "{key}".  Check your quotation marks and special characters. ⚠️')
         return fallback
   return fallback
 
