@@ -40,8 +40,8 @@ import torchvision.transforms as T
 import torchvision.transforms.functional as TF
 from resize_right import resize
 import disco_xform_utils as dxf
+import pytorch3dlite as p3d
 
-# import pytorch3d.transforms as p3dT
 from clip import clip
 from ipywidgets import Output
 import argparse
@@ -63,9 +63,7 @@ def str2json(v):
         j = json.loads(v)
         return j
     except:
-        raise argparse.ArgumentTypeError(
-            f"⚠️ Could not parse CLI parameter.  Check your quotation marks and special characters. ⚠️ Value:\n{v}"
-        )
+        raise argparse.ArgumentTypeError(f"⚠️ Could not parse CLI parameter.  Check your quotation marks and special characters. ⚠️ Value:\n{v}")
 
 
 def get_param(key, fallback=None):
@@ -73,9 +71,7 @@ def get_param(key, fallback=None):
         try:
             return json.loads(os.getenv(key))
         except:
-            print(
-                f'⚠️ Could not parse environment parameter "{key}".  Check your quotation marks and special characters. ⚠️'
-            )
+            print(f'⚠️ Could not parse environment parameter "{key}".  Check your quotation marks and special characters. ⚠️')
             return fallback
     return fallback
 
@@ -402,9 +398,7 @@ class MakeCutoutsDango(nn.Module):
                     cutouts.append(cutout)
 
             if self.cutout_debug:
-                TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save(
-                    f"{self.debug_folder}/cutout_overview0.jpg", quality=99
-                )
+                TF.to_pil_image(cutouts[0].clamp(0, 1).squeeze(0)).save(f"{self.debug_folder}/cutout_overview0.jpg", quality=99)
 
         if self.InnerCrop > 0:
             for i in range(self.InnerCrop):
@@ -417,9 +411,7 @@ class MakeCutoutsDango(nn.Module):
                 cutout = resize(cutout, out_shape=output_shape)
                 cutouts.append(cutout)
             if self.cutout_debug:
-                TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save(
-                    f"{self.debug_folder}/cutout_InnerCrop.jpg", quality=99
-                )
+                TF.to_pil_image(cutouts[-1].clamp(0, 1).squeeze(0)).save(f"{self.debug_folder}/cutout_InnerCrop.jpg", quality=99)
         cutouts = torch.cat(cutouts)
         if skip_augs is not True:
             cutouts = self.augs(cutouts)
@@ -484,7 +476,7 @@ def do_3d_step(
         math.radians(rotate_xyz_degrees[1]),
         math.radians(rotate_xyz_degrees[2]),
     ]
-    rot_mat = p3dT.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
+    rot_mat = p3d.euler_angles_to_matrix(torch.tensor(rotate_xyz, device=device), "XYZ").unsqueeze(0)
     print("rot_mat: " + str(rot_mat))
     next_step_pil = dxf.transform_image_3d(
         img_filepath,
@@ -1198,9 +1190,7 @@ def do_run(
     if args.use_secondary_model:
         print("🤖 Loading secondary model...")
         secondary_model = SecondaryDiffusionImageNet2()
-        secondary_model.load_state_dict(
-            torch.load(f"{args.model_path}/secondary_model_imagenet_2.pth", map_location="cpu")
-        )
+        secondary_model.load_state_dict(torch.load(f"{args.model_path}/secondary_model_imagenet_2.pth", map_location="cpu"))
         secondary_model.eval().requires_grad_(False).to(device)
 
     print(f"🤖 Loading LPIPS...")
@@ -1307,9 +1297,7 @@ def do_run(
             if frame_num > 0:
                 seed += 1
                 if args.resume_run and frame_num == args.start_frame:
-                    img_0 = cv2.imread(
-                        args.batchFolder + f"/{args.batch_name}({args.batchNum})_{args.start_frame-1:04}.png"
-                    )
+                    img_0 = cv2.imread(args.batchFolder + f"/{args.batch_name}({args.batchNum})_{args.start_frame-1:04}.png")
                 else:
                     img_0 = cv2.imread("prevFrame.png")
                 center = (1 * img_0.shape[1] // 2, 1 * img_0.shape[0] // 2)
@@ -1428,9 +1416,7 @@ def do_run(
         else:
             frame_prompt = []
 
-        image_prompts_series = (
-            split_prompts(args.image_prompts_series, max_frames=args.max_frames) if args.image_prompts_series else None,
-        )
+        image_prompts_series = (split_prompts(args.image_prompts_series, max_frames=args.max_frames) if args.image_prompts_series else None,)
         if image_prompts_series is not None and frame_num >= len(image_prompts_series):
             image_prompt = image_prompts_series[-1]
             # print(f'🖼️ Image Prompt: {image_prompt}`')
@@ -1458,18 +1444,14 @@ def do_run(
 
                 if args.fuzzy_prompt:
                     for i in range(25):
-                        model_stat["target_embeds"].append(
-                            (txt + torch.randn(txt.shape).cuda() * args.rand_mag).clamp(0, 1)
-                        )
+                        model_stat["target_embeds"].append((txt + torch.randn(txt.shape).cuda() * args.rand_mag).clamp(0, 1))
                         model_stat["weights"].append(weight)
                 else:
                     model_stat["target_embeds"].append(txt)
                     model_stat["weights"].append(weight)
 
             if image_prompt:
-                model_stat["make_cutouts"] = MakeCutouts(
-                    clip_model.visual.input_resolution, cutn, skip_augs=args.skip_augs
-                )
+                model_stat["make_cutouts"] = MakeCutouts(clip_model.visual.input_resolution, cutn, skip_augs=args.skip_augs)
                 for prompt in image_prompt:
                     path, weight = parse_prompt(prompt)
                     img = Image.open(fetch(path)).convert("RGB")
@@ -1482,9 +1464,7 @@ def do_run(
                     embed = clip_model.encode_image(normalize(batch)).float()
                     if args.fuzzy_prompt:
                         for i in range(25):
-                            model_stat["target_embeds"].append(
-                                (embed + torch.randn(embed.shape).cuda() * args.rand_mag).clamp(0, 1)
-                            )
+                            model_stat["target_embeds"].append((embed + torch.randn(embed.shape).cuda() * args.rand_mag).clamp(0, 1))
                             weights.extend([weight / cutn] * cutn)
                     else:
                         model_stat["target_embeds"].append(embed)
@@ -1620,20 +1600,14 @@ def do_run(
                         )
                         losses = dists.mul(model_stat["weights"]).sum(2).mean(0)
                         loss_values.append(losses.sum().item())  # log loss, probably shouldn't do per cutn_batch
-                        x_in_grad += (
-                            torch.autograd.grad(losses.sum() * args.clip_guidance_scale, x_in)[0] / args.cutn_batches
-                        )
+                        x_in_grad += torch.autograd.grad(losses.sum() * args.clip_guidance_scale, x_in)[0] / args.cutn_batches
                 tv_losses = tv_loss(x_in)
                 if args.use_secondary_model is True:
                     range_losses = range_loss(out)
                 else:
                     range_losses = range_loss(out["pred_xstart"])
                 sat_losses = torch.abs(x_in - x_in.clamp(min=-1, max=1)).mean()
-                loss = (
-                    tv_losses.sum() * args.tv_scale
-                    + range_losses.sum() * args.range_scale
-                    + sat_losses.sum() * args.sat_scale
-                )
+                loss = tv_losses.sum() * args.tv_scale + range_losses.sum() * args.range_scale + sat_losses.sum() * args.sat_scale
                 if init is not None and args.init_scale:
                     init_losses = lpips_model(x_in, init)
                     loss = loss + init_losses.sum() * args.init_scale
@@ -1814,7 +1788,9 @@ def createVideo(args):
     final_frame = "final_frame"
 
     init_frame = 1  # @param {type:"number"} This is the frame where the video will start
-    last_frame = final_frame  # @param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
+    last_frame = (
+        final_frame  # @param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
+    )
     fps = 12  # @param {type:"number"}
     # view_video_in_cell = True #@param {type: 'boolean'}
     frames = []

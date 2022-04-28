@@ -30,14 +30,6 @@ is_colab = False
 google_drive = False
 save_models_to_google_drive = False
 
-# Install pytorch3d-lite
-if not os.path.exists(f"{PROJECT_DIR}/pytorch3d-lite"):
-    git_output = subprocess.run(
-        "git clone https://github.com/MSFTserver/pytorch3d-lite.git".split(),
-        stdout=subprocess.PIPE,
-    ).stdout.decode("utf-8")
-sys.path.append(f"{PROJECT_DIR}/pytorch3d-lite")
-
 from dd import *
 import dd_args
 
