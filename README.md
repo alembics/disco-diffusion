@@ -64,9 +64,9 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     python disco.py
     ```
 
-## Windows First-time Setup (`pip`)
+## First-time Setup (`pip`)
    
-   - If in PowerShell:
+   - Windows PowerShell:
      ```powershell
      python3 -m pip install --user virtualenv
      python -m venv .\.venv\discodiffusion
@@ -74,13 +74,20 @@ Follow these steps for the first time that you are running Disco Diffusion from 
      pip install -r requirements.txt
      ```
 
-   - If in Command Prompt:
+   - Windows Command Prompt:
      ```cmd
      python3 -m pip install --user virtualenv
      python -m venv .\.venv\discodiffusion
      .venv\discodiffusion\Scripts\Activate.cmd
      pip install -r requirements.txt
      ```
+   - Linux
+
+     ```bash
+     python3 -m pip install --user virtualenv
+     python -m venv ./.venv/discodiffusion
+     ```
+   
    - Test Run
 
      ```powershell
