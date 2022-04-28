@@ -1141,12 +1141,56 @@ def do_run(
     args=None,
     device=None,
     is_colab=False,
-    model_config=None,
     batchNum=None,
     start_frame=None,
 ):
     print(f"💻 Starting Run: {args.batch_name}({batchNum}) at frame {start_frame}")
     print("Prepping models...")
+    model_config = model_and_diffusion_defaults()
+    # Update Model Settings
+    if args.diffusion_model == "512x512_diffusion_uncond_finetune_008100":
+        model_config.update(
+            {
+                "attention_resolutions": "32, 16, 8",
+                "class_cond": False,
+                "diffusion_steps": 1000,  # No need to edit this, it is taken care of later.
+                "rescale_timesteps": True,
+                "timestep_respacing": 250,  # No need to edit this, it is taken care of later.
+                "image_size": 512,
+                "learn_sigma": True,
+                "noise_schedule": "linear",
+                "num_channels": 256,
+                "num_head_channels": 64,
+                "num_res_blocks": 2,
+                "resblock_updown": True,
+                "use_checkpoint": args.use_checkpoint,
+                "use_fp16": True,
+                "use_scale_shift_norm": True,
+            }
+        )
+    elif args.diffusion_model == "256x256_diffusion_uncond":
+        model_config.update(
+            {
+                "attention_resolutions": "32, 16, 8",
+                "class_cond": False,
+                "diffusion_steps": 1000,  # No need to edit this, it is taken care of later.
+                "rescale_timesteps": True,
+                "timestep_respacing": 250,  # No need to edit this, it is taken care of later.
+                "image_size": 256,
+                "learn_sigma": True,
+                "noise_schedule": "linear",
+                "num_channels": 256,
+                "num_head_channels": 64,
+                "num_res_blocks": 2,
+                "resblock_updown": True,
+                "use_checkpoint": args.use_checkpoint,
+                "use_fp16": True,
+                "use_scale_shift_norm": True,
+            }
+        )
+    timestep_respacing = f"ddim{args.steps}"
+    diffusion_steps = (1000 // args.steps) * args.steps if args.steps < 1000 else args.steps
+    model_config.update({"timestep_respacing": timestep_respacing, "diffusion_steps": diffusion_steps})
     model, diffusion = create_model_and_diffusion(**model_config)
     model.load_state_dict(torch.load(f"{args.model_path}/{args.diffusion_model}.pt", map_location="cpu"))
     model.requires_grad_(False).eval().to(device)
