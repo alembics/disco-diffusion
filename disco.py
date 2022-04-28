@@ -35,7 +35,7 @@ sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
 from dd import *
 import dd_args
 
-pargs = dd_args.parse()
+pargs = dd_args.arg_configuration_loader()
 
 # warnings.filterwarnings("ignore", category=UserWarning)
 

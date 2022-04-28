@@ -1,0 +1,95 @@
+RN101: false
+RN50: true
+RN50x16: false
+RN50x4: false
+RN50x64: false
+ViTB16: true
+ViTB32: true
+ViTL14: false
+ViTL14_336: false
+angle: 0:(0)
+animation_mode: None
+batch_name: TimeToDisco
+check_model_SHA: false
+clamp_grad: true
+clamp_max: 0.05
+clip_denoised: false
+clip_guidance_scale: 5000
+console_preview: false
+console_preview_width: 80
+cuda_device: cuda:0
+cut_ic_pow: 1
+cut_icgray_p: '[0.2]*400+[0]*600'
+cut_innercut: '[4]*400+[12]*600'
+cut_overview: '[12]*400+[4]*600'
+cutn_batches: 4
+cutout_debug: false
+diffusion_model: 512x512_diffusion_uncond_finetune_008100
+diffusion_sampling_mode: ddim
+display_rate: 50
+eta: 0.8
+extract_nth_frame: 2
+far_plane: 10000
+fov: 40
+frames_scale: 1500
+frames_skip_steps: 60%
+fuzzy_prompt: false
+image_prompts: {}
+init_image: null
+init_scale: 1000
+intermediate_saves: 0
+intermediates_in_subfolder: true
+interp_spline: Linear
+key_frames: true
+max_frames: 10000
+midas_depth_model: dpt_large
+midas_weight: 0.3
+n_batches: 50
+near_plane: 200
+padding_mode: border
+perlin_init: false
+perlin_mode: mixed
+rand_mag: 0.05
+randomize_class: true
+range_scale: 150
+resume_from_frame: latest
+resume_run: false
+retain_overwritten_frames: false
+rotation_3d_x: '0: (0)'
+rotation_3d_y: '0: (0)'
+rotation_3d_z: '0: (0)'
+run_to_resume: latest
+sampling_mode: bicubic
+sat_scale: 0
+set_seed: random_seed
+simple_nvidia_smi_display: false
+skip_augs: false
+skip_steps: 10
+skip_video_for_run_all: false
+steps: 250
+text_prompts:
+  0:
+  - A beautiful painting of a singular lighthouse, shining its light across a tumultuous
+    sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.
+  - yellow color scheme
+  100:
+  - This set of prompts start at frame 100
+  - This prompt has weight five:5
+translation_x: '0: (0)'
+translation_y: '0: (0)'
+translation_z: '0: (10.0)'
+turbo_mode: false
+turbo_preroll: 10
+turbo_steps: 3
+tv_scale: 0
+use_checkpoint: true
+use_secondary_model: true
+video_init_path: training.mp4
+video_init_seed_continuity: true
+vr_eye_angle: 0.5
+vr_ipd: 5.0
+vr_mode: false
+width_height:
+- 1280
+- 768
+zoom: '"0: (1), 10: (1.05)'

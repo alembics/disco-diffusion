@@ -1,5 +1,11 @@
 import argparse
+import traceback
+from typing import Union
 from dd import str2bool, str2json, get_param as gp
+from yaml import dump, full_load
+from loguru import logger
+from pydotted import pydot
+import argparse
 
 def parse():
     parser = argparse.ArgumentParser(description='Disco Diffusion')
@@ -92,4 +98,66 @@ def parse():
     parser.add_argument('--retain_overwritten_frames', help='Retain Overwritten Frames', type=str2bool, default=gp('retain_overwritten_frames', False), required=False)
     parser.add_argument('--skip_video_for_run_all', help='Skip Video Creation', type=str2bool, default=gp('skip_video_for_run_all', False), required=False)
     parser.add_argument('--check_model_SHA', help='Check Model Hash', type=str2bool, default=gp('check_model_SHA', False), required=False)
+    parser.add_argument(
+        "--gen_config",
+        help="Generate initial configurations",
+        type=str,
+        default="",
+        required=False,
+    )
+    parser.add_argument(
+        "-c",
+        "--config_file",
+        help="Configuration file to use instead of command-line arguments",
+        type=str,
+        default=None,
+        required=False,
+    )
     return parser.parse_args()
+
+# Thanks, Zippy
+def arg_configuration_loader(args: Union[pydot, dict] = None) -> pydot:
+    # get args if loader called without cli-arguments.
+    if args is None:
+        args = parse().__dict__
+
+    # Check whether 'args' is a dict, which would error, since using dot access.
+    if type(args) == dict:
+        confargs = pydot(args)
+
+    confgen = confargs.gen_config
+
+    # Check if user wants to generate a defaults configuration file.
+    if confgen != "":
+        if confgen.endswith(".yml") or confgen.endswith(".yaml"):
+            del confargs.gen_config
+            del confargs.config_file
+            dump(confargs.todict(), open(confgen, "w"))
+            logger.info("Configuration saved in " + confgen)
+            exit(0)
+        else:
+            logger.warning(
+                "Configuration file output must be a YAML file, ending with .yml or .yaml\n"
+                + "Example: python disco.py --gen_config defaults.yml"
+            )
+            exit(0)
+
+    # Try loading config from config_file cli-argument if exists.
+    if confargs.config_file is not None:
+        logger.info("Attempting to load configuration from: " + confargs.config_file)
+        try:
+            with open(confargs.config_file, "r") as conf:
+                confargs = pydot(full_load(conf))
+        except Exception as e:
+            logger.error(
+                f"Could not load configuration file! There was an error loading from {confargs.config_file}"
+                + "\nCheck to make sure it exists, and is formatted correctly."
+            )
+            logger.warning(
+                "\n".join(
+                    traceback.format_exception(type(e), e, e.__traceback__, limit=4)
+                ),
+            )
+            exit(0)
+        logger.info("Loaded configuration arguments.")
+    return confargs

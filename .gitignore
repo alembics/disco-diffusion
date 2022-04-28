@@ -9,6 +9,8 @@ images_out/TimeToDisco/*
 
 # Ignore some examples
 examples/local/*
+examples/configs/*
+!examples/configs/lighthouse.yml
 !examples/local/README.md
 !examples/linux
 !examples/windows
