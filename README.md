@@ -64,8 +64,47 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     python disco.py
     ```
 
-## Windows First-time Setup (PIP)
+## Windows First-time Setup (`pip`)
+   
+   - If in PowerShell:
+     ```powershell
+     python3 -m pip install --user virtualenv
+     python -m venv .\.venv\discodiffusion
+     .venv\discodiffusion\Scripts\Activate.ps1
+     pip install -r requirements.txt
+     ```
 
+   - If in Command Prompt:
+     ```cmd
+     python3 -m pip install --user virtualenv
+     python -m venv .\.venv\discodiffusion
+     .venv\discodiffusion\Scripts\Activate.cmd
+     pip install -r requirements.txt
+     ```
+   - Test Run
+
+     ```powershell
+     python disco.py
+     ```
+
+     A batch run should begin.  Kill with **Control+C** Example:
+        ```
+        Using device: cuda:0
+        💻 Starting Run: TimeToDisco(0) at frame 0
+        🌱 Randomly using seed: 1825817222
+        Prepping models...
+        🤖 Loading model 'ViT-B/32'...
+        🤖 Loading model 'ViT-B/16'...
+        🤖 Loading model 'RN50'...
+        🤖 Loading secondary model...
+        Setting up [LPIPS] perceptual loss: trunk [vgg], v[0.1], spatial [off]
+        Loading model from: C:\Users\youruser\code\disco-diffusion-1\.venv\discodiffusion\lib\site-packages\lpips\weights\v0.1\vgg.pth
+        🌱 Seed used: 1825817222
+        Frame 0 📝 Prompt: ['A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.', 'yellow color scheme']
+        Batches:   0%|          | 0/50 [00:00<?, ?it/s]
+
+        4%|████▌                                                                                                         | 10/240 [00:14<05:05,  1.33s/it]
+        ```
 
 ## Changelog
 #### v1 Oct 29th 2021 - Somnai  
