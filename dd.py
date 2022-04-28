@@ -949,7 +949,8 @@ def do_run(args=None, device=None, is_colab=False, model_config=None, batchNum=N
     secondary_model.load_state_dict(torch.load(f'{args.model_path}/secondary_model_imagenet_2.pth', map_location='cpu'))
     secondary_model.eval().requires_grad_(False).to(device)
   
-  lpips_model = lpips.LPIPS(net='vgg').to(device)
+  print (f'🤖 Loading LPIPS...')
+  lpips_model = lpips.LPIPS(net='vgg', verbose=False).to(device)
   
   print('🌱 Seed used:', args.seed)
   
