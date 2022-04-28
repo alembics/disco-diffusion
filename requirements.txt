@@ -23,7 +23,7 @@ fonttools==4.33.3
 ftfy==6.1.1
 fvcore==0.1.5.post20220414
 gdown==4.4.0
-guided-diffusion @ git+https://github.com/entmike/guided-diffusion.git@9b813fafea39251db6da2c4873690c94d0f22763
+guided-diffusion @ git+https://github.com/entmike/guided-diffusion.git@packagify
 idna==3.3
 iopath==0.1.9
 ipykernel==6.13.0
@@ -44,7 +44,7 @@ lpips==0.1.4
 MarkupSafe==2.1.1
 matplotlib==3.5.1
 matplotlib-inline==0.1.3
-midas @ git+https://github.com/ahupp/MiDaS@44af432c4a316f10a511b67a8497d26637a4a3e5
+midas @ git+https://github.com/ahupp/MiDaS@packagify
 mistune==0.8.4
 nbclient==0.6.0
 nbconvert==6.5.0
@@ -74,14 +74,14 @@ pyparsing==3.0.8
 pyrsistent==0.18.1
 PySocks==1.7.1
 python-dateutil==2.8.2
-pytorch3dlite @ git+https://github.com/entmike/pytorch3d-lite@5bacf67f6f89ef04a14f24d0fca92014373464ca
-pyttitools-adabins @ git+https://github.com/pytti-tools/AdaBins@21303dd74709f7660cff61c5788942a7a15e2993
+pytorch3dlite @ git+https://github.com/entmike/pytorch3d-lite@packagify
+pyttitools-adabins @ git+https://github.com/pytti-tools/AdaBins@packagify
 pytz==2022.1
 PyYAML==6.0
 pyzmq==22.3.0
 regex==2022.3.15
 requests==2.27.1
-ResizeRight @ git+https://github.com/ahupp/ResizeRight@1b8c9bb698766c2312f28d3a98fad95758c098c3
+ResizeRight @ git+https://github.com/ahupp/ResizeRight@packagify
 scipy==1.8.0
 Send2Trash==1.8.0
 six==1.16.0
