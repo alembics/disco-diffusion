@@ -1096,7 +1096,7 @@ def do_run(args, device=None, is_colab=False, model_config=None):
       target_embeds, weights = [], []
       
       prompts_series = split_prompts(args.prompts_series, max_frames = args.max_frames) if args.prompts_series else None      
-      if prompts_series is not None and frame_num >= len(args.prompts_series):
+      if prompts_series is not None and frame_num >= len(prompts_series):
         frame_prompt = prompts_series[-1]
         # print(f'Text Prompt: {frame_prompt}`')
       elif args.prompts_series is not None:
@@ -1105,7 +1105,7 @@ def do_run(args, device=None, is_colab=False, model_config=None):
         frame_prompt = []
         
       image_prompts_series = split_prompts(args.image_prompts_series, max_frames = args.max_frames) if args.image_prompts_series else None,
-      if image_prompts_series is not None and frame_num >= len(args.image_prompts_series):
+      if image_prompts_series is not None and frame_num >= len(image_prompts_series):
         image_prompt = image_prompts_series[-1]
         # print(f'🖼️ Image Prompt: {image_prompt}`')
       elif args.image_prompts_series is not None:
