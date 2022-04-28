@@ -1,10 +1,7 @@
 import argparse
-from dd import str2bool, str2json, get_param
+from dd import str2bool, str2json, get_param as gp
 
 def parse():
-    def gp(parameter, fallback):
-        return get_param(parameter, fallback=fallback)
-
     parser = argparse.ArgumentParser(description='Disco Diffusion')
     parser.add_argument('-s','--steps', type=int, help='Number of steps', required=False, default=gp('steps', 250))
     parser.add_argument('-b','--batch_name', help='Batch Name', required=False, default=gp('batch_name', 'TimeToDisco'))
