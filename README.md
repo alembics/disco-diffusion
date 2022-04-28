@@ -86,6 +86,7 @@ Follow these steps for the first time that you are running Disco Diffusion from 
      ```bash
      python3 -m pip install --user virtualenv
      python -m venv ./.venv/discodiffusion
+     pip install -r requirements.txt
      ```
    
    - Test Run
