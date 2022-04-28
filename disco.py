@@ -77,9 +77,15 @@ else:
 DEVICE = torch.device(pargs.cuda_device if torch.cuda.is_available() else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
-if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
-  print('Disabling CUDNN for A100 gpu', file=sys.stderr)
-  torch.backends.cudnn.enabled = False
+try:
+  # Fails if CPU is set
+  if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
+    print('Disabling CUDNN for A100 gpu', file=sys.stderr)
+    torch.backends.cudnn.enabled = False
+except:
+  print("Are you using a CPU?  Check your PyTorch version if you get errors.")
+  # torch.backends.cudnn.enabled = False
+  pass
 
 model_config = model_and_diffusion_defaults()
 if pargs.diffusion_model == '512x512_diffusion_uncond_finetune_008100':

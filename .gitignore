@@ -7,6 +7,12 @@ images_out/*
 images_out/TimeToDisco/*
 !images_out/README.md
 
+# Ignore some examples
+examples/local/*
+!examples/local/README.md
+!examples/linux
+!examples/windows
+
 # Allow a few sample images for sake of GitHub visibility for new users:
 !images_out/TimeToDisco/TimeToDisco(0)_0.png
 !images_out/TimeToDisco/TimeToDisco(0)_settings.txt

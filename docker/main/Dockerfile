@@ -16,8 +16,10 @@ RUN DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install -y tzdata image
 RUN useradd -ms /bin/bash disco
 USER disco
 
-# Set up code directory
-RUN mkdir code
+# Set up code directories
+RUN mkdir -p code/pretrained && \
+    mkdir -p code/models
+
 WORKDIR /workspace/code
 
 # Copy over models used

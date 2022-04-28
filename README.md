@@ -64,6 +64,9 @@ Follow these steps for the first time that you are running Disco Diffusion from 
     python disco.py
     ```
 
+## Windows First-time Setup (PIP)
+
+
 ## Changelog
 #### v1 Oct 29th 2021 - Somnai  
 * Initial QoL improvements added, including user friendly UI, settings+prompt saving and improved google drive folder organization.
