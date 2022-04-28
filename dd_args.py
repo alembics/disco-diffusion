@@ -115,7 +115,7 @@ def parse():
     )
     return parser.parse_args()
 
-# Thanks, Zippy
+# Thanks, https://github.com/aredden
 def arg_configuration_loader(args: Union[pydot, dict] = None) -> pydot:
     # get args if loader called without cli-arguments.
     if args is None:
