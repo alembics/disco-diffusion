@@ -365,7 +365,7 @@ def tv_loss(input):
 def range_loss(input):
     return (input - input.clamp(-1, 1)).pow(2).mean([1, 2, 3])
   
-def do_3d_step(img_filepath, frame_num, midas_model, midas_transform, translations=None, device=None, TRANSLATION_SCALE=None, key_frames=True):
+def do_3d_step(img_filepath, frame_num, midas_model, midas_transform, translations=None, device=None, TRANSLATION_SCALE=None, key_frames=True, args=None):
   if key_frames:
     translation_x = translations.translation_x_series[frame_num]
     translation_y = translations.translation_y_series[frame_num]
@@ -1064,7 +1064,7 @@ def do_run(args=None, device=None, is_colab=False, model_config=None, batchNum=N
             'rotation_3d_x_series':rotation_3d_x_series,
             'rotation_3d_y_series':rotation_3d_y_series,
             'rotation_3d_z_series':rotation_3d_z_series
-          }, device=device, TRANSLATION_SCALE=args.TRANSLATION_SCALE)
+          }, device=device, TRANSLATION_SCALE=args.TRANSLATION_SCALE, args=args)
           next_step_pil.save('prevFrameScaled.png')
 
           ### Turbo mode - skip some diffusions, use 3d morph for clarity and to save time
