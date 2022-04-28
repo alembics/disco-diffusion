@@ -63,7 +63,7 @@ for m in [{'file' :f'{model_path}/dpt_large-midas-2f21e586.pt', 'url':'https://g
 ]:
   if not os.path.exists(f'{m["file"]}'):
     print(f'🌍 (First time setup): Downloading model from {m["url"]} to {m["file"]}')
-    wget.download(m["url"], model_path)
+    wget.download(m["url"], m["file"])
 
 if pargs.simple_nvidia_smi_display:
   nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
