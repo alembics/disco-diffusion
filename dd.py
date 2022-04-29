@@ -1308,7 +1308,7 @@ def do_run(
         # if stop_on_next_loop:
         #  break
 
-        # display.clear_output(wait=True)
+        display.clear_output(wait=True)
 
         # Print Frame progress if animation mode is on
         if args.animation_mode != "None":
@@ -1754,7 +1754,7 @@ def do_run(
                                 image.save(f"{args.batchFolder}/progress.png")
                                 # prints output on console.
                                 display.clear_output(wait=True)
-                                display.display(display.Image('progress.png'))
+                                display.display(f"{args.batchFolder}/progress.png")
                                 if args.console_preview:
                                     output = climage.convert(
                                         f"{args.batchFolder}/progress.png",
