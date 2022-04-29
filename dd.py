@@ -1312,7 +1312,7 @@ def do_run(
 
         # Print Frame progress if animation mode is on
         if args.animation_mode != "None":
-            batchBar = tqdm(range(args.max_frames), desc="Frames")
+            batchBar = tqdm(range(args.max_frames), ncols=40, dynamic_ncols=True, desc="Frames", position=0, leave=True)
             batchBar.n = frame_num
             batchBar.refresh()
 
@@ -1676,11 +1676,11 @@ def do_run(
         for i in range(args.n_batches):
             if args.animation_mode == "None":
                 display.clear_output(wait=True)
-                batchBar = tqdm(range(args.n_batches), desc="Batches")
+                batchBar = tqdm(range(args.n_batches), ncols=40, dynamic_ncols=True, desc="Batches", position=0, leave=True)
                 batchBar.n = i
                 batchBar.refresh()
             # print('')
-            # display.display(image_display)
+            display.display(image_display)
             gc.collect()
             torch.cuda.empty_cache()
             cur_t = diffusion.num_timesteps - skip_steps - 1
@@ -1733,8 +1733,8 @@ def do_run(
                 with image_display:
                     if j % args.display_rate == 0 or cur_t == -1 or intermediateStep == True:
                         for k, image in enumerate(sample["pred_xstart"]):
-                            # tqdm.write(f'Batch {i}, step {j}, output {k}:')
-                            current_time = datetime.now().strftime("%y%m%d-%H%M%S_%f")
+                            tqdm.write(f'Batch {i}, step {j}, output {k}:')
+                            tqdm.write(datetime.now().strftime("%y%m%d-%H%M%S_%f"))
                             percent = math.ceil(j / total_steps * 100)
                             if args.n_batches > 0:
                                 # if intermediates are saved to the subfolder, don't append a step or percentage to the name
@@ -1753,14 +1753,14 @@ def do_run(
                                 # image.save('progress.png')
                                 image.save(f"{args.batchFolder}/progress.png")
                                 # prints output on console.
+                                display.clear_output(wait=True)
+                                display.display(display.Image('progress.png'))
                                 if args.console_preview:
                                     output = climage.convert(
                                         f"{args.batchFolder}/progress.png",
                                         width=args.console_preview_width,
                                     )
-                                    print(output)
-                                # display.clear_output(wait=True)
-                                # display.display(display.Image('progress.png'))
+                                    tqdm.write(output)
                             if args.steps_per_checkpoint is not None:
                                 if j % args.steps_per_checkpoint == 0 and j > 0:
                                     if args.intermediates_in_subfolder is True:
