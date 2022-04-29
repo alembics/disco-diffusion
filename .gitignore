@@ -31,7 +31,9 @@ AdaBins
 
 # Ignore model files (they will be DLed on first run)
 models/*
+!models/README.md
 pretrained/*
+!pretrained/README.md
 settings.json
 .vscode
 

@@ -1,0 +1,15 @@
+guided-diffusion @ git+https://github.com/entmike/guided-diffusion.git@packagify
+pytorch3dlite @ git+https://github.com/entmike/pytorch3d-lite@packagify
+pyttitools-adabins @ git+https://github.com/pytti-tools/AdaBins
+ResizeRight @ git+https://github.com/ahupp/ResizeRight@packagify
+midas @ git+https://github.com/ahupp/MiDaS@packagify
+clip @ git+https://github.com/openai/CLIP
+folium
+urllib3
+lpips
+climage
+pydotted
+timm
+loguru
+pyyaml
+wget

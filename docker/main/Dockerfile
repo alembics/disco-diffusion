@@ -33,8 +33,9 @@ RUN pip install git+https://github.com/openai/CLIP && \
     pip install git+https://github.com/ahupp/guided-diffusion@packagify && \
     pip install git+https://github.com/ahupp/ResizeRight@packagify && \
     pip install git+https://github.com/ahupp/MiDaS@packagify && \
-    pip install git+https://github.com/pytti-tools/AdaBins@installable
-    
+    pip install git+https://github.com/pytti-tools/AdaBins@installable && \ 
+    pip install git+https://github.com/entmike/pytorch3d-lite@packagify
+
 # Precache other big files
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip
 COPY --chown=disco --from=modelprep /scratch/model-lpips/vgg16-397923af.pth /home/disco/.cache/torch/hub/checkpoints/vgg16-397923af.pth
@@ -42,6 +43,5 @@ COPY --chown=disco --from=modelprep /scratch/model-lpips/vgg16-397923af.pth /hom
 ARG BUILD_DATE=unknown
 
 # Clone Git repositories
-RUN git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
-    git clone https://github.com/entmike/disco-diffusion-1.git && \
+RUN git clone https://github.com/entmike/disco-diffusion-1.git && \
     cd disco-diffusion-1
