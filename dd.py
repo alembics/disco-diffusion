@@ -1754,7 +1754,7 @@ def do_run(
                                 image.save(f"{args.batchFolder}/progress.png")
                                 # prints output on console.
                                 display.clear_output(wait=True)
-                                display.display(f"{args.batchFolder}/progress.png")
+                                display.display(image)
                                 if args.console_preview:
                                     output = climage.convert(
                                         f"{args.batchFolder}/progress.png",
