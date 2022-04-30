@@ -5,8 +5,7 @@ PROJECT_DIR = os.path.abspath(os.getcwd())
 
 # Import DD helper modules
 sys.path.append(PROJECT_DIR)
-import dd
-import dd_args
+import dd, dd_args
 
 # Unsure about these:
 os.environ["KMP_DUPLICATE_LIB_OK"] = "TRUE"

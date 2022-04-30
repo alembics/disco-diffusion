@@ -6,6 +6,7 @@ from yaml import dump, full_load
 from loguru import logger
 from pydotted import pydot
 import argparse
+import dd
 
 
 def parse():
@@ -139,7 +140,10 @@ def parse():
 def arg_configuration_loader(args: Union[pydot, dict] = None) -> pydot:
     # get args if loader called without cli-arguments.
     if args is None:
-        args = parse().__dict__
+        if dd.is_in_notebook():
+            args = dd.fixlater()
+        else:
+            args = parse().__dict__
 
     # Check whether 'args' is a dict, which would error, since using dot access.
     if type(args) == dict:
