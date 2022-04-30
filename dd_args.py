@@ -34,7 +34,7 @@ def parse():
     parser.add_argument("--console_preview", nargs="?", type=str2bool, const=True, default=gp("console_preview", False), help="Console Preview", required=False)
     parser.add_argument("--console_preview_width", type=int, help="Console Preview Column Width", required=False, default=gp("console_preview_width", 80))
     parser.add_argument("--cuda_device", help="CUDA Device", required=False, default=gp("cuda_device", "cuda:0"))
-    parser.add_argument("--simple_nvidia_smi_display", type=bool, help="Condensed nvidia-smi display", required=False, default=gp("simple_nvidia_smi_display", False))
+    parser.add_argument("--simple_nvidia_smi_display", type=bool, help="Condensed nvidia-smi display", required=False, default=gp("simple_nvidia_smi_display", True))
     parser.add_argument("--use_checkpoint", nargs="?", type=str2bool, const=True, default=gp("use_checkpoint", True), help="Use Checkpoint", required=False)
     parser.add_argument("--ViTB32", help="Use VitB32 model", type=str2bool, default=gp("ViTB32", True))
     parser.add_argument("--ViTB16", help="Use VitB16 model", type=str2bool, default=gp("ViTB16", True))

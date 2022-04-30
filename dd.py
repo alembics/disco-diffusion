@@ -312,7 +312,7 @@ class MakeCutoutsDango(nn.Module):
         self.IC_Size_Pow = IC_Size_Pow
         self.IC_Grey_P = IC_Grey_P
         self.cutout_debug = args.cutout_debug
-        self.debug_folder = f"{args.batchFolder}/debug"
+        self.debug_folder = f"{args.batch_folder}/debug"
         if args.animation_mode == "None":
             self.augs = T.Compose(
                 [
@@ -1307,8 +1307,8 @@ def do_run(
     for frame_num in range(args.start_frame, args.max_frames):
         # if stop_on_next_loop:
         #  break
-
-        display.clear_output(wait=True)
+        if is_in_notebook():
+            display.clear_output(wait=True)
 
         # Print Frame progress if animation mode is on
         if args.animation_mode != "None":
@@ -1680,7 +1680,8 @@ def do_run(
                 batchBar.n = i
                 batchBar.refresh()
             # print('')
-            display.display(image_display)
+            if is_in_notebook():
+                display.display(image_display)
             gc.collect()
             torch.cuda.empty_cache()
             cur_t = diffusion.num_timesteps - skip_steps - 1
@@ -1720,8 +1721,6 @@ def do_run(
                     order=2,
                 )
 
-            # with run_display:
-            # display.clear_output(wait=True)
             for j, sample in enumerate(samples):
                 cur_t -= 1
                 intermediateStep = False
@@ -1733,7 +1732,7 @@ def do_run(
                 with image_display:
                     if j % args.display_rate == 0 or cur_t == -1 or intermediateStep == True:
                         for k, image in enumerate(sample["pred_xstart"]):
-                            tqdm.write(f'Batch {i}, step {j}, output {k}:')
+                            tqdm.write(f"Batch {i}, step {j}, output {k}:")
                             tqdm.write(datetime.now().strftime("%y%m%d-%H%M%S_%f"))
                             percent = math.ceil(j / total_steps * 100)
                             if args.n_batches > 0:
@@ -1753,8 +1752,9 @@ def do_run(
                                 # image.save('progress.png')
                                 image.save(f"{args.batchFolder}/progress.png")
                                 # prints output on console.
-                                display.clear_output(wait=True)
-                                display.display(image)
+                                if is_in_notebook():
+                                    display.clear_output(wait=True)
+                                    display.display(image)
                                 if args.console_preview:
                                     output = climage.convert(
                                         f"{args.batchFolder}/progress.png",
@@ -1879,3 +1879,334 @@ def createVideo(args):
         raise RuntimeError(stderr)
     else:
         print("The video is ready and saved to the images folder")
+
+
+def setupFolders(is_colab=False, PROJECT_DIR=None, pargs=None):
+    from pydotted import pydot
+
+    batch_name = pargs.batch_name
+    videoFramesFolder = None
+    partialFolder = None
+    folders = pydot(
+        {
+            "root_path": os.getcwd(),
+            "batch_folder": f"{PROJECT_DIR}/images_out/{batch_name}",
+            "initDirPath": f"{PROJECT_DIR}/init_images",
+            "outDirPath": f"{PROJECT_DIR}/images_out",
+            "model_path": f"{PROJECT_DIR}/models",
+            "pretrain_path": f"{PROJECT_DIR}/pretrained",
+        }
+    )
+
+    createPath(folders.batch_folder)
+    createPath(folders.initDirPath)
+    createPath(folders.outDirPath)
+    createPath(folders.model_path)
+    createPath(folders.pretrain_path)
+
+    return folders
+
+
+def loadModels(folders):
+    import wget
+
+    # Download models if not present
+    for m in [
+        {
+            "file": f"{folders.model_path}/dpt_large-midas-2f21e586.pt",
+            "url": "https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt",
+        },
+        {
+            "file": f"{folders.model_path}/512x512_diffusion_uncond_finetune_008100.pt",
+            "url": "https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt",
+        },
+        {
+            "file": f"{folders.model_path}/256x256_diffusion_uncond.pt",
+            "url": "https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt",
+        },
+        {
+            "file": f"{folders.model_path}/secondary_model_imagenet_2.pth",
+            "url": "https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth",
+        },
+        {
+            "file": f"{folders.pretrain_path}/AdaBins_nyu.pt",
+            "url": "https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt",
+        },
+    ]:
+        if not os.path.exists(f'{m["file"]}'):
+            print(f'🌍 (First time setup): Downloading model from {m["url"]} to {m["file"]}')
+            wget.download(m["url"], m["file"])
+        else:
+            print(f'✅ Model already downloaded: {m["file"]}')
+
+
+def start_run(pargs=None, folders=None, device=None, is_colab=False):
+    import sys
+
+    USE_ADABINS = True
+    TRANSLATION_SCALE = 1.0 / 200.0
+    MAX_ADABINS_AREA = 500000
+    videoFramesFolder = None
+    partialFolder = None
+    # Get corrected sizes
+    side_x = (pargs.width_height[0] // 64) * 64
+    side_y = (pargs.width_height[1] // 64) * 64
+    if side_x != pargs.width_height[0] or side_y != pargs.width_height[1]:
+        print(f"Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.")
+
+    if pargs.animation_mode == "Video Input":
+        videoFramesFolder = f"videoFrames"
+        createPath(videoFramesFolder)
+        print(f"Exporting Video Frames (1 every {pargs.extract_nth_frame})...")
+        pargs.max_frames = len(glob(f"{videoFramesFolder}/*.jpg"))
+        try:
+            for f in pathlib.Path(f"{videoFramesFolder}").glob("*.jpg"):
+                f.unlink()
+        except:
+            print("")
+        vf = f"select=not(mod(n\,{pargs.extract_nth_frame}))"
+        subprocess.run(
+            f"ffmpeg -i {pargs.video_init_path} -vf f{vf} -vsync -vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg".split(" "), stdout=subprocess.PIPE
+        ).stdout.decode("utf-8")
+
+    # Insist turbo be used only w 3d anim.
+    if pargs.animation_mode != "3D" and (pargs.turbo_mode or pargs.vr_mode):
+        print("⚠️ Turbo/VR modes only available with 3D animations. Disabling... ⚠️")
+        pargs.turbo_mode = False
+        pargs.vr_mode = False
+
+    if type(pargs.intermediate_saves) is not list:
+        if pargs.intermediate_saves:
+            steps_per_checkpoint = math.floor((pargs.steps - pargs.skip_steps - 1) // (pargs.intermediate_saves + 1))
+            steps_per_checkpoint = steps_per_checkpoint if steps_per_checkpoint > 0 else 1
+            print(f"Will save every {steps_per_checkpoint} steps")
+        else:
+            steps_per_checkpoint = pargs.steps + 10
+    else:
+        steps_per_checkpoint = None
+
+    if pargs.intermediate_saves and pargs.intermediates_in_subfolder is True:
+        partialFolder = f"{folders.batch_folder}/partials"
+        createPath(partialFolder)
+
+    if pargs.retain_overwritten_frames is True:
+        retainFolder = f"{folders.batch_folder}/retained"
+        createPath(retainFolder)
+
+    if pargs.cutout_debug is True:
+        cutoutDebugFolder = f"{folders.batch_folder}/debug"
+        createPath(cutoutDebugFolder)
+
+    skip_step_ratio = int(pargs.frames_skip_steps.rstrip("%")) / 100
+    calc_frames_skip_steps = math.floor(pargs.steps * skip_step_ratio)
+
+    if pargs.steps <= calc_frames_skip_steps:
+        sys.exit("⚠️ ERROR: You can't skip more steps than your total steps ⚠️")
+
+    if pargs.resume_run:
+        if pargs.run_to_resume == "latest":
+            try:
+                batchNum  # type: ignore
+            except:
+                batchNum = len(glob(f"{folders.batch_folder}/{pargs.batch_name}(*)_settings.txt")) - 1
+        else:
+            batchNum = int(pargs.run_to_resume)
+        if pargs.resume_from_frame == "latest":
+            start_frame = len(glob(folders.batch_folder + f"/{pargs.batch_name}({batchNum})_*.png"))
+            if pargs.animation_mode != "3D" and pargs.turbo_mode == True and start_frame > pargs.turbo_preroll and start_frame % int(pargs.turbo_steps) != 0:
+                start_frame = start_frame - (start_frame % int(pargs.turbo_steps))
+        else:
+            start_frame = int(pargs.resume_from_frame) + 1
+            if pargs.animation_mode != "3D" and pargs.turbo_mode == True and start_frame > pargs.urbo_preroll and start_frame % int(pargs.turbo_steps) != 0:
+                start_frame = start_frame - (start_frame % int(pargs.turbo_steps))
+            if pargs.retain_overwritten_frames is True:
+                existing_frames = len(glob(folders.batch_folder + f"/{pargs.batch_name}({batchNum})_*.png"))
+                frames_to_save = existing_frames - start_frame
+                print(f"Moving {frames_to_save} frames to the Retained folder")
+                move_files(
+                    start_frame,
+                    existing_frames,
+                    folders.batchFolder,
+                    retainFolder,
+                    batch_name=pargs.batch_name,
+                    batchNum=batchNum,
+                )
+    else:
+        start_frame = 0
+        batchNum = len(glob(folders.batch_folder + "/*.txt"))
+        while (
+            os.path.isfile(f"{folders.batch_folder}/{pargs.batch_name}({batchNum})_settings.txt") is True
+            or os.path.isfile(f"{folders.batch_folder}/{pargs.batch_name}-{batchNum}_settings.txt") is True
+        ):
+            batchNum += 1
+
+    if pargs.set_seed == "random_seed":
+        random.seed()
+        seed = random.randint(0, 2**32)
+        print(f"🌱 Randomly using seed: {seed}")
+    else:
+        seed = int(pargs.set_seed)
+
+    args = {
+        "use_checkpoint": pargs.use_checkpoint,
+        "cutout_debug": pargs.cutout_debug,
+        "ViTB32": pargs.ViTB32,
+        "ViTB16": pargs.ViTB16,
+        "ViTL14": pargs.ViTL14,
+        "ViTL14_336": pargs.ViTL14_336,
+        "RN50": pargs.RN50,
+        "RN50x4": pargs.RN50x4,
+        "RN50x16": pargs.RN50x16,
+        "RN50x64": pargs.RN50x64,
+        "RN101": pargs.RN101,
+        "diffusion_sampling_mode": pargs.diffusion_sampling_mode,
+        "width_height": pargs.width_height,
+        "clip_guidance_scale": pargs.clip_guidance_scale,
+        "tv_scale": pargs.tv_scale,
+        "range_scale": pargs.range_scale,
+        "sat_scale": pargs.sat_scale,
+        "cutn_batches": pargs.cutn_batches,
+        "use_secondary_model": pargs.use_secondary_model,
+        "diffusion_model": pargs.diffusion_model,
+        "animation_mode": pargs.animation_mode,
+        "batchNum": batchNum,
+        "prompts_series": pargs.text_prompts,
+        "text_prompts": pargs.text_prompts,
+        "console_preview": pargs.console_preview,
+        "console_preview_width": pargs.console_preview_width,
+        "image_prompts_series": pargs.image_prompts,
+        "seed": seed,
+        "display_rate": pargs.display_rate,
+        "n_batches": pargs.n_batches if pargs.animation_mode == "None" else 1,
+        "batch_size": 1,
+        "batch_name": pargs.batch_name,
+        "steps": pargs.steps,
+        "init_image": pargs.init_image,
+        "init_scale": pargs.init_scale,
+        "skip_steps": pargs.skip_steps,
+        "side_x": side_x,
+        "side_y": side_y,
+        "animation_mode": pargs.animation_mode,
+        "video_init_path": pargs.video_init_path,
+        "extract_nth_frame": pargs.extract_nth_frame,
+        "video_init_seed_continuity": pargs.video_init_seed_continuity,
+        "key_frames": pargs.key_frames,
+        "max_frames": pargs.max_frames if pargs.animation_mode != "None" else 1,
+        "interp_spline": pargs.interp_spline,
+        "start_frame": start_frame,
+        "angle": pargs.angle,
+        "zoom": pargs.zoom,
+        "translation_x": pargs.translation_x,
+        "translation_y": pargs.translation_y,
+        "translation_z": pargs.translation_z,
+        "rotation_3d_x": pargs.rotation_3d_x,
+        "rotation_3d_y": pargs.rotation_3d_y,
+        "rotation_3d_z": pargs.rotation_3d_z,
+        "midas_depth_model": pargs.midas_depth_model,
+        "midas_weight": pargs.midas_weight,
+        "near_plane": pargs.near_plane,
+        "far_plane": pargs.far_plane,
+        "fov": pargs.fov,
+        "padding_mode": pargs.padding_mode,
+        "sampling_mode": pargs.sampling_mode,
+        "frames_scale": pargs.frames_scale,
+        "calc_frames_skip_steps": calc_frames_skip_steps,
+        "skip_step_ratio": skip_step_ratio,
+        "calc_frames_skip_steps": calc_frames_skip_steps,
+        "image_prompts": pargs.image_prompts,
+        "cut_overview": pargs.cut_overview,
+        "cut_innercut": pargs.cut_innercut,
+        "cut_ic_pow": pargs.cut_ic_pow,
+        "cut_icgray_p": pargs.cut_icgray_p,
+        "intermediate_saves": pargs.intermediate_saves,
+        "intermediates_in_subfolder": pargs.intermediates_in_subfolder,
+        "steps_per_checkpoint": steps_per_checkpoint,
+        "perlin_init": pargs.perlin_init,
+        "perlin_mode": pargs.perlin_mode,
+        "set_seed": pargs.set_seed,
+        "eta": pargs.eta,
+        "clamp_grad": pargs.clamp_grad,
+        "clamp_max": pargs.clamp_max,
+        "skip_augs": pargs.skip_augs,
+        "randomize_class": pargs.randomize_class,
+        "clip_denoised": pargs.clip_denoised,
+        "fuzzy_prompt": pargs.fuzzy_prompt,
+        "rand_mag": pargs.rand_mag,
+        "turbo_mode": pargs.turbo_mode,
+        "turbo_preroll": pargs.turbo_preroll,
+        "turbo_steps": pargs.turbo_steps,
+        "video_init_seed_continuity": pargs.video_init_seed_continuity,
+        "videoFramesFolder": videoFramesFolder,
+        "TRANSLATION_SCALE": TRANSLATION_SCALE,
+        "partialFolder": partialFolder,
+        "model_path": folders.model_path,
+        "batchFolder": folders.batch_folder,
+        "resume_run": pargs.resume_run,
+    }
+    # args = SimpleNamespace(**args)
+    args = pydot(args)  # Thx Zippy
+    try:
+        do_run(
+            args=args,
+            device=device,
+            is_colab=is_colab,
+            batchNum=batchNum,
+            start_frame=start_frame,
+        )
+    except KeyboardInterrupt:
+        print("🛑 Run interrupted by user.")
+        pass
+    finally:
+        gc.collect()
+        torch.cuda.empty_cache()
+
+    if pargs.animation_mode != "None":
+        if pargs.skip_video_for_run_all == True:
+            print("⚠️ Skipping video creation, uncheck skip_video_for_run_all if you want to run it")
+        else:
+            createVideo(args)
+
+
+def systemDetails(pargs):
+    if pargs.simple_nvidia_smi_display:
+        nvidiasmi_output = subprocess.run(["nvidia-smi", "-L"], stdout=subprocess.PIPE).stdout.decode("utf-8")
+        print(f"🔎 {nvidiasmi_output}")
+    else:
+        nvidiasmi_output = subprocess.run(["nvidia-smi"], stdout=subprocess.PIPE).stdout.decode("utf-8")
+        print(nvidiasmi_output)
+        # nvidiasmi_ecc_note = subprocess.run(["nvidia-smi", "-i", "0"], stdout=subprocess.PIPE).stdout.decode("utf-8")
+        # print(nvidiasmi_ecc_note)
+
+
+def getDevice(pargs):
+    import sys
+
+    DEVICE = torch.device(pargs.cuda_device if torch.cuda.is_available() else "cpu")
+    print("✅ Using device:", DEVICE)
+    device = DEVICE  # At least one of the modules expects this name..
+    try:
+        # Fails if CPU is set
+        if torch.cuda.get_device_capability(DEVICE) == (8, 0):  ## A100 fix thanks to Emad
+            print("Disabling CUDNN for A100 gpu", file=sys.stderr)
+            torch.backends.cudnn.enabled = False
+    except:
+        print("Are you using a CPU?  Check your PyTorch version if you get errors.")
+        # torch.backends.cudnn.enabled = False
+        pass
+    return device
+
+
+def detectColab():
+    try:
+        from google.colab import drive  # type: ignore
+
+        return True
+    except:
+        return False
+
+
+def is_in_notebook():
+    import traceback
+
+    rstk = traceback.extract_stack(limit=1)[0]
+    return rstk[0].startswith("<ipython")
