@@ -1942,7 +1942,6 @@ def loadModels(folders):
 
 def start_run(pargs=None, folders=None, device=None, is_colab=False):
     import sys
-
     USE_ADABINS = True
     TRANSLATION_SCALE = 1.0 / 200.0
     MAX_ADABINS_AREA = 500000
