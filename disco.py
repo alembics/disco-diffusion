@@ -1707,8 +1707,8 @@ def download_models(diffusion_model,use_secondary_model,fallback=False):
   model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
 
   model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
-  model_512_link_fb = 'https://www.dropbox.com/s/yjqvhu6l6l0r2eh/512x512_diffusion_uncond_finetune_008100.pt'
-  model_secondary_link_fb = 'https://www.dropbox.com/s/luv4fezod3r8d2n/secondary_model_imagenet_2.pth'
+  model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
+  model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
 
   model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
   model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
