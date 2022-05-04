@@ -1,166 +1,123 @@
-# %%
-# !! {"metadata": {
-# !!   "id": "view-in-github",
-# !!   "colab_type": "text"
-# !! }}
-"""
-<a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
-"""
+#!/usr/bin/env python
+# coding: utf-8
 
-# %%
-# !! {"metadata": {
-# !!    "id": "TitleTop"
-# !! }}
-"""
-# Disco Diffusion v5.2 - Now with VR Mode
+# <a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
 
-In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
+# # Disco Diffusion v5.2 - Now with VR Mode
+# 
+# In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
+# 
+# For issues, join the [Disco Diffusion Discord](https://discord.gg/msEZBy4HxA) or message us on twitter at [@somnai_dreams](https://twitter.com/somnai_dreams) or [@gandamu](https://twitter.com/gandamu_ml)
 
-For issues, join the [Disco Diffusion Discord](https://discord.gg/msEZBy4HxA) or message us on twitter at [@somnai_dreams](https://twitter.com/somnai_dreams) or [@gandamu](https://twitter.com/gandamu_ml)
-"""
+# ### Credits & Changelog ⬇️
 
-# %%
-# !! {"metadata": {
-# !!   "id": "CreditsChTop"
-# !! }}
-"""
-### Credits & Changelog ⬇️
-"""
+# #### Credits
+# 
+# Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
+# 
+# Modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
+# 
+# Further improvements from Dango233 and nsheppard helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
+# 
+# Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may greatly improve accuracy.
+# 
+# The latest zoom, pan, rotation, and keyframes features were taken from Chigozie Nri's VQGAN Zoom Notebook (https://github.com/chigozienri, https://twitter.com/chigozienri)
+# 
+# Advanced DangoCutn Cutout method is also from Dango223.
+# 
+# --
+# 
+# Disco:
+# 
+# Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
+# 
+# 3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai. Creation of disco.py and ongoing maintenance.
+# 
+# Turbo feature by Chris Allen (https://twitter.com/zippy731)
+# 
+# Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
+# 
+# VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 
-# %%
-# !! {"metadata": {
-# !!   "id": "Credits"
-# !! }}
-"""
-#### Credits
+# #### License
 
-Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
+# Licensed under the MIT License
+# 
+# Copyright (c) 2021 Katherine Crowson 
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+# 
+# --
+# 
+# MIT License
+# 
+# Copyright (c) 2019 Intel ISL (Intel Intelligent Systems Lab)
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+# 
+# --
+# 
+# Licensed under the MIT License
+# 
+# Copyright (c) 2021 Maxwell Ingham
+# 
+# Copyright (c) 2022 Adam Letts 
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+# 
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 
-Modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
+# #### Changelog
 
-Further improvements from Dango233 and nsheppard helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
+# In[ ]:
 
-Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may greatly improve accuracy.
 
-The latest zoom, pan, rotation, and keyframes features were taken from Chigozie Nri's VQGAN Zoom Notebook (https://github.com/chigozienri, https://twitter.com/chigozienri)
-
-Advanced DangoCutn Cutout method is also from Dango223.
-
---
-
-Disco:
-
-Somnai (https://twitter.com/Somnai_dreams) added Diffusion Animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
-
-3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai. Creation of disco.py and ongoing maintenance.
-
-Turbo feature by Chris Allen (https://twitter.com/zippy731)
-
-Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
-
-VR Mode by Tom Mason (https://twitter.com/nin_artificial)
-
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "LicenseTop"
-# !! }}
-"""
-#### License
-"""
-
-# %%
-# !! {"metadata": {
-# !!  "id": "License"
-# !!  }}
-"""
-Licensed under the MIT License
-
-Copyright (c) 2021 Katherine Crowson 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
---
-
-MIT License
-
-Copyright (c) 2019 Intel ISL (Intel Intelligent Systems Lab)
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-
---
-
-Licensed under the MIT License
-
-Copyright (c) 2021 Maxwell Ingham
-
-Copyright (c) 2022 Adam Letts 
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "id": "ChangelogTop"
-# !! }}
-"""
-#### Changelog
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "cellView": "form",
-# !!    "id": "Changelog"
-# !! }}
 #@title <- View Changelog
 skip_for_run_all = True #@param {type: 'boolean'}
 
@@ -265,84 +222,64 @@ if skip_for_run_all == False:
   )
 
 
-# %%
-# !! {"metadata": {
-# !!   "id": "TutorialTop"
-# !! }}
-"""
-# Tutorial
-"""
+# # Tutorial
 
-# %%
-# !! {"metadata": {
-# !!  "id": "DiffusionSet"
-# !! }}
-"""
-**Diffusion settings (Defaults are heavily outdated)**
----
-Disco Diffusion is complex, and continually evolving with new features.  The most current documentation on on Disco Diffusion settings can be found in the unofficial guidebook:
+# **Diffusion settings (Defaults are heavily outdated)**
+# ---
+# Disco Diffusion is complex, and continually evolving with new features.  The most current documentation on on Disco Diffusion settings can be found in the unofficial guidebook:
+# 
+# [Zippy's Disco Diffusion Cheatsheet](https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit)
+# 
+# We also encourage users to join the [Disco Diffusion User Discord](https://discord.gg/XGZrFFCRfN) to learn from the active user community.
+# 
+# This section below is outdated as of v2
+# 
+# Setting | Description | Default
+# --- | --- | ---
+# **Your vision:**
+# `text_prompts` | A description of what you'd like the machine to generate. Think of it like writing the caption below your image on a website. | N/A
+# `image_prompts` | Think of these images more as a description of their contents. | N/A
+# **Image quality:**
+# `clip_guidance_scale`  | Controls how much the image should look like the prompt. | 1000
+# `tv_scale` | Controls the smoothness of the final output. | 150
+# `range_scale` | Controls how far out of range RGB values are allowed to be. | 150
+# `sat_scale` | Controls how much saturation is allowed. From nshepperd's JAX notebook. | 0
+# `cutn` | Controls how many crops to take from the image. | 16
+# `cutn_batches` | Accumulate CLIP gradient from multiple batches of cuts. | 2
+# **Init settings:**
+# `init_image` | URL or local path | None
+# `init_scale` | This enhances the effect of the init image, a good value is 1000 | 0
+# `skip_steps` | Controls the starting point along the diffusion timesteps | 0
+# `perlin_init` | Option to start with random perlin noise | False
+# `perlin_mode` | ('gray', 'color') | 'mixed'
+# **Advanced:**
+# `skip_augs` | Controls whether to skip torchvision augmentations | False
+# `randomize_class` | Controls whether the imagenet class is randomly changed each iteration | True
+# `clip_denoised` | Determines whether CLIP discriminates a noisy or denoised image | False
+# `clamp_grad` | Experimental: Using adaptive clip grad in the cond_fn | True
+# `seed`  | Choose a random seed and print it at end of run for reproduction | random_seed
+# `fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
+# `rand_mag` | Controls the magnitude of the random noise | 0.1
+# `eta` | DDIM hyperparameter | 0.5
+# 
+# ..
+# 
+# **Model settings**
+# ---
+# 
+# Setting | Description | Default
+# --- | --- | ---
+# **Diffusion:**
+# `timestep_respacing` | Modify this value to decrease the number of timesteps. | ddim100
+# `diffusion_steps` || 1000
+# **Diffusion:**
+# `clip_models` | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
 
-[Zippy's Disco Diffusion Cheatsheet](https://docs.google.com/document/d/1l8s7uS2dGqjztYSjPpzlmXLjl5PM3IGkRWI3IiCuK7g/edit)
+# # 1. Set Up
 
-We also encourage users to join the [Disco Diffusion User Discord](https://discord.gg/XGZrFFCRfN) to learn from the active user community.
+# In[ ]:
 
-This section below is outdated as of v2
 
-Setting | Description | Default
---- | --- | ---
-**Your vision:**
-`text_prompts` | A description of what you'd like the machine to generate. Think of it like writing the caption below your image on a website. | N/A
-`image_prompts` | Think of these images more as a description of their contents. | N/A
-**Image quality:**
-`clip_guidance_scale`  | Controls how much the image should look like the prompt. | 1000
-`tv_scale` | Controls the smoothness of the final output. | 150
-`range_scale` | Controls how far out of range RGB values are allowed to be. | 150
-`sat_scale` | Controls how much saturation is allowed. From nshepperd's JAX notebook. | 0
-`cutn` | Controls how many crops to take from the image. | 16
-`cutn_batches` | Accumulate CLIP gradient from multiple batches of cuts. | 2
-**Init settings:**
-`init_image` | URL or local path | None
-`init_scale` | This enhances the effect of the init image, a good value is 1000 | 0
-`skip_steps` | Controls the starting point along the diffusion timesteps | 0
-`perlin_init` | Option to start with random perlin noise | False
-`perlin_mode` | ('gray', 'color') | 'mixed'
-**Advanced:**
-`skip_augs` | Controls whether to skip torchvision augmentations | False
-`randomize_class` | Controls whether the imagenet class is randomly changed each iteration | True
-`clip_denoised` | Determines whether CLIP discriminates a noisy or denoised image | False
-`clamp_grad` | Experimental: Using adaptive clip grad in the cond_fn | True
-`seed`  | Choose a random seed and print it at end of run for reproduction | random_seed
-`fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
-`rand_mag` | Controls the magnitude of the random noise | 0.1
-`eta` | DDIM hyperparameter | 0.5
-
-..
-
-**Model settings**
----
-
-Setting | Description | Default
---- | --- | ---
-**Diffusion:**
-`timestep_respacing` | Modify this value to decrease the number of timesteps. | ddim100
-`diffusion_steps` || 1000
-**Diffusion:**
-`clip_models` | Models of CLIP to load. Typically the more, the better but they all come at a hefty VRAM cost. | ViT-B/32, ViT-B/16, RN50x4
-"""
-
-# %%
-# !! {"metadata": {
-# !!  "id": "SetupTop"
-# !! }}
-"""
-# 1. Set Up
-"""
-
-# %%
-# !! {"metadata": {
-# !!   "cellView": "form",
-# !!    "id": "CheckGPU"
-# !! }}
 #@title 1.1 Check GPU Status
 import subprocess
 simple_nvidia_smi_display = False#@param {type:"boolean"}
@@ -357,11 +294,10 @@ else:
   nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0', '-e', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   print(nvidiasmi_ecc_note)
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "PrepFolders"
-# !! }}
+
+# In[ ]:
+
+
 #@title 1.2 Prepare Folders
 import subprocess, os, sys, ipykernel
 
@@ -427,14 +363,16 @@ else:
 # libraries = f'{root_path}/libraries'
 # createPath(libraries)
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "InstallDeps"
-# !! }}
-#@title ### 1.3 Install and import dependencies
+
+# In[ ]:
+
+
+#@title ### 1.3 Install, import dependencies and set up runtime devices
 
 import pathlib, shutil, os, sys
+
+#@markdown Check this if you want to use CPU
+useCPU = False #@param {type:"boolean"}
 
 if not is_colab:
   # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
@@ -566,19 +504,19 @@ if USE_ADABINS:
   MAX_ADABINS_AREA = 500000
 
 import torch
-DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cuda:0' if (torch.cuda.is_available() or not useCPU) else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
 
-if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
-  print('Disabling CUDNN for A100 gpu', file=sys.stderr)
-  torch.backends.cudnn.enabled = False
+if not useCPU:
+  if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
+    print('Disabling CUDNN for A100 gpu', file=sys.stderr)
+    torch.backends.cudnn.enabled = False
 
-# %%
-# !! {"metadata": {
-# !!  "cellView": "form",
-# !!    "id": "DefMidasFns"
-# !! }}
+
+# In[ ]:
+
+
 #@title ### 1.4 Define Midas functions
 
 from midas.dpt_depth import DPTDepthModel
@@ -681,11 +619,10 @@ def init_midas_depth_model(midas_model_type="dpt_large", optimize=True):
     print(f"MiDaS '{midas_model_type}' depth model initialized.")
     return midas_model, midas_transform, net_w, net_h, resize_mode, normalization
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefFns"
-# !! }}
+
+# In[ ]:
+
+
 #@title 1.5 Define necessary functions
 
 # https://gist.github.com/adefossez/0646dbe9ed4005480a2407c62aac8869
@@ -1492,11 +1429,10 @@ def save_settings():
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
     json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
-# %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefSecModel"
-# !! }}
+
+# In[ ]:
+
+
 #@title 1.6 Define the secondary diffusion model
 
 def append_dims(x, n):
@@ -1662,18 +1598,11 @@ class SecondaryDiffusionImageNet2(nn.Module):
         return DiffusionOutput(v, pred, eps)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "DiffClipSetTop"
-# !! }}
-"""
-# 2. Diffusion and CLIP model settings
-"""
+# # 2. Diffusion and CLIP model settings
 
-# %%
-# !! {"metadata": {
-# !!   "id": "ModelSettings"
-# !!  }}
+# In[ ]:
+
+
 #@markdown ####**Models Settings:**
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
@@ -1817,7 +1746,7 @@ if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
         'num_res_blocks': 2,
         'resblock_updown': True,
         'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
+        'use_fp16': not useCPU,
         'use_scale_shift_norm': True,
     })
 elif diffusion_model == '256x256_diffusion_uncond':
@@ -1835,7 +1764,7 @@ elif diffusion_model == '256x256_diffusion_uncond':
         'num_res_blocks': 2,
         'resblock_updown': True,
         'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
+        'use_fp16': not useCPU,
         'use_scale_shift_norm': True,
     })
 
@@ -1862,18 +1791,11 @@ normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.2686295
 lpips_model = lpips.LPIPS(net='vgg').to(device)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "SettingsTop"
-# !! }}
-"""
-# 3. Settings
-"""
+# # 3. Settings
 
-# %%
-# !! {"metadata": {
-# !!    "id": "BasicSettings"
-# !!  }}
+# In[ ]:
+
+
 #@markdown ####**Basic Settings:**
 batch_name = 'TimeToDisco' #@param{type: 'string'}
 steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
@@ -1912,18 +1834,11 @@ batchFolder = f'{outDirPath}/{batch_name}'
 createPath(batchFolder)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "AnimSetTop"
-# !! }}
-"""
-### Animation Settings
-"""
+# ### Animation Settings
 
-# %%
-# !! {"metadata": {
-# !!    "id": "AnimSettings"
-# !! }}
+# In[ ]:
+
+
 #@markdown ####**Animation Mode:**
 animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
 #@markdown *For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.*
@@ -2278,19 +2193,12 @@ else:
     rotation_3d_z = float(rotation_3d_z)
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "ExtraSetTop"
-# !! }}
-"""
-### Extra Settings
- Partial Saves, Advanced Settings, Cutn Scheduling
-"""
+# ### Extra Settings
+#  Partial Saves, Advanced Settings, Cutn Scheduling
 
-# %%
-# !! {"metadata": {
-# !!   "id": "ExtraSettings"
-# !! }}
+# In[ ]:
+
+
 #@markdown ####**Saving:**
 
 intermediate_saves = 0#@param{type: 'raw'}
@@ -2351,19 +2259,12 @@ cut_ic_pow = 1#@param {type: 'number'}
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "PromptsTop"
-# !! }}
-"""
-### Prompts
-`animation_mode: None` will only use the first set. `animation_mode: 2D / Video` will run through them per the set frames and hold on the last one.
-"""
+# ### Prompts
+# `animation_mode: None` will only use the first set. `animation_mode: 2D / Video` will run through them per the set frames and hold on the last one.
 
-# %%
-# !! {"metadata": {
-# !!    "id": "Prompts"
-# !! }}
+# In[ ]:
+
+
 text_prompts = {
     0: ["A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.", "yellow color scheme"],
     100: ["This set of prompts start at frame 100","This prompt has weight five:5"],
@@ -2374,18 +2275,11 @@ image_prompts = {
 }
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "DiffuseTop"
-# !! }}
-"""
-# 4. Diffuse!
-"""
+# # 4. Diffuse!
 
-# %%
-# !! {"metadata": {
-# !!    "id": "DoTheRun"
-# !!  }}
+# In[ ]:
+
+
 #@title Do the Run!
 #@markdown `n_batches` ignored with animation modes.
 display_rate =  50 #@param{type: 'number'}
@@ -2567,18 +2461,11 @@ finally:
     torch.cuda.empty_cache()
 
 
-# %%
-# !! {"metadata": {
-# !!    "id": "CreateVidTop"
-# !! }}
-"""
-# 5. Create the video
-"""
+# # 5. Create the video
 
-# %%
-# !! {"metadata": {
-# !!    "id": "CreateVid"
-# !! }}
+# In[ ]:
+
+
 # @title ### **Create video**
 #@markdown Video file will save in the same folder as your images.
 
@@ -2654,3 +2541,4 @@ else:
   #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
   #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
   
+
