@@ -569,7 +569,7 @@ if USE_ADABINS:
   MAX_ADABINS_AREA = 500000
 
 import torch
-DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+DEVICE = torch.device('cuda:0' if (torch.cuda.is_available() and not useCPU) else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
 
