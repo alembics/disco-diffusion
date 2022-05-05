@@ -432,9 +432,12 @@ else:
 # !!    "cellView": "form",
 # !!    "id": "InstallDeps"
 # !! }}
-#@title ### 1.3 Install and import dependencies
+#@title ### 1.3 Install, import dependencies and set up runtime devices
 
 import pathlib, shutil, os, sys
+
+# Check this if you want to use CPU
+useCPU = False
 
 if not is_colab:
   # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
@@ -570,9 +573,10 @@ DEVICE = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
 
-if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
-  print('Disabling CUDNN for A100 gpu', file=sys.stderr)
-  torch.backends.cudnn.enabled = False
+if not useCPU:
+  if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
+    print('Disabling CUDNN for A100 gpu', file=sys.stderr)
+    torch.backends.cudnn.enabled = False
 
 # %%
 # !! {"metadata": {
@@ -1817,7 +1821,7 @@ if diffusion_model == '512x512_diffusion_uncond_finetune_008100':
         'num_res_blocks': 2,
         'resblock_updown': True,
         'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
+        'use_fp16': not useCPU,
         'use_scale_shift_norm': True,
     })
 elif diffusion_model == '256x256_diffusion_uncond':
@@ -1835,7 +1839,7 @@ elif diffusion_model == '256x256_diffusion_uncond':
         'num_res_blocks': 2,
         'resblock_updown': True,
         'use_checkpoint': use_checkpoint,
-        'use_fp16': True,
+        'use_fp16': not useCPU,
         'use_scale_shift_norm': True,
     })
 
