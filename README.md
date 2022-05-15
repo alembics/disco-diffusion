@@ -6,7 +6,16 @@ A frankensteinian amalgamation of notebooks, models and techniques for the gener
 
 [to be updated with further info soon]
 
+## Contributing
+This project uses a special conversion tool to convert the python files into notebooks for easier development.
 
+What this means is you do not have to touch the notebook directly to make changes to it
+
+the tool being used is called [Colab-Convert](https://github.com/MSFTserver/colab-convert)
+
+- install using `pip install colab-convert`
+- convert .py to .ipynb `colab-convert /path/to/file.py /path/to/file.ipynb`
+- convert .ipynb to .py `colab-convert /path/to/file.ipynb /path/to/file.py`
 
 
 ## Changelog
