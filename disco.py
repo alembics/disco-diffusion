@@ -1,5 +1,5 @@
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "view-in-github",
 # !!   "colab_type": "text"
 # !! }}
@@ -8,8 +8,8 @@
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "TitleTop"
+# !! {"metadata":{
+# !!   "id": "TitleTop"
 # !! }}
 """
 # Disco Diffusion v5.2 - Now with VR Mode
@@ -20,7 +20,7 @@ For issues, join the [Disco Diffusion Discord](https://discord.gg/msEZBy4HxA) or
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "CreditsChTop"
 # !! }}
 """
@@ -28,7 +28,7 @@ For issues, join the [Disco Diffusion Discord](https://discord.gg/msEZBy4HxA) or
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "Credits"
 # !! }}
 """
@@ -59,11 +59,10 @@ Turbo feature by Chris Allen (https://twitter.com/zippy731)
 Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
 
 VR Mode by Tom Mason (https://twitter.com/nin_artificial)
-
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "LicenseTop"
 # !! }}
 """
@@ -71,9 +70,9 @@ VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 """
 
 # %%
-# !! {"metadata": {
-# !!  "id": "License"
-# !!  }}
+# !! {"metadata":{
+# !!   "id": "License"
+# !! }}
 """
 Licensed under the MIT License
 
@@ -149,7 +148,7 @@ THE SOFTWARE.
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "ChangelogTop"
 # !! }}
 """
@@ -157,9 +156,9 @@ THE SOFTWARE.
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "cellView": "form",
-# !!    "id": "Changelog"
+# !!   "id": "Changelog"
 # !! }}
 #@title <- View Changelog
 skip_for_run_all = True #@param {type: 'boolean'}
@@ -264,9 +263,8 @@ if skip_for_run_all == False:
       '''
   )
 
-
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "TutorialTop"
 # !! }}
 """
@@ -274,8 +272,8 @@ if skip_for_run_all == False:
 """
 
 # %%
-# !! {"metadata": {
-# !!  "id": "DiffusionSet"
+# !! {"metadata":{
+# !!   "id": "DiffusionSet"
 # !! }}
 """
 **Diffusion settings (Defaults are heavily outdated)**
@@ -331,17 +329,17 @@ Setting | Description | Default
 """
 
 # %%
-# !! {"metadata": {
-# !!  "id": "SetupTop"
+# !! {"metadata":{
+# !!   "id": "SetupTop"
 # !! }}
 """
 # 1. Set Up
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "cellView": "form",
-# !!    "id": "CheckGPU"
+# !!   "id": "CheckGPU"
 # !! }}
 #@title 1.1 Check GPU Status
 import subprocess
@@ -358,9 +356,9 @@ else:
   print(nvidiasmi_ecc_note)
 
 # %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "PrepFolders"
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "PrepFolders"
 # !! }}
 #@title 1.2 Prepare Folders
 import subprocess, os, sys, ipykernel
@@ -428,16 +426,16 @@ else:
 # createPath(libraries)
 
 # %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "InstallDeps"
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "InstallDeps"
 # !! }}
 #@title ### 1.3 Install, import dependencies and set up runtime devices
 
 import pathlib, shutil, os, sys
 
-# Check this if you want to use CPU
-useCPU = False
+#@markdown Check this if you want to use CPU
+useCPU = False #@param {type:"boolean"}
 
 if not is_colab:
   # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
@@ -579,9 +577,9 @@ if not useCPU:
     torch.backends.cudnn.enabled = False
 
 # %%
-# !! {"metadata": {
-# !!  "cellView": "form",
-# !!    "id": "DefMidasFns"
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "DefMidasFns"
 # !! }}
 #@title ### 1.4 Define Midas functions
 
@@ -686,9 +684,9 @@ def init_midas_depth_model(midas_model_type="dpt_large", optimize=True):
     return midas_model, midas_transform, net_w, net_h, resize_mode, normalization
 
 # %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefFns"
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "DefFns"
 # !! }}
 #@title 1.5 Define necessary functions
 
@@ -1497,9 +1495,9 @@ def save_settings():
     json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
 # %%
-# !! {"metadata": {
-# !!    "cellView": "form",
-# !!    "id": "DefSecModel"
+# !! {"metadata":{
+# !!   "cellView": "form",
+# !!   "id": "DefSecModel"
 # !! }}
 #@title 1.6 Define the secondary diffusion model
 
@@ -1665,19 +1663,18 @@ class SecondaryDiffusionImageNet2(nn.Module):
         eps = input * sigmas + v * alphas
         return DiffusionOutput(v, pred, eps)
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "DiffClipSetTop"
+# !! {"metadata":{
+# !!   "id": "DiffClipSetTop"
 # !! }}
 """
 # 2. Diffusion and CLIP model settings
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "ModelSettings"
-# !!  }}
+# !! }}
 #@markdown ####**Models Settings:**
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100"]
 use_secondary_model = True #@param {type: 'boolean'}
@@ -1865,19 +1862,18 @@ if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().req
 normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 lpips_model = lpips.LPIPS(net='vgg').to(device)
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "SettingsTop"
+# !! {"metadata":{
+# !!   "id": "SettingsTop"
 # !! }}
 """
 # 3. Settings
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "BasicSettings"
-# !!  }}
+# !! {"metadata":{
+# !!   "id": "BasicSettings"
+# !! }}
 #@markdown ####**Basic Settings:**
 batch_name = 'TimeToDisco' #@param{type: 'string'}
 steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
@@ -1915,18 +1911,17 @@ model_config.update({
 batchFolder = f'{outDirPath}/{batch_name}'
 createPath(batchFolder)
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "AnimSetTop"
+# !! {"metadata":{
+# !!   "id": "AnimSetTop"
 # !! }}
 """
 ### Animation Settings
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "AnimSettings"
+# !! {"metadata":{
+# !!   "id": "AnimSettings"
 # !! }}
 #@markdown ####**Animation Mode:**
 animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
@@ -2281,10 +2276,9 @@ else:
     rotation_3d_y = float(rotation_3d_y)
     rotation_3d_z = float(rotation_3d_z)
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "ExtraSetTop"
+# !! {"metadata":{
+# !!   "id": "ExtraSetTop"
 # !! }}
 """
 ### Extra Settings
@@ -2292,7 +2286,7 @@ else:
 """
 
 # %%
-# !! {"metadata": {
+# !! {"metadata":{
 # !!   "id": "ExtraSettings"
 # !! }}
 #@markdown ####**Saving:**
@@ -2354,10 +2348,9 @@ cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}
 cut_ic_pow = 1#@param {type: 'number'}  
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "PromptsTop"
+# !! {"metadata":{
+# !!   "id": "PromptsTop"
 # !! }}
 """
 ### Prompts
@@ -2365,8 +2358,8 @@ cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "Prompts"
+# !! {"metadata":{
+# !!   "id": "Prompts"
 # !! }}
 text_prompts = {
     0: ["A beautiful painting of a singular lighthouse, shining its light across a tumultuous sea of blood by greg rutkowski and thomas kinkade, Trending on artstation.", "yellow color scheme"],
@@ -2377,19 +2370,18 @@ image_prompts = {
     # 0:['ImagePromptsWorkButArentVeryGood.png:2',],
 }
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "DiffuseTop"
+# !! {"metadata":{
+# !!   "id": "DiffuseTop"
 # !! }}
 """
 # 4. Diffuse!
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "DoTheRun"
-# !!  }}
+# !! {"metadata":{
+# !!   "id": "DoTheRun"
+# !! }}
 #@title Do the Run!
 #@markdown `n_batches` ignored with animation modes.
 display_rate =  50 #@param{type: 'number'}
@@ -2570,18 +2562,17 @@ finally:
     gc.collect()
     torch.cuda.empty_cache()
 
-
 # %%
-# !! {"metadata": {
-# !!    "id": "CreateVidTop"
+# !! {"metadata":{
+# !!   "id": "CreateVidTop"
 # !! }}
 """
 # 5. Create the video
 """
 
 # %%
-# !! {"metadata": {
-# !!    "id": "CreateVid"
+# !! {"metadata":{
+# !!   "id": "CreateVid"
 # !! }}
 # @title ### **Create video**
 #@markdown Video file will save in the same folder as your images.
@@ -2657,4 +2648,45 @@ else:
   #     mp4 = open(filepath,'rb').read()
   #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
   #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
-  
+
+# %%
+# !! {"main_metadata":{
+# !!   "anaconda-cloud": {},
+# !!   "accelerator": "GPU",
+# !!   "colab": {
+# !!     "collapsed_sections": [
+# !!       "CreditsChTop",
+# !!       "TutorialTop",
+# !!       "CheckGPU",
+# !!       "InstallDeps",
+# !!       "DefMidasFns",
+# !!       "DefFns",
+# !!       "DefSecModel",
+# !!       "DefSuperRes",
+# !!       "AnimSetTop",
+# !!       "ExtraSetTop"
+# !!     ],
+# !!     "machine_shape": "hm",
+# !!     "name": "Disco Diffusion v5.2 [w/ VR Mode]",
+# !!     "private_outputs": true,
+# !!     "provenance": [],
+# !!     "include_colab_link": true
+# !!   },
+# !!   "kernelspec": {
+# !!     "display_name": "Python 3",
+# !!     "language": "python",
+# !!     "name": "python3"
+# !!   },
+# !!   "language_info": {
+# !!     "codemirror_mode": {
+# !!       "name": "ipython",
+# !!       "version": 3
+# !!     },
+# !!     "file_extension": ".py",
+# !!     "mimetype": "text/x-python",
+# !!     "name": "python",
+# !!     "nbconvert_exporter": "python",
+# !!     "pygments_lexer": "ipython3",
+# !!     "version": "3.6.1"
+# !!   }
+# !! }}
