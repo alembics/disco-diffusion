@@ -434,6 +434,13 @@ else:
 
 import pathlib, shutil, os, sys
 
+nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+cards_requiring_downgrade = ["Tesla T4", "V100"]
+if any(cardstr in nvidiasmi_output for cardstr in cards_requiring_downgrade):
+    print("Downgrading pytorch. This can take a couple minutes ...")
+    downgrade_pytorch_result = subprocess.run(['pip', 'install', 'torch==1.10.2', 'torchvision==0.11.3', '-q'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print("pytorch downgraded.")
+
 #@markdown Check this if you want to use CPU
 useCPU = False #@param {type:"boolean"}
 
