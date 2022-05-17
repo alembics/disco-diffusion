@@ -345,15 +345,15 @@ Setting | Description | Default
 import subprocess
 simple_nvidia_smi_display = False#@param {type:"boolean"}
 if simple_nvidia_smi_display:
-  #!nvidia-smi
-  nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_output)
+    #!nvidia-smi
+    nvidiasmi_output = subprocess.run(['nvidia-smi', '-L'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(nvidiasmi_output)
 else:
-  #!nvidia-smi -i 0 -e 0
-  nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_output)
-  nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0', '-e', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(nvidiasmi_ecc_note)
+    #!nvidia-smi -i 0 -e 0
+    nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(nvidiasmi_output)
+    nvidiasmi_ecc_note = subprocess.run(['nvidia-smi', '-i', '0', '-e', '0'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(nvidiasmi_ecc_note)
 
 # %%
 # !! {"metadata":{
@@ -364,20 +364,20 @@ else:
 import subprocess, os, sys, ipykernel
 
 def gitclone(url):
-  res = subprocess.run(['git', 'clone', url], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
+    res = subprocess.run(['git', 'clone', url], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(res)
 
 def pipi(modulestr):
-  res = subprocess.run(['pip', 'install', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
+    res = subprocess.run(['pip', 'install', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(res)
 
 def pipie(modulestr):
-  res = subprocess.run(['git', 'install', '-e', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
+    res = subprocess.run(['git', 'install', '-e', modulestr], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(res)
 
 def wget(url, outputdir):
-  res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-  print(res)
+    res = subprocess.run(['wget', url, '-P', f'{outputdir}'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    print(res)
 
 try:
     from google.colab import drive
@@ -436,83 +436,84 @@ import pathlib, shutil, os, sys
 
 nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 cards_requiring_downgrade = ["Tesla T4", "V100"]
-if any(cardstr in nvidiasmi_output for cardstr in cards_requiring_downgrade):
-    print("Downgrading pytorch. This can take a couple minutes ...")
-    downgrade_pytorch_result = subprocess.run(['pip', 'install', 'torch==1.10.2', 'torchvision==0.11.3', '-q'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-    print("pytorch downgraded.")
+if is_colab:
+    if any(cardstr in nvidiasmi_output for cardstr in cards_requiring_downgrade):
+        print("Downgrading pytorch. This can take a couple minutes ...")
+        downgrade_pytorch_result = subprocess.run(['pip', 'install', 'torch==1.10.2', 'torchvision==0.11.3', '-q'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        print("pytorch downgraded.")
 
 #@markdown Check this if you want to use CPU
 useCPU = False #@param {type:"boolean"}
 
 if not is_colab:
-  # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
-  os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
+    # If running locally, there's a good chance your env will need this in order to not crash upon np.matmul() or similar operations.
+    os.environ['KMP_DUPLICATE_LIB_OK']='TRUE'
 
 PROJECT_DIR = os.path.abspath(os.getcwd())
 USE_ADABINS = True
 
 if is_colab:
-  if google_drive is not True:
-    root_path = f'/content'
-    model_path = '/content/models' 
+    if not google_drive:
+        root_path = f'/content'
+        model_path = '/content/models' 
 else:
-  root_path = os.getcwd()
-  model_path = f'{root_path}/models'
+    root_path = os.getcwd()
+    model_path = f'{root_path}/models'
 
 multipip_res = subprocess.run(['pip', 'install', 'lpips', 'datetime', 'timm', 'ftfy', 'einops', 'pytorch-lightning', 'omegaconf'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 print(multipip_res)
 
 if is_colab:
-  subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+    subprocess.run(['apt', 'install', 'imagemagick'], stdout=subprocess.PIPE).stdout.decode('utf-8')
 
 try:
-  from CLIP import clip
+    from CLIP import clip
 except:
-  if not os.path.exists("CLIP"):
-    gitclone("https://github.com/openai/CLIP")
-  sys.path.append(f'{PROJECT_DIR}/CLIP')
+    if not os.path.exists("CLIP"):
+        gitclone("https://github.com/openai/CLIP")
+    sys.path.append(f'{PROJECT_DIR}/CLIP')
 
 try:
-  from guided_diffusion.script_util import create_model_and_diffusion
+    from guided_diffusion.script_util import create_model_and_diffusion
 except:
-  if not os.path.exists("guided-diffusion"):
-    gitclone("https://github.com/crowsonkb/guided-diffusion")
-  sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
+    if not os.path.exists("guided-diffusion"):
+        gitclone("https://github.com/crowsonkb/guided-diffusion")
+    sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 
 try:
-  from resize_right import resize
+    from resize_right import resize
 except:
-  if not os.path.exists("ResizeRight"):
-    gitclone("https://github.com/assafshocher/ResizeRight.git")
-  sys.path.append(f'{PROJECT_DIR}/ResizeRight')
+    if not os.path.exists("ResizeRight"):
+        gitclone("https://github.com/assafshocher/ResizeRight.git")
+    sys.path.append(f'{PROJECT_DIR}/ResizeRight')
 
 try:
-  import py3d_tools
+    import py3d_tools
 except:
-  if not os.path.exists('pytorch3d-lite'):
-    gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
-  sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
+    if not os.path.exists('pytorch3d-lite'):
+        gitclone("https://github.com/MSFTserver/pytorch3d-lite.git")
+    sys.path.append(f'{PROJECT_DIR}/pytorch3d-lite')
 
 try:
-  from midas.dpt_depth import DPTDepthModel
+    from midas.dpt_depth import DPTDepthModel
 except:
-  if not os.path.exists('MiDaS'):
-    gitclone("https://github.com/isl-org/MiDaS.git")
-  if not os.path.exists('MiDaS/midas_utils.py'):
-    shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
-  if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
-    wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
-  sys.path.append(f'{PROJECT_DIR}/MiDaS')
+    if not os.path.exists('MiDaS'):
+        gitclone("https://github.com/isl-org/MiDaS.git")
+    if not os.path.exists('MiDaS/midas_utils.py'):
+        shutil.move('MiDaS/utils.py', 'MiDaS/midas_utils.py')
+    if not os.path.exists(f'{model_path}/dpt_large-midas-2f21e586.pt'):
+        wget("https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt", model_path)
+    sys.path.append(f'{PROJECT_DIR}/MiDaS')
 
 try:
-  sys.path.append(PROJECT_DIR)
-  import disco_xform_utils as dxf
+    sys.path.append(PROJECT_DIR)
+    import disco_xform_utils as dxf
 except:
-  if not os.path.exists("disco-diffusion"):
-    gitclone("https://github.com/alembics/disco-diffusion.git")
-  if os.path.exists('disco_xform_utils.py') is not True:
-    shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
-  sys.path.append(PROJECT_DIR)
+    if not os.path.exists("disco-diffusion"):
+        gitclone("https://github.com/alembics/disco-diffusion.git")
+    if not os.path.exists('disco_xform_utils.py'):
+        shutil.move('disco-diffusion/disco_xform_utils.py', 'disco_xform_utils.py')
+    sys.path.append(PROJECT_DIR)
 
 import torch
 from dataclasses import dataclass
@@ -546,10 +547,10 @@ from ipywidgets import Output
 import hashlib
 from functools import partial
 if is_colab:
-  os.chdir('/content')
-  from google.colab import files
+    os.chdir('/content')
+    from google.colab import files
 else:
-  os.chdir(f'{PROJECT_DIR}')
+    os.chdir(f'{PROJECT_DIR}')
 from IPython.display import Image as ipyimg
 from numpy import asarray
 from einops import rearrange, repeat
@@ -561,17 +562,17 @@ warnings.filterwarnings("ignore", category=UserWarning)
 
 # AdaBins stuff
 if USE_ADABINS:
-  try:
+    try:
+        from infer import InferenceHelper
+    except:
+        if not os.path.exists("AdaBins"):
+            gitclone("https://github.com/shariqfarooq123/AdaBins.git")
+        if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
+            createPath(f'{PROJECT_DIR}/pretrained')
+            wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
+        sys.path.append(f'{PROJECT_DIR}/AdaBins')
     from infer import InferenceHelper
-  except:
-    if os.path.exists("AdaBins") is not True:
-      gitclone("https://github.com/shariqfarooq123/AdaBins.git")
-    if not os.path.exists(f'{PROJECT_DIR}/pretrained/AdaBins_nyu.pt'):
-      createPath(f'{PROJECT_DIR}/pretrained')
-      wget("https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt", f'{PROJECT_DIR}/pretrained')
-    sys.path.append(f'{PROJECT_DIR}/AdaBins')
-  from infer import InferenceHelper
-  MAX_ADABINS_AREA = 500000
+    MAX_ADABINS_AREA = 500000
 
 import torch
 DEVICE = torch.device('cuda:0' if (torch.cuda.is_available() and not useCPU) else 'cpu')
@@ -579,9 +580,9 @@ print('Using device:', DEVICE)
 device = DEVICE # At least one of the modules expects this name..
 
 if not useCPU:
-  if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
-    print('Disabling CUDNN for A100 gpu', file=sys.stderr)
-    torch.backends.cudnn.enabled = False
+    if torch.cuda.get_device_capability(DEVICE) == (8,0): ## A100 fix thanks to Emad
+        print('Disabling CUDNN for A100 gpu', file=sys.stderr)
+        torch.backends.cudnn.enabled = False
 
 # %%
 # !! {"metadata":{
@@ -1702,110 +1703,110 @@ RN50x64 = False #@param{type:"boolean"}
 check_model_SHA = False #@param{type:"boolean"}
 
 def download_models(diffusion_model,use_secondary_model,fallback=False):
-  model_256_downloaded = False
-  model_512_downloaded = False
-  model_secondary_downloaded = False
+    model_256_downloaded = False
+    model_512_downloaded = False
+    model_secondary_downloaded = False
 
-  model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
-  model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
-  model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+    model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+    model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
+    model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
 
-  model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
-  model_512_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt'
-  model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
+    model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
+    model_512_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt'
+    model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
 
-  model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
-  model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
-  model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
+    model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
+    model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
+    model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
 
-  model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
-  model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
-  model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
+    model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
+    model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
+    model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
 
-  if fallback:
-    model_256_link = model_256_link_fb
-    model_512_link = model_512_link_fb
-    model_secondary_link = model_secondary_link_fb
-  # Download the diffusion model
-  if diffusion_model == '256x256_diffusion_uncond':
-    if os.path.exists(model_256_path) and check_model_SHA:
-      print('Checking 256 Diffusion File')
-      with open(model_256_path,"rb") as f:
-          bytes = f.read() 
-          hash = hashlib.sha256(bytes).hexdigest();
-      if hash == model_256_SHA:
-        print('256 Model SHA matches')
-        model_256_downloaded = True
-      else: 
-        print("256 Model SHA doesn't match, redownloading...")
-        wget(model_256_link, model_path)
-        if os.path.exists(model_256_path):
-          model_256_downloaded = True
-        else:
-          print('First URL Failed using FallBack')
-          download_models(diffusion_model,use_secondary_model,True)
-    elif os.path.exists(model_256_path) and not check_model_SHA or model_256_downloaded == True:
-      print('256 Model already downloaded, check check_model_SHA if the file is corrupt')
-    else:  
-      wget(model_256_link, model_path)
-      if os.path.exists(model_256_path):
-        model_256_downloaded = True
-      else:
-        print('First URL Failed using FallBack')
-        download_models(diffusion_model,True)
-  elif diffusion_model == '512x512_diffusion_uncond_finetune_008100':
-    if os.path.exists(model_512_path) and check_model_SHA:
-      print('Checking 512 Diffusion File')
-      with open(model_512_path,"rb") as f:
-          bytes = f.read() 
-          hash = hashlib.sha256(bytes).hexdigest();
-      if hash == model_512_SHA:
-        print('512 Model SHA matches')
-        if os.path.exists(model_512_path):
-          model_512_downloaded = True
-        else:
-          print('First URL Failed using FallBack')
-          download_models(diffusion_model,use_secondary_model,True)
-      else:  
-        print("512 Model SHA doesn't match, redownloading...")
-        wget(model_512_link, model_path)
-        if os.path.exists(model_512_path):
-          model_512_downloaded = True
-        else:
-          print('First URL Failed using FallBack')
-          download_models(diffusion_model,use_secondary_model,True)
-    elif os.path.exists(model_512_path) and not check_model_SHA or model_512_downloaded == True:
-      print('512 Model already downloaded, check check_model_SHA if the file is corrupt')
-    else:  
-      wget(model_512_link, model_path)
-      model_512_downloaded = True
-  # Download the secondary diffusion model v2
-  if use_secondary_model == True:
-    if os.path.exists(model_secondary_path) and check_model_SHA:
-      print('Checking Secondary Diffusion File')
-      with open(model_secondary_path,"rb") as f:
-          bytes = f.read() 
-          hash = hashlib.sha256(bytes).hexdigest();
-      if hash == model_secondary_SHA:
-        print('Secondary Model SHA matches')
-        model_secondary_downloaded = True
-      else:  
-        print("Secondary Model SHA doesn't match, redownloading...")
-        wget(model_secondary_link, model_path)
-        if os.path.exists(model_secondary_path):
-          model_secondary_downloaded = True
-        else:
-          print('First URL Failed using FallBack')
-          download_models(diffusion_model,use_secondary_model,True)
-    elif os.path.exists(model_secondary_path) and not check_model_SHA or model_secondary_downloaded == True:
-      print('Secondary Model already downloaded, check check_model_SHA if the file is corrupt')
-    else:  
-      wget(model_secondary_link, model_path)
-      if os.path.exists(model_secondary_path):
-          model_secondary_downloaded = True
-      else:
-        print('First URL Failed using FallBack')
-        download_models(diffusion_model,use_secondary_model,True)
+    if fallback:
+        model_256_link = model_256_link_fb
+        model_512_link = model_512_link_fb
+        model_secondary_link = model_secondary_link_fb
+    # Download the diffusion model
+    if diffusion_model == '256x256_diffusion_uncond':
+        if os.path.exists(model_256_path) and check_model_SHA:
+            print('Checking 256 Diffusion File')
+            with open(model_256_path,"rb") as f:
+                bytes = f.read() 
+                hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_256_SHA:
+                print('256 Model SHA matches')
+                model_256_downloaded = True
+            else:
+                print("256 Model SHA doesn't match, redownloading...")
+                wget(model_256_link, model_path)
+                if os.path.exists(model_256_path):
+                    model_256_downloaded = True
+                else:
+                    print('First URL Failed using FallBack')
+                    download_models(diffusion_model,use_secondary_model,True)
+        elif os.path.exists(model_256_path) and not check_model_SHA or model_256_downloaded == True:
+            print('256 Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_256_link, model_path)
+            if os.path.exists(model_256_path):
+                model_256_downloaded = True
+            else:
+                print('First URL Failed using FallBack')
+                download_models(diffusion_model,True)
+    elif diffusion_model == '512x512_diffusion_uncond_finetune_008100':
+        if os.path.exists(model_512_path) and check_model_SHA:
+            print('Checking 512 Diffusion File')
+            with open(model_512_path,"rb") as f:
+                  bytes = f.read() 
+                  hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_512_SHA:
+                print('512 Model SHA matches')
+                if os.path.exists(model_512_path):
+                    model_512_downloaded = True
+                else:
+                    print('First URL Failed using FallBack')
+                    download_models(diffusion_model,use_secondary_model,True)
+            else:  
+                print("512 Model SHA doesn't match, redownloading...")
+                wget(model_512_link, model_path)
+                if os.path.exists(model_512_path):
+                    model_512_downloaded = True
+                else:
+                    print('First URL Failed using FallBack')
+                    download_models(diffusion_model,use_secondary_model,True)
+        elif os.path.exists(model_512_path) and not check_model_SHA or model_512_downloaded:
+            print('512 Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_512_link, model_path)
+            model_512_downloaded = True
+    # Download the secondary diffusion model v2
+    if use_secondary_model:
+        if os.path.exists(model_secondary_path) and check_model_SHA:
+            print('Checking Secondary Diffusion File')
+            with open(model_secondary_path,"rb") as f:
+                bytes = f.read() 
+                hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_secondary_SHA:
+                print('Secondary Model SHA matches')
+                model_secondary_downloaded = True
+            else:  
+                print("Secondary Model SHA doesn't match, redownloading...")
+                wget(model_secondary_link, model_path)
+                if os.path.exists(model_secondary_path):
+                    model_secondary_downloaded = True
+                else:
+                    print('First URL Failed using FallBack')
+                    download_models(diffusion_model,use_secondary_model,True)
+        elif os.path.exists(model_secondary_path) and not check_model_SHA or model_secondary_downloaded:
+            print('Secondary Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_secondary_link, model_path)
+            if os.path.exists(model_secondary_path):
+                model_secondary_downloaded = True
+            else:
+                print('First URL Failed using FallBack')
+                download_models(diffusion_model,use_secondary_model,True)
 
 download_models(diffusion_model,use_secondary_model)
 
@@ -1904,7 +1905,7 @@ skip_steps = 10 #@param{type: 'integer'}
 side_x = (width_height[0]//64)*64;
 side_y = (width_height[1]//64)*64;
 if side_x != width_height[0] or side_y != width_height[1]:
-  print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
+    print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
 
 #Update Model Settings
 timestep_respacing = f'ddim{steps}'
@@ -1953,10 +1954,10 @@ if animation_mode == "Video Input":
   createPath(videoFramesFolder)
   print(f"Exporting Video Frames (1 every {extract_nth_frame})...")
   try:
-    for f in pathlib.Path(f'{videoFramesFolder}').glob('*.jpg'):
-      f.unlink()
+      for f in pathlib.Path(f'{videoFramesFolder}').glob('*.jpg'):
+          f.unlink()
   except:
-    print('')
+      print('')
   vf = f'select=not(mod(n\,{extract_nth_frame}))'
   subprocess.run(['ffmpeg', '-i', f'{video_init_path}', '-vf', f'{vf}', '-vsync', 'vfr', '-q:v', '2', '-loglevel', 'error', '-stats', f'{videoFramesFolder}/%04d.jpg'], stdout=subprocess.PIPE).stdout.decode('utf-8')
   #!ffmpeg -i {video_init_path} -vf {vf} -vsync vfr -q:v 2 -loglevel error -stats {videoFramesFolder}/%04d.jpg
@@ -1972,7 +1973,7 @@ key_frames = True #@param {type:"boolean"}
 max_frames = 10000#@param {type:"number"}
 
 if animation_mode == "Video Input":
-  max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
+    max_frames = len(glob(f'{videoFramesFolder}/*.jpg'))
 
 interp_spline = 'Linear' #Do not change, currently will not look good. param ['Linear','Quadratic','Cubic']{type:"string"}
 angle = "0:(0)"#@param {type:"string"}
@@ -2004,10 +2005,10 @@ turbo_preroll = 10 # frames
 
 #insist turbo be used only w 3d anim.
 if turbo_mode and animation_mode != '3D':
-  print('=====')
-  print('Turbo mode only available with 3D animations. Disabling Turbo.')
-  print('=====')
-  turbo_mode = False
+    print('=====')
+    print('Turbo mode only available with 3D animations. Disabling Turbo.')
+    print('=====')
+    turbo_mode = False
 
 #@markdown ---
 
@@ -2037,10 +2038,10 @@ vr_ipd = 5.0 #@param{type:"number"}
 
 #insist VR be used only w 3d anim.
 if vr_mode and animation_mode != '3D':
-  print('=====')
-  print('VR mode only available with 3D animations. Disabling VR.')
-  print('=====')
-  vr_mode = False
+    print('=====')
+    print('VR mode only available with 3D animations. Disabling VR.')
+    print('=====')
+    vr_mode = False
 
 
 def parse_key_frames(string, prompt_parser=None):
@@ -2153,12 +2154,12 @@ def get_inbetweens(key_frames, integer=False):
     return key_frame_series
 
 def split_prompts(prompts):
-  prompt_series = pd.Series([np.nan for a in range(max_frames)])
-  for i, prompt in prompts.items():
-    prompt_series[i] = prompt
-  # prompt_series = prompt_series.astype(str)
-  prompt_series = prompt_series.ffill().bfill()
-  return prompt_series
+    prompt_series = pd.Series([np.nan for a in range(max_frames)])
+    for i, prompt in prompts.items():
+        prompt_series[i] = prompt
+    # prompt_series = prompt_series.astype(str)
+    prompt_series = prompt_series.ffill().bfill()
+    return prompt_series
 
 if key_frames:
     try:
@@ -2308,20 +2309,20 @@ intermediates_in_subfolder = True #@param{type: 'boolean'}
 
 
 if type(intermediate_saves) is not list:
-  if intermediate_saves:
-    steps_per_checkpoint = math.floor((steps - skip_steps - 1) // (intermediate_saves+1))
-    steps_per_checkpoint = steps_per_checkpoint if steps_per_checkpoint > 0 else 1
-    print(f'Will save every {steps_per_checkpoint} steps')
-  else:
-    steps_per_checkpoint = steps+10
+    if intermediate_saves:
+        steps_per_checkpoint = math.floor((steps - skip_steps - 1) // (intermediate_saves+1))
+        steps_per_checkpoint = steps_per_checkpoint if steps_per_checkpoint > 0 else 1
+        print(f'Will save every {steps_per_checkpoint} steps')
+    else:
+        steps_per_checkpoint = steps+10
 else:
-  steps_per_checkpoint = None
+    steps_per_checkpoint = None
 
 if intermediate_saves and intermediates_in_subfolder is True:
-  partialFolder = f'{batchFolder}/partials'
-  createPath(partialFolder)
+    partialFolder = f'{batchFolder}/partials'
+    createPath(partialFolder)
 
-  #@markdown ---
+#@markdown ---
 
 #@markdown ####**Advanced Settings:**
 #@markdown *There are a few extra advanced settings available if you double click this cell.*
@@ -2343,7 +2344,7 @@ fuzzy_prompt = False
 rand_mag = 0.05
 
 
- #@markdown ---
+#@markdown ---
 
 #@markdown ####**Cutn Scheduling:**
 #@markdown Format: `[40]*400+[20]*600` = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
@@ -2417,9 +2418,9 @@ resume_run = False #@param{type: 'boolean'}
 run_to_resume = 'latest' #@param{type: 'string'}
 resume_from_frame = 'latest' #@param{type: 'string'}
 retain_overwritten_frames = False #@param{type: 'boolean'}
-if retain_overwritten_frames is True:
-  retainFolder = f'{batchFolder}/retained'
-  createPath(retainFolder)
+if retain_overwritten_frames:
+    retainFolder = f'{batchFolder}/retained'
+    createPath(retainFolder)
 
 
 skip_step_ratio = int(frames_skip_steps.rstrip("%")) / 100
@@ -2430,31 +2431,31 @@ if steps <= calc_frames_skip_steps:
   sys.exit("ERROR: You can't skip more steps than your total steps")
 
 if resume_run:
-  if run_to_resume == 'latest':
-    try:
-      batchNum
-    except:
-      batchNum = len(glob(f"{batchFolder}/{batch_name}(*)_settings.txt"))-1
-  else:
-    batchNum = int(run_to_resume)
-  if resume_from_frame == 'latest':
-    start_frame = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
-    if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
-      start_frame = start_frame - (start_frame % int(turbo_steps))
-  else:
-    start_frame = int(resume_from_frame)+1
-    if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
-      start_frame = start_frame - (start_frame % int(turbo_steps))
-    if retain_overwritten_frames is True:
-      existing_frames = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
-      frames_to_save = existing_frames - start_frame
-      print(f'Moving {frames_to_save} frames to the Retained folder')
-      move_files(start_frame, existing_frames, batchFolder, retainFolder)
+    if run_to_resume == 'latest':
+        try:
+            batchNum
+        except:
+            batchNum = len(glob(f"{batchFolder}/{batch_name}(*)_settings.txt"))-1
+    else:
+        batchNum = int(run_to_resume)
+    if resume_from_frame == 'latest':
+        start_frame = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
+        if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
+            start_frame = start_frame - (start_frame % int(turbo_steps))
+    else:
+        start_frame = int(resume_from_frame)+1
+        if animation_mode != '3D' and turbo_mode == True and start_frame > turbo_preroll and start_frame % int(turbo_steps) != 0:
+            start_frame = start_frame - (start_frame % int(turbo_steps))
+        if retain_overwritten_frames is True:
+            existing_frames = len(glob(batchFolder+f"/{batch_name}({batchNum})_*.png"))
+            frames_to_save = existing_frames - start_frame
+            print(f'Moving {frames_to_save} frames to the Retained folder')
+            move_files(start_frame, existing_frames, batchFolder, retainFolder)
 else:
-  start_frame = 0
-  batchNum = len(glob(batchFolder+"/*.txt"))
-  while os.path.isfile(f"{batchFolder}/{batch_name}({batchNum})_settings.txt") is True or os.path.isfile(f"{batchFolder}/{batch_name}-{batchNum}_settings.txt") is True:
-    batchNum += 1
+    start_frame = 0
+    batchNum = len(glob(batchFolder+"/*.txt"))
+    while os.path.isfile(f"{batchFolder}/{batch_name}({batchNum})_settings.txt") or os.path.isfile(f"{batchFolder}/{batch_name}-{batchNum}_settings.txt"):
+        batchNum += 1
 
 print(f'Starting Run: {batch_name}({batchNum}) at frame {start_frame}')
 
@@ -2561,7 +2562,7 @@ if model_config['use_fp16']:
 gc.collect()
 torch.cuda.empty_cache()
 try:
-  do_run()
+    do_run()
 except KeyboardInterrupt:
     pass
 finally:
@@ -2587,74 +2588,74 @@ finally:
 skip_video_for_run_all = True #@param {type: 'boolean'}
 
 if skip_video_for_run_all == True:
-  print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
+   print('Skipping video creation, uncheck skip_video_for_run_all if you want to run it')
 
 else:
-  # import subprocess in case this cell is run without the above cells
-  import subprocess
-  from base64 import b64encode
+    # import subprocess in case this cell is run without the above cells
+    import subprocess
+    from base64 import b64encode
 
-  latest_run = batchNum
+    latest_run = batchNum
 
-  folder = batch_name #@param
-  run = latest_run #@param
-  final_frame = 'final_frame'
-
-
-  init_frame = 1#@param {type:"number"} This is the frame where the video will start
-  last_frame = final_frame#@param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
-  fps = 12#@param {type:"number"}
-  # view_video_in_cell = True #@param {type: 'boolean'}
-
-  frames = []
-  # tqdm.write('Generating video...')
-
-  if last_frame == 'final_frame':
-    last_frame = len(glob(batchFolder+f"/{folder}({run})_*.png"))
-    print(f'Total frames: {last_frame}')
-
-  image_path = f"{outDirPath}/{folder}/{folder}({run})_%04d.png"
-  filepath = f"{outDirPath}/{folder}/{folder}({run}).mp4"
+    folder = batch_name #@param
+    run = latest_run #@param
+    final_frame = 'final_frame'
 
 
-  cmd = [
-      'ffmpeg',
-      '-y',
-      '-vcodec',
-      'png',
-      '-r',
-      str(fps),
-      '-start_number',
-      str(init_frame),
-      '-i',
-      image_path,
-      '-frames:v',
-      str(last_frame+1),
-      '-c:v',
-      'libx264',
-      '-vf',
-      f'fps={fps}',
-      '-pix_fmt',
-      'yuv420p',
-      '-crf',
-      '17',
-      '-preset',
-      'veryslow',
-      filepath
-  ]
+    init_frame = 1#@param {type:"number"} This is the frame where the video will start
+    last_frame = final_frame#@param {type:"number"} You can change i to the number of the last frame you want to generate. It will raise an error if that number of frames does not exist.
+    fps = 12#@param {type:"number"}
+    # view_video_in_cell = True #@param {type: 'boolean'}
 
-  process = subprocess.Popen(cmd, cwd=f'{batchFolder}', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-  stdout, stderr = process.communicate()
-  if process.returncode != 0:
-      print(stderr)
-      raise RuntimeError(stderr)
-  else:
-      print("The video is ready and saved to the images folder")
+    frames = []
+    # tqdm.write('Generating video...')
 
-  # if view_video_in_cell:
-  #     mp4 = open(filepath,'rb').read()
-  #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
-  #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
+    if last_frame == 'final_frame':
+        last_frame = len(glob(batchFolder+f"/{folder}({run})_*.png"))
+        print(f'Total frames: {last_frame}')
+
+    image_path = f"{outDirPath}/{folder}/{folder}({run})_%04d.png"
+    filepath = f"{outDirPath}/{folder}/{folder}({run}).mp4"
+
+
+    cmd = [
+        'ffmpeg',
+        '-y',
+        '-vcodec',
+        'png',
+        '-r',
+        str(fps),
+        '-start_number',
+        str(init_frame),
+        '-i',
+        image_path,
+        '-frames:v',
+        str(last_frame+1),
+        '-c:v',
+        'libx264',
+        '-vf',
+        f'fps={fps}',
+        '-pix_fmt',
+        'yuv420p',
+        '-crf',
+        '17',
+        '-preset',
+        'veryslow',
+        filepath
+    ]
+
+    process = subprocess.Popen(cmd, cwd=f'{batchFolder}', stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = process.communicate()
+    if process.returncode != 0:
+        print(stderr)
+        raise RuntimeError(stderr)
+    else:
+        print("The video is ready and saved to the images folder")
+
+    # if view_video_in_cell:
+    #     mp4 = open(filepath,'rb').read()
+    #     data_url = "data:video/mp4;base64," + b64encode(mp4).decode()
+    #     display.HTML(f'<video width=400 controls><source src="{data_url}" type="video/mp4"></video>')
 
 # %%
 # !! {"main_metadata":{
