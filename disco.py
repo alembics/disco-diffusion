@@ -434,13 +434,15 @@ else:
 
 import pathlib, shutil, os, sys
 
-nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-cards_requiring_downgrade = ["Tesla T4", "V100"]
-if is_colab:
-    if any(cardstr in nvidiasmi_output for cardstr in cards_requiring_downgrade):
-        print("Downgrading pytorch. This can take a couple minutes ...")
-        downgrade_pytorch_result = subprocess.run(['pip', 'install', 'torch==1.10.2', 'torchvision==0.11.3', '-q'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-        print("pytorch downgraded.")
+# There are some reports that with a T4 or V100 on Colab, downgrading to a previous version of PyTorch may be necessary.
+# .. but there are also reports that downgrading breaks them!  If you're facing issues, you may want to try uncommenting and running this code.
+# nvidiasmi_output = subprocess.run(['nvidia-smi'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+# cards_requiring_downgrade = ["Tesla T4", "V100"]
+# if is_colab:
+#     if any(cardstr in nvidiasmi_output for cardstr in cards_requiring_downgrade):
+#         print("Downgrading pytorch. This can take a couple minutes ...")
+#         downgrade_pytorch_result = subprocess.run(['pip', 'install', 'torch==1.10.2', 'torchvision==0.11.3', '-q'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+#         print("pytorch downgraded.")
 
 #@markdown Check this if you want to use CPU
 useCPU = False #@param {type:"boolean"}
