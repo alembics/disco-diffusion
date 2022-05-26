@@ -190,7 +190,7 @@ if skip_for_run_all == False:
 
       Perlin now changes properly within batches (not sure where this perlin_regen code came from originally, but thank you)
 
-  v4 Update: Jan 2021 - Somnai
+  v4 Update: Jan 2022 - Somnai
 
       Implemented Diffusion Zooming
 
@@ -198,7 +198,7 @@ if skip_for_run_all == False:
 
       Made a bunch of edits to processes
   
-  v4.1 Update: Jan  14th 2021 - Somnai
+  v4.1 Update: Jan  14th 2022 - Somnai
 
       Added video input mode
 
