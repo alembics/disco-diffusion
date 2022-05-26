@@ -198,7 +198,7 @@ if skip_for_run_all == False:
 
       Made a bunch of edits to processes
   
-  v4.1 Update: Jan  14th 2022 - Somnai
+  v4.1 Update: Jan 14th 2022 - Somnai
 
       Added video input mode
 
