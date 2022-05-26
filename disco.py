@@ -1275,9 +1275,9 @@ def do_run():
                 range_losses = range_loss(out['pred_xstart'])
               sat_losses = torch.abs(x_in - x_in.clamp(min=-1,max=1)).mean()
               loss = tv_losses.sum() * tv_scale + range_losses.sum() * range_scale + sat_losses.sum() * sat_scale
-              if init is not None and args.init_scale:
+              if init is not None and init_scale:
                   init_losses = lpips_model(x_in, init)
-                  loss = loss + init_losses.sum() * args.init_scale
+                  loss = loss + init_losses.sum() * init_scale
               x_in_grad += torch.autograd.grad(loss, x_in)[0]
               if torch.isnan(x_in_grad).any()==False:
                   grad = -torch.autograd.grad(x_in, x, x_in_grad)[0]
