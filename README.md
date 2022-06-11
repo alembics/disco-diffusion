@@ -77,7 +77,7 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 
 * VR Mode
 
-#### v5.3 Update: Jun 10th 2022 - nsheppard, huemin, cut_pow
+#### v5.3 Update: Jun 10th 2022 - nshepperd, huemin, cut_pow
 
 * Horizontal and Vertical symmetry
 * Addition of ViT-L/14@336px model (requires high VRAM)
@@ -88,7 +88,7 @@ Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://tw
 
 Modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
 
-Further improvements from Dango233 and nsheppard helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
+Further improvements from Dango233 and nshepperd helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
 
 Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may greatly improve accuracy.
 
