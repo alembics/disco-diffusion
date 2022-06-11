@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.2 - Now with VR Mode
+# Disco Diffusion v5.3 - Now with Symmetry
 
 In case of confusion, Disco is the name of this notebook edit. The diffusion model in use is Katherine Crowson's fine-tuned 512x512 model
 
@@ -59,6 +59,8 @@ Turbo feature by Chris Allen (https://twitter.com/zippy731)
 Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
 
 VR Mode by Tom Mason (https://twitter.com/nin_artificial)
+
+Horizontal and Vertical symmetry functionality by nsheppard. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
 """
 
 # %%
@@ -260,7 +262,12 @@ if skip_for_run_all == False:
 
       VR Mode
 
-      '''
+  v5.3 Update: Jun 10th 2022 - nsheppard, huemin, cut_pow
+
+      Horizontal and Vertical symmetry
+
+      Addition of ViT-L/14@336px model (requires high VRAM)
+    '''
   )
 
 # %%
@@ -313,6 +320,9 @@ Setting | Description | Default
 `fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
 `rand_mag` | Controls the magnitude of the random noise | 0.1
 `eta` | DDIM hyperparameter | 0.5
+`use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`use_horizontal_symmetry` | Enforce symmetry over y axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`transformation_steps` | Steps (expressed in percentages) in which the symmetry is enforced | [0.01]
 
 ..
 
@@ -479,7 +489,7 @@ try:
     from guided_diffusion.script_util import create_model_and_diffusion
 except:
     if not os.path.exists("guided-diffusion"):
-        gitclone("https://github.com/crowsonkb/guided-diffusion")
+        gitclone("https://github.com/kostarion/guided-diffusion")
     sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 
 try:
@@ -1018,6 +1028,17 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
                                           sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
   return next_step_pil
 
+def symmetry_transformation_fn(x):
+  if args.use_horizontal_symmetry:
+    [n, c, h, w] = x.size()
+    x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
+    print("horizontal symmetry applied")
+  if args.use_vertical_symmetry:
+    [n, c, h, w] = x.size()
+    x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
+    print("vertical symmetry applied")
+  return x
+
 def do_run():
   seed = args.seed
   print(range(args.start_frame, args.max_frames))
@@ -1325,6 +1346,8 @@ def do_run():
                   init_image=init,
                   randomize_class=randomize_class,
                   eta=eta,
+                  transformation_fn=symmetry_transformation_fn,
+                  transformation_percent=args.transformation_percent
               )
           else:
               samples = sample_fn(
@@ -1467,6 +1490,7 @@ def save_settings():
     'ViTB32': ViTB32,
     'ViTB16': ViTB16,
     'ViTL14': ViTL14,
+    'ViTL14_336px': ViTL14_336px,
     'RN101': RN101,
     'RN50': RN50,
     'RN50x4': RN50x4,
@@ -1499,6 +1523,9 @@ def save_settings():
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
+    'use_horizontal_symmetry':use_horizontal_symmetry,
+    'use_vertical_symmetry':use_vertical_symmetry,
+    'transformation_percent':transformation_percent,
   }
   # print('Settings:', setting_list)
   with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
@@ -1695,6 +1722,7 @@ use_checkpoint = True #@param {type: 'boolean'}
 ViTB32 = True #@param{type:"boolean"}
 ViTB16 = True #@param{type:"boolean"}
 ViTL14 = False #@param{type:"boolean"}
+ViTL14_336px = False #@param{type:"boolean"}
 RN101 = False #@param{type:"boolean"}
 RN50 = True #@param{type:"boolean"}
 RN50x4 = False #@param{type:"boolean"}
@@ -1860,14 +1888,15 @@ if use_secondary_model:
     secondary_model.eval().requires_grad_(False).to(device)
 
 clip_models = []
-if ViTB32 is True: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if ViTB16 is True: clip_models.append(clip.load('ViT-B/16', jit=False)[0].eval().requires_grad_(False).to(device) ) 
-if ViTL14 is True: clip_models.append(clip.load('ViT-L/14', jit=False)[0].eval().requires_grad_(False).to(device) ) 
-if RN50 is True: clip_models.append(clip.load('RN50', jit=False)[0].eval().requires_grad_(False).to(device))
-if RN50x4 is True: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN50x16 is True: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN50x64 is True: clip_models.append(clip.load('RN50x64', jit=False)[0].eval().requires_grad_(False).to(device)) 
-if RN101 is True: clip_models.append(clip.load('RN101', jit=False)[0].eval().requires_grad_(False).to(device)) 
+if ViTB32: clip_models.append(clip.load('ViT-B/32', jit=False)[0].eval().requires_grad_(False).to(device))
+if ViTB16: clip_models.append(clip.load('ViT-B/16', jit=False)[0].eval().requires_grad_(False).to(device))
+if ViTL14: clip_models.append(clip.load('ViT-L/14', jit=False)[0].eval().requires_grad_(False).to(device))
+if ViTL14_336px: clip_models.append(clip.load('ViT-L/14@336px', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN50: clip_models.append(clip.load('RN50', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN50x4: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN50x16: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN50x64: clip_models.append(clip.load('RN50x64', jit=False)[0].eval().requires_grad_(False).to(device))
+if RN101: clip_models.append(clip.load('RN101', jit=False)[0].eval().requires_grad_(False).to(device))
 
 normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 lpips_model = lpips.LPIPS(net='vgg').to(device)
@@ -1887,12 +1916,12 @@ lpips_model = lpips.LPIPS(net='vgg').to(device)
 #@markdown ####**Basic Settings:**
 batch_name = 'TimeToDisco' #@param{type: 'string'}
 steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
-width_height = [1280, 768]#@param{type: 'raw'}
+width_height = [1280, 768] #@param{type: 'raw'}
 clip_guidance_scale = 5000 #@param{type: 'number'}
-tv_scale =  0#@param{type: 'number'}
-range_scale =   150#@param{type: 'number'}
-sat_scale =   0#@param{type: 'number'}
-cutn_batches = 4  #@param{type: 'number'}
+tv_scale = 0 #@param{type: 'number'}
+range_scale = 150 #@param{type: 'number'}
+sat_scale = 0 #@param{type: 'number'}
+cutn_batches = 4 #@param{type: 'number'}
 skip_augs = False#@param{type: 'boolean'}
 
 #@markdown ---
@@ -2358,6 +2387,14 @@ cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}
 cut_ic_pow = 1#@param {type: 'number'}  
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
+#@markdown ---
+
+#@markdown ####**Transformation Settings:**
+use_vertical_symmetry = False #@param {type:"boolean"}
+use_horizontal_symmetry = False #@param {type:"boolean"}
+transformation_percent = [0.09] #@param
+
+
 # %%
 # !! {"metadata":{
 # !!   "id": "PromptsTop"
@@ -2394,8 +2431,8 @@ image_prompts = {
 # !! }}
 #@title Do the Run!
 #@markdown `n_batches` ignored with animation modes.
-display_rate =  50 #@param{type: 'number'}
-n_batches =  50 #@param{type: 'number'}
+display_rate = 50 #@param{type: 'number'}
+n_batches = 50 #@param{type: 'number'}
 
 #Update Model Settings
 timestep_respacing = f'ddim{steps}'
@@ -2547,6 +2584,9 @@ args = {
     'clip_denoised': clip_denoised,
     'fuzzy_prompt': fuzzy_prompt,
     'rand_mag': rand_mag,
+    'use_vertical_symmetry': use_vertical_symmetry,
+    'use_horizontal_symmetry': use_horizontal_symmetry,
+    'transformation_percent': transformation_percent,
 }
 
 args = SimpleNamespace(**args)
@@ -2677,7 +2717,7 @@ else:
 # !!       "ExtraSetTop"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.2 [w/ VR Mode]",
+# !!     "name": "Disco Diffusion v5.3 [w/ Symmetry]",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
