@@ -28,7 +28,7 @@ def transform_image_3d(img_filepath, midas_model, midas_transform, device, rot_m
         predictions using nyu dataset
         """
         print("Running AdaBins depth estimation implementation...")
-        infer_helper = InferenceHelper(dataset='nyu')
+        infer_helper = InferenceHelper(dataset='nyu', device=device)
 
         image_pil_area = w*h
         if image_pil_area > MAX_ADABINS_AREA:
