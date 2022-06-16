@@ -2962,16 +2962,17 @@ args = {
     'video_init_blend_mode':video_init_blend_mode
 }
 
-# This isn't great in terms of what will get saved to the settings.. but it should work.
-args['steps'] = args['video_init_steps']
-args['clip_guidance_scale'] = args['video_init_clip_guidance_scale']
-args['tv_scale'] = args['video_init_tv_scale']
-args['range_scale'] = args['video_init_range_scale']
-args['sat_scale'] = args['video_init_sat_scale']
-args['cutn_batches'] = args['video_init_cutn_batches']
-args['skip_steps'] = args['video_init_skip_steps']
-args['frames_scale'] = args['video_init_frames_scale']
-args['frames_skip_steps'] = args['video_init_frames_skip_steps']
+if animation_mode == 'Video Input':
+    # This isn't great in terms of what will get saved to the settings.. but it should work.
+    args['steps'] = args['video_init_steps']
+    args['clip_guidance_scale'] = args['video_init_clip_guidance_scale']
+    args['tv_scale'] = args['video_init_tv_scale']
+    args['range_scale'] = args['video_init_range_scale']
+    args['sat_scale'] = args['video_init_sat_scale']
+    args['cutn_batches'] = args['video_init_cutn_batches']
+    args['skip_steps'] = args['video_init_skip_steps']
+    args['frames_scale'] = args['video_init_frames_scale']
+    args['frames_skip_steps'] = args['video_init_frames_skip_steps']
 
 args = SimpleNamespace(**args)
 
