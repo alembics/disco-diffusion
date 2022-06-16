@@ -2727,14 +2727,6 @@ side_y = (width_height[1]//64)*64;
 if side_x != width_height[0] or side_y != width_height[1]:
     print(f'Changing output size to {side_x}x{side_y}. Dimensions must by multiples of 64.')
 
-#Update Model Settings
-timestep_respacing = f'ddim{steps}'
-diffusion_steps = (1000//steps)*steps if steps < 1000 else steps
-model_config.update({
-    'timestep_respacing': timestep_respacing,
-    'diffusion_steps': diffusion_steps,
-})
-
 #Make folder for batch
 batchFolder = f'{outDirPath}/{batch_name}'
 createPath(batchFolder)
@@ -3163,7 +3155,7 @@ if animation_mode == 'Video Input':
     print(os.getcwd())
   
     print("Renaming RAFT core's utils.utils to raftutils.utils (to avoid a naming conflict with AdaBins)")
-    if not os.path.exists("f'{PROJECT_DIR}/RAFT/core/raftutils'"):
+    if not os.path.exists(f'{PROJECT_DIR}/RAFT/core/raftutils'):
         os.rename(f'{PROJECT_DIR}/RAFT/core/utils', f'{PROJECT_DIR}/RAFT/core/raftutils')
         sub_p_res = subprocess.run(['sed', '-i', 's/from utils.utils/from raftutils.utils/g', f'{PROJECT_DIR}/RAFT/core/corr.py'], stdout=subprocess.PIPE).stdout.decode('utf-8')
         sub_p_res = subprocess.run(['sed', '-i', 's/from utils.utils/from raftutils.utils/g', f'{PROJECT_DIR}/RAFT/core/raft.py'], stdout=subprocess.PIPE).stdout.decode('utf-8')
@@ -3488,6 +3480,9 @@ image_prompts = {
 #@markdown `n_batches` ignored with animation modes.
 display_rate = 20 #@param{type: 'number'}
 n_batches = 50 #@param{type: 'number'}
+
+if animation_mode == 'Video Input':
+    steps = video_init_steps
 
 #Update Model Settings
 timestep_respacing = f'ddim{steps}'
