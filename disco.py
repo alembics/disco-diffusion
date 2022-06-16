@@ -3067,10 +3067,9 @@ else:
         if last_frame == 'final_frame':
             last_frame = len(glob(batchFolder+f"/flow/{folder}({run})_*.png"))
         flo_out = batchFolder+f"/flow"
-        sub_p_res = subprocess.run(['mkdir', '"{flo_out}"'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-        print(sub_p_res)
+        createPath(flo_out)
         frames_in = sorted(glob(batchFolder+f"/{folder}({run})_*.png"))
-        sub_p_res = subprocess.run(['cp', '"{frames_in[0]}"', '"{flo_out}"'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        shutil.copy(frames_in[0], flo_out)
         print(sub_p_res)
         for i in trange(init_frame, min(len(frames_in), last_frame)):
             frame1_path = frames_in[i-1]
@@ -3091,11 +3090,9 @@ else:
         if last_frame == 'final_frame':
             last_frame = len(glob(batchFolder+f"/blend/{folder}({run})_*.png"))
         blend_out = batchFolder+f"/blend"
-        sub_p_res = subprocess.run(['mkdir', '"{blend_out}"'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-        print(sub_p_res)
+        createPath(blend_out)
         frames_in = glob(batchFolder+f"/{folder}({run})_*.png")
-        sub_p_res = subprocess.run(['cp', '"{frames_in[0]}"', '"{blend_out}"'], stdout=subprocess.PIPE).stdout.decode('utf-8')
-        print(sub_p_res)
+        shutil.copy(frames_in[0], blend_out)
         for i in trange(1, len(frames_in)):
             frame1_path = frames_in[i-1]
             frame2_path = frames_in[i]
