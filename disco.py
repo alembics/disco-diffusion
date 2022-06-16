@@ -2068,7 +2068,7 @@ createPath(batchFolder)
 # !!   "id": "AnimSettings"
 # !! }}
 #@markdown ####**Animation Mode:**
-animation_mode = 'Video Input' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
+animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'string'}
 #@markdown *For animation, you probably want to turn `cutn_batches` to 1 to make it quicker.*
 
 
