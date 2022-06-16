@@ -82,6 +82,11 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * Horizontal and Vertical symmetry
 * Addition of ViT-L/14@336px model (requires high VRAM)
 
+#### v5.4 Update: Jun 14th 2022 - devdef / Alex Spirin, integrated into DD main by gandamu / Adam Letts
+
+* Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
+* Custom models support
+
 ## Notebook Provenance 
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
@@ -101,3 +106,13 @@ Advanced DangoCutn Cutout method is also from Dango223.
 Somnai (https://twitter.com/Somnai_dreams) added 2D Diffusion animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
 
 3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
+
+Turbo feature by Chris Allen (https://twitter.com/zippy731)
+
+Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
+
+VR Mode by Tom Mason (https://twitter.com/nin_artificial)
+
+Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
+
+Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
