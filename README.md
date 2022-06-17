@@ -87,6 +87,9 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 * Custom models support
 
+#### v5.4 Update: Jun 16th 2022 - Symmetry Loss Function(s) by PsiloCyborg (https://twitter.com/psilocyborg_nft), Tomas Gravenmier (https://twitter.com/HighDruidMotas), and Carson Bentley (https://twitter.com/Aztecman_Dnb)
+
+
 ## Notebook Provenance 
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
