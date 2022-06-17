@@ -2453,8 +2453,8 @@ if animation_mode == 'Video Input':
         sys.path.append(f'{PROJECT_DIR}/RAFT')
 
     if (not (os.path.exists(f'{root_path}/RAFT/models'))) or force_download:
-        os.chdir(f'{root_path}/RAFT/')
-        sub_p_res = subprocess.run(['bash', './download_models.sh'], stdout=subprocess.PIPE).stdout.decode('utf-8')
+        os.chdir(f'{root_path}/RAFT')
+        sub_p_res = subprocess.run(['bash', f'{PROJECT_DIR}/RAFT/download_models.sh'], stdout=subprocess.PIPE).stdout.decode('utf-8')
         print(sub_p_res)
         os.chdir(PROJECT_DIR)
 
@@ -2597,7 +2597,7 @@ if animation_mode == 'Video Input':
     flo_fwd_folder = in_path+'/out_flo_fwd'
     # TBD flow backwards!
   
-    os.chdir(root_path)
+    os.chdir(PROJECT_DIR)
 
 
 # %%
