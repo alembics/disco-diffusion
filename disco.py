@@ -2076,7 +2076,7 @@ animation_mode = 'None' #@param ['None', '2D', '3D', 'Video Input'] {type:'strin
 
 #@markdown ####**Video Input Settings:**
 if is_colab:
-    video_init_path = "/content/drive/MyDrive/AI/Disco_Diffusion/init.mp4" #@param {type: 'string'}
+    video_init_path = "/content/drive/MyDrive/init.mp4" #@param {type: 'string'}
 else:
     video_init_path = "init.mp4" #@param {type: 'string'}
 extract_nth_frame = 2 #@param {type: 'number'}
@@ -2453,6 +2453,7 @@ if animation_mode == 'Video Input':
         sys.path.append(f'{PROJECT_DIR}/RAFT')
 
     if (not (os.path.exists(f'{root_path}/RAFT/models'))) or force_download:
+        createPath(f'{root_path}/RAFT')
         os.chdir(f'{root_path}/RAFT')
         sub_p_res = subprocess.run(['bash', f'{PROJECT_DIR}/RAFT/download_models.sh'], stdout=subprocess.PIPE).stdout.decode('utf-8')
         print(sub_p_res)
