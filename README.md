@@ -1,6 +1,6 @@
-# Disco Diffusion
+# Druid Diffusion
 
-<a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
+<a href="https://colab.research.google.com/drive/18LWFeJUz9QkCY0d9mMyp3bqmbCh-wrvX" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
 
 A frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
 
@@ -87,6 +87,9 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 * Custom models support
 
+#### v5.4 Update: Jun 16th 2022 - Symmetry Loss Function(s) by PsiloCyborg (https://twitter.com/psilocyborg_nft), Tomas Gravenmier (https://twitter.com/HighDruidMotas), and Carson Bentley (https://twitter.com/Aztecman_Dnb)
+
+
 ## Notebook Provenance 
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
@@ -114,5 +117,7 @@ Improvements to ability to run on local systems, Windows support, and dependency
 VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 
 Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
+
+Symmetry Loss Function(s) by PsiloCyborg (https://twitter.com/psilocyborg_nft), Tomas Gravenmier (https://twitter.com/HighDruidMotas), and Carson Bentley (https://twitter.com/Aztecman_Dnb)
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
