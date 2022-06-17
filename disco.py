@@ -291,7 +291,7 @@ if skip_for_run_all == False:
 
       Addition of ViT-L/14@336px model (requires high VRAM)
 
-  v5.3 Update: Jun 14th 2022 - devdef / Alex Spirin, Alex's Warp changes integrated into DD main by gandamu / Adam Letts
+  v5.4 Update: Jun 14th 2022 - devdef / Alex Spirin, Alex's Warp changes integrated into DD main by gandamu / Adam Letts
 
       Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 
@@ -2445,7 +2445,6 @@ else:
 #@markdown Use force download to reload raft models if needed
 force_download = False #@param {type:'boolean'}
 if animation_mode == 'Video Input':
-    os.chdir(f'{PROJECT_DIR}')
     try:
         from raft import RAFT
     except:
@@ -2453,10 +2452,11 @@ if animation_mode == 'Video Input':
             gitclone('https://github.com/princeton-vl/RAFT', os.path.join(PROJECT_DIR, 'RAFT'))
         sys.path.append(f'{PROJECT_DIR}/RAFT')
 
-    os.chdir(PROJECT_DIR)
-    if (not (os.path.exists(f'/{root_path}/RAFT/models'))) or force_download:
+    if (not (os.path.exists(f'{root_path}/RAFT/models'))) or force_download:
+        os.chdir(f'{root_path}/RAFT/')
         sub_p_res = subprocess.run(['bash', './download_models.sh'], stdout=subprocess.PIPE).stdout.decode('utf-8')
         print(sub_p_res)
+        os.chdir(PROJECT_DIR)
 
 # %%
 # !! {"metadata":{
@@ -2629,7 +2629,7 @@ if animation_mode == "Video Input":
             if len(frames)>=2:
         
                 raft_model = torch.nn.DataParallel(RAFT(args2))
-                raft_model.load_state_dict(torch.load(f'/{root_path}/RAFT/models/raft-things.pth'))
+                raft_model.load_state_dict(torch.load(f'{root_path}/RAFT/models/raft-things.pth'))
                 raft_model = raft_model.module.cuda().eval()
         
                 for f in pathlib.Path(f'{flo_fwd_folder}').glob('*.*'):
