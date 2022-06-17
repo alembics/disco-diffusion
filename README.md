@@ -118,4 +118,6 @@ VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 
 Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
 
+Symmetry Loss Function(s) by PsiloCyborg (https://twitter.com/psilocyborg_nft), Tomas Gravenmier (https://twitter.com/HighDruidMotas), and Carson Bentley (https://twitter.com/Aztecman_Dnb)
+
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
