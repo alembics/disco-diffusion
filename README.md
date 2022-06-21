@@ -2,7 +2,7 @@
 
 <a href="https://colab.research.google.com/drive/18LWFeJUz9QkCY0d9mMyp3bqmbCh-wrvX" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
 
-A frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
+A Druid's re-amalgamation of an already frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
 
 [to be updated with further info soon]
 
