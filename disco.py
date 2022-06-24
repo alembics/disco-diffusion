@@ -3071,7 +3071,6 @@ else:
         createPath(flo_out)
         frames_in = sorted(glob(batchFolder+f"/{folder}({run})_*.png"))
         shutil.copy(frames_in[0], flo_out)
-        print(sub_p_res)
         for i in trange(init_frame, min(len(frames_in), last_frame)):
             frame1_path = frames_in[i-1]
             frame2_path = frames_in[i]
