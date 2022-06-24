@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.4 - Now with Warp
+# Disco Diffusion v5.5 - Now with Diagonal Symmetry
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -65,6 +65,8 @@ VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
+
+Diagonal Symmetry by Carson Bentley (https://twitter.com/Aztecman_Dnb).
 """
 
 # %%
@@ -296,6 +298,9 @@ if skip_for_run_all == False:
       Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 
       Custom models support
+  v5.5 Update: Jun 24th 2022 - Aztecman / Carson Bentley
+
+      Diagonal Symmetry
     '''
   )
 
@@ -351,6 +356,7 @@ Setting | Description | Default
 `eta` | DDIM hyperparameter | 0.5
 `use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
 `use_horizontal_symmetry` | Enforce symmetry over y axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`use_diagonal_symmetry` | Enforce symmetry across the 'main diagonal' (\) at the appropriate transformation step(s) as above | False
 `transformation_steps` | Steps (expressed in percentages) in which the symmetry is enforced | [0.01]
 `video_init_flow_warp` | Flow warp enabled | True
 `video_init_flow_blend` | 0 - you get raw input, 1 - you get warped diffused previous frame  | 0.999
@@ -1064,15 +1070,20 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
   return next_step_pil
 
 def symmetry_transformation_fn(x):
-    if args.use_horizontal_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
-        print("horizontal symmetry applied")
-    if args.use_vertical_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
-        print("vertical symmetry applied")
-    return x
+  [n, c, h, w] = x.size()
+  if arts.use_diagonal_symmetry:
+    if h != w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    x_triu = torch.triu(x)
+    x_triu_flip = TF.vflip(torch.rot90(x_triu, 1, (2, 3)))
+    x = x_triu + x_triu_flip
+  if args.use_horizontal_symmetry:
+    x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
+    print("horizontal symmetry applied")
+  if args.use_vertical_symmetry:
+    x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
+    print("vertical symmetry applied")
+  return x
 
 def do_run():
   seed = args.seed
@@ -1581,6 +1592,7 @@ def save_settings():
       'turbo_preroll':turbo_preroll,
       'use_horizontal_symmetry':use_horizontal_symmetry,
       'use_vertical_symmetry':use_vertical_symmetry,
+      'use_diagonal_symmetry':use_diagonal_symmetry,
       'transformation_percent':transformation_percent,
       #video init settings
       'video_init_steps': video_init_steps,
@@ -1810,17 +1822,17 @@ def download_models(diffusion_model,use_secondary_model,fallback=False):
     model_512_downloaded = False
     model_secondary_downloaded = False
 
-    model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+    model_256_SHA = 'a37c32fffd316cd494cf3f35b339936debdc1576dad13fe57c42399a5dbc78b1'
     model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
     model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
 
     model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
     model_512_link = 'https://the-eye.eu/public/AI/models/512x512_diffusion_unconditional_ImageNet/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
+    model_secondary_link = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
 
     model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
     model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
+    model_secondary_link_fb = 'https://ipfs.pollinations.ai/ipfs/bafybeibaawhhk7fhyhvmm7x24zwwkeuocuizbqbcg5nqx64jq42j75rdiy/secondary_model_imagenet_2.pth'
 
     model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
     model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
@@ -2737,8 +2749,9 @@ cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 #@markdown ---
 
 #@markdown ####**Transformation Settings:**
-use_vertical_symmetry = False #@param {type:"boolean"}
 use_horizontal_symmetry = False #@param {type:"boolean"}
+use_vertical_symmetry = False #@param {type:"boolean"}
+use_diagonal_symmetry = False #@param {type:"boolean"}
 transformation_percent = [0.09] #@param
 
 
@@ -2943,8 +2956,9 @@ args = {
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
-    'use_vertical_symmetry': use_vertical_symmetry,
     'use_horizontal_symmetry': use_horizontal_symmetry,
+    'use_vertical_symmetry': use_vertical_symmetry,
+    'use_diagonal_symmetry':use_diagonal_symmetry,
     'transformation_percent': transformation_percent,
     #video init settings
     'video_init_steps': video_init_steps,
@@ -3164,7 +3178,7 @@ else:
 # !!       "FlowFns2"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.4 [Now with Warp]",
+# !!     "name": "Disco Diffusion v5.5 [Now with Diagonal Symmetry]",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
