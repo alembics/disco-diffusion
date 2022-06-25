@@ -1071,7 +1071,7 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
 
 def symmetry_transformation_fn(x):
   [n, c, h, w] = x.size()
-  if arts.use_diagonal_symmetry:
+  if args.use_diagonal_symmetry:
     if h != w:
       raise ValueError("height must equal width for diagonal symmetry")
     x_triu = torch.triu(x)
