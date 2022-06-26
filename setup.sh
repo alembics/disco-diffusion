@@ -10,6 +10,6 @@ conda run -n diffusion pip install -e ./CLIP
 conda run -n diffusion pip install -e ./guided-diffusion
 
 conda run -n diffusion pip install lpips IPython requests timm einops omegaconf
-conda install -y jupyter opencv pandas numpy matplotlib
+conda install -y jupyter opencv pandas numpy matplotlib ipykernel
 
 wget https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt -P models
