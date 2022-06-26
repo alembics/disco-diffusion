@@ -13,3 +13,4 @@ conda run -n diffusion pip install lpips IPython requests timm einops omegaconf 
 conda install -n diffusion -y jupyter ipykernel opencv pandas numpy matplotlib scikit-image
 
 wget https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt -P models
+
