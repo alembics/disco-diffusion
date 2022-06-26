@@ -9,7 +9,7 @@ git clone https://github.com/isl-org/MiDaS.git
 conda run -n diffusion pip install -e ./CLIP
 conda run -n diffusion pip install -e ./guided-diffusion
 
-conda run -n diffusion pip install lpips IPython requests timm einops omegaconf
-conda install -y jupyter opencv pandas numpy matplotlib
+conda run -n diffusion pip install lpips IPython requests timm einops omegaconf imutils
+conda install -n diffusion -y jupyter ipykernel opencv pandas numpy matplotlib scikit-image
 
 wget https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt -P models
