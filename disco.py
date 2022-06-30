@@ -360,7 +360,7 @@ Setting | Description | Default
 `use_diagonal_neg_symmetry` | Enforce symmetry over line of y=-x (\) at the appropriate transformation step(s) as above. Note, requires square image | False
 `use_radial_symmetry` | Enforce symmetry mirroring on a number of rays similar to a starfish or flower petals | False
 `n_rays` | how many rays to mirror on. minimum : 1 | 1
-`override_str` | if not empty, this overrides the order of the symmetry operations. Must end in "." | "."
+`override_str` | if not empty, this overrides the order of the symmetry operations. Must end in "." Found in ADVANCED SYMMETRY(not exposed)| "."
 `transformation_steps` | Steps (expressed in percentages) in which the symmetry is enforced | [0.01]
 `video_init_flow_warp` | Flow warp enabled | True
 `video_init_flow_blend` | 0 - you get raw input, 1 - you get warped diffused previous frame  | 0.999
@@ -2824,8 +2824,6 @@ cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
 #@markdown ---
 #@markdown diagonal symmetry and radial symmetry require a square image. n_rays must be at least 1.
-#@markdown override_str can be used to change the order of transforms, For example "|-/\*." means to apply horizontal (|), vertical (-), diagonal+ (/), diagonal- (\), radial (*).
-#@markdown override_str must end in "."
 
 #@markdown ####**Transformation Settings:**
 use_diagonal_pos_symmetry = False #@param {type:"boolean"}
@@ -2834,8 +2832,12 @@ use_horizontal_symmetry = False #@param {type:"boolean"}
 use_vertical_symmetry = False #@param {type:"boolean"}
 use_radial_symmetry = False #@param {type:"boolean"}
 n_rays = 1 #@param{type: 'number'}
-override_str = r"."#@param {type: 'string'}
 transformation_percent = [0.09] #@param
+
+### ADVANCED SYMMETRY:
+# override_str can be used to change the order of transforms, For example r"|-/\*." means to apply horizontal (|), vertical (-), diagonal+ (/), diagonal- (\), radial (*).
+# note, override_str must end in a '.'
+override_str = r"."
 
 
 # %%
