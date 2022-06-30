@@ -3267,7 +3267,7 @@ else:
 # !!       "FlowFns2"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.5 [Now with Diagonal Symmetry]",
+# !!     "name": "Disco Diffusion v5.5 [Now with Diagonal and Radial Symmetry]",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
