@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.5 - Now with Diagonal Symmetry
+# Disco Diffusion v5.5 - Now with Diagonal and Radial Symmetry
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -66,7 +66,7 @@ Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transforma
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
 
-Diagonal Symmetry by Carson Bentley (https://twitter.com/Aztecman_Dnb).
+Diagonal Symmetry, Radial Symmetry, and 'Symmetry Override' by Carson Bentley (https://twitter.com/Aztecman_Dnb).
 """
 
 # %%
@@ -354,9 +354,13 @@ Setting | Description | Default
 `fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
 `rand_mag` | Controls the magnitude of the random noise | 0.1
 `eta` | DDIM hyperparameter | 0.5
-`use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
 `use_horizontal_symmetry` | Enforce symmetry over y axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
-`use_diagonal_symmetry` | Enforce symmetry across the 'main diagonal' (\) at the appropriate transformation step(s) as above | False
+`use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`use_diagonal_pos_symmetry` | Enforce symmetry over line of y=x (/) at the appropriate transformation step(s) as above. Note, requires square image | False
+`use_diagonal_neg_symmetry` | Enforce symmetry over line of y=-x (\) at the appropriate transformation step(s) as above. Note, requires square image | False
+`use_radial_symmetry` | Enforce symmetry mirroring on a number of rays similar to a starfish or flower petals | False
+`n_rays` | how many rays to mirror on. minimum : 1 | 1
+`override_str` | if not empty, this overrides the order of the symmetry operations. Must end in "." | "."
 `transformation_steps` | Steps (expressed in percentages) in which the symmetry is enforced | [0.01]
 `video_init_flow_warp` | Flow warp enabled | True
 `video_init_flow_blend` | 0 - you get raw input, 1 - you get warped diffused previous frame  | 0.999
@@ -1069,20 +1073,88 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
                                           sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
   return next_step_pil
 
+def triu_secondary(x, diag_offset):
+  mask = torch.ones_like(x)
+  mask = torch.triu(mask, diagonal=diag_offset)
+  mask = TF.hflip(mask)
+  return x * mask
+
+class SymmTransforms:
+  """
+  Symmetry Transforms
+  """
+  def __init__(self, x_shape):
+    [self.n, self.c, self.h, self.w] = x_shape
+    pass
+
+  def horizontal(self, x):
+    print("horizontal symmetry applied")
+    return torch.concat((x[:, :, :, :self.w//2], torch.flip(x[:, :, :, :self.w//2], [-1])), -1)
+    
+  def vertical(self, x):
+    print("vertical symmetry applied")
+    return torch.concat((x[:, :, :self.h//2, :], torch.flip(x[:, :, :self.h//2, :], [-2])), -2)
+    
+  def diagonal_pos(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = x")
+    x_triu = triu_secondary(x, 1)
+    x_triu_flip = TF.hflip(torch.rot90(triu_secondary(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+    
+  def diagonal_neg(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = -x")
+    x_triu = torch.triu(x, 1)
+    x_triu_flip = TF.vflip(torch.rot90(torch.triu(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+
+  def radial(self, x, num_rays):
+    if self.h != self.w:
+      raise ValueError("height must equal width for radial symmetry transform")
+    mask = torch.triu(torch.ones_like(x))
+    mask = TF.rotate(mask, (360/(num_rays*2)) - 45)
+    mask[:,:,self.h//2:,self.w//2:] = 0
+    masked = mask * x
+    pizza_slice = torch.concat((masked[:, :, :, :self.w//2], TF.hflip(masked[:, :, :, :self.w//2])), -1)
+    pizza = torch.zeros_like(x)
+    for i in range(num_rays):
+      pizza += TF.rotate(pizza_slice, i*(360/num_rays))
+    return pizza
+
 def symmetry_transformation_fn(x):
   [n, c, h, w] = x.size()
-  if args.use_diagonal_symmetry:
-    if h != w:
-      raise ValueError("height must equal width for diagonal symmetry")
-    x_triu = torch.triu(x)
-    x_triu_flip = TF.vflip(torch.rot90(x_triu, 1, (2, 3)))
-    x = x_triu + x_triu_flip
-  if args.use_horizontal_symmetry:
-    x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
-    print("horizontal symmetry applied")
-  if args.use_vertical_symmetry:
-    x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
-    print("vertical symmetry applied")
+  if len(args.override_str) > 0 and args.override_str != ".":
+    #using override string
+    func_dict = {"/":"diagonal_pos",
+                 "\\":"diagonal_neg",
+                 "-":"vertical",
+                 "|":"horizontal",
+                 "*":"radial"}
+    m = globals()['SymmTransforms'](x.size())
+    for char in args.override_str:
+      if char == ".":
+        continue
+      t_func = getattr(m, func_dict[char])
+      if char == "*":
+        x = t_func(x, args.n_rays)
+      else:
+        x = t_func(x)
+  else:
+    #if no override, using boolean parameters
+    symm_t = SymmTransforms(x.size())
+    if args.use_diagonal_pos_symmetry:
+      x = symm_t.diagonal_pos(x)
+    if args.use_diagonal_neg_symmetry:
+      x = symm_t.diagonal_neg(x)
+    if args.use_horizontal_symmetry:
+      x = symm_t.horizontal(x)
+    if args.use_vertical_symmetry:
+      x = symm_t.vertical(x)
+    if args.use_radial_symmetry:
+      x = symm_t.radial(x, args.n_rays)
   return x
 
 def do_run():
@@ -1590,9 +1662,13 @@ def save_settings():
       'turbo_mode':turbo_mode,
       'turbo_steps':turbo_steps,
       'turbo_preroll':turbo_preroll,
-      'use_horizontal_symmetry':use_horizontal_symmetry,
-      'use_vertical_symmetry':use_vertical_symmetry,
-      'use_diagonal_symmetry':use_diagonal_symmetry,
+      'use_horizontal_symmetry': use_horizontal_symmetry,
+      'use_vertical_symmetry': use_vertical_symmetry,
+      'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+      'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+      'use_radial_symmetry': use_radial_symmetry,
+      'n_rays': n_rays,
+      'override_str':override_str,
       'transformation_percent':transformation_percent,
       #video init settings
       'video_init_steps': video_init_steps,
@@ -2747,11 +2823,18 @@ cut_ic_pow = 1#@param {type: 'number'}
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
 #@markdown ---
+#@markdown diagonal symmetry and radial symmetry require a square image. n_rays must be at least 1.
+#@markdown override_str can be used to change the order of transforms, For example "|-/\*." means to apply horizontal (|), vertical (-), diagonal+ (/), diagonal- (\), radial (*).
+#@markdown override_str must end in "."
 
 #@markdown ####**Transformation Settings:**
+use_diagonal_pos_symmetry = False #@param {type:"boolean"}
+use_diagonal_neg_symmetry = False #@param {type:"boolean"}
 use_horizontal_symmetry = False #@param {type:"boolean"}
 use_vertical_symmetry = False #@param {type:"boolean"}
-use_diagonal_symmetry = False #@param {type:"boolean"}
+use_radial_symmetry = False #@param {type:"boolean"}
+n_rays = 1 #@param{type: 'number'}
+override_str = r"."#@param {type: 'string'}
 transformation_percent = [0.09] #@param
 
 
@@ -2958,7 +3041,11 @@ args = {
     'turbo_preroll':turbo_preroll,
     'use_horizontal_symmetry': use_horizontal_symmetry,
     'use_vertical_symmetry': use_vertical_symmetry,
-    'use_diagonal_symmetry':use_diagonal_symmetry,
+    'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+    'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+    'use_radial_symmetry': use_radial_symmetry,
+    'n_rays': n_rays,
+    'override_str':override_str,
     'transformation_percent': transformation_percent,
     #video init settings
     'video_init_steps': video_init_steps,
