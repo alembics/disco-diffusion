@@ -33,15 +33,7 @@ git clone https://github.com/discus0434/latent-diffusion.git
 cd latent-diffusion
 
 # Setup virtual environment
-<<<<<<< HEAD
+conda env create -f environment.yaml
 
 # Install models
-conda env create -f environment.yaml
-wget -O latent-diffusion/models/ldm/inpainting_big/last.ckpt https://heibox.uni-heidelberg.de/f/4d9ac7ea40c64582b7c9/?dl=1
-
-=======
->>>>>>> 4d3397b014f89e162128e299afe1d59c95211a42
-
-# Install models
-conda env create -f environment.yaml
 wget -O latent-diffusion/models/ldm/inpainting_big/last.ckpt https://heibox.uni-heidelberg.de/f/4d9ac7ea40c64582b7c9/?dl=1
