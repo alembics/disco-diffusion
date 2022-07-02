@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.4 - Now with Warp
+# Disco Diffusion v5.5 - Now with Diagonal and Radial Symmetry
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -65,6 +65,8 @@ VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
+
+Diagonal Symmetry, Radial Symmetry, and 'Symmetry Override' by Carson Bentley (https://twitter.com/Aztecman_Dnb).
 """
 
 # %%
@@ -296,6 +298,9 @@ if skip_for_run_all == False:
       Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 
       Custom models support
+  v5.5 Update: Jun 24th 2022 - Aztecman / Carson Bentley
+
+      Diagonal Symmetry
     '''
   )
 
@@ -349,8 +354,13 @@ Setting | Description | Default
 `fuzzy_prompt` | Controls whether to add multiple noisy prompts to the prompt losses | False
 `rand_mag` | Controls the magnitude of the random noise | 0.1
 `eta` | DDIM hyperparameter | 0.5
-`use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
 `use_horizontal_symmetry` | Enforce symmetry over y axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`use_vertical_symmetry` | Enforce symmetry over x axis of the image on [`tr_st`*`steps` for `tr_st` in `transformation_steps`] steps of the diffusion process | False
+`use_diagonal_pos_symmetry` | Enforce symmetry over line of y=x (/) at the appropriate transformation step(s) as above. Note, requires square image | False
+`use_diagonal_neg_symmetry` | Enforce symmetry over line of y=-x (\) at the appropriate transformation step(s) as above. Note, requires square image | False
+`use_radial_symmetry` | Enforce symmetry mirroring on a number of rays similar to a starfish or flower petals | False
+`n_rays` | how many rays to mirror on. minimum : 1 | 1
+`override_str` | if not empty, this overrides the order of the symmetry operations. Must end in "." Found in ADVANCED SYMMETRY(not exposed)| "."
 `transformation_steps` | Steps (expressed in percentages) in which the symmetry is enforced | [0.01]
 `video_init_flow_warp` | Flow warp enabled | True
 `video_init_flow_blend` | 0 - you get raw input, 1 - you get warped diffused previous frame  | 0.999
@@ -1063,16 +1073,89 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
                                           sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
   return next_step_pil
 
+def triu_secondary(x, diag_offset):
+  mask = torch.ones_like(x)
+  mask = torch.triu(mask, diagonal=diag_offset)
+  mask = TF.hflip(mask)
+  return x * mask
+
+class SymmTransforms:
+  """
+  Symmetry Transforms
+  """
+  def __init__(self, x_shape):
+    [self.n, self.c, self.h, self.w] = x_shape
+    pass
+
+  def horizontal(self, x):
+    print("horizontal symmetry applied")
+    return torch.concat((x[:, :, :, :self.w//2], torch.flip(x[:, :, :, :self.w//2], [-1])), -1)
+    
+  def vertical(self, x):
+    print("vertical symmetry applied")
+    return torch.concat((x[:, :, :self.h//2, :], torch.flip(x[:, :, :self.h//2, :], [-2])), -2)
+    
+  def diagonal_pos(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = x")
+    x_triu = triu_secondary(x, 1)
+    x_triu_flip = TF.hflip(torch.rot90(triu_secondary(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+    
+  def diagonal_neg(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = -x")
+    x_triu = torch.triu(x, 1)
+    x_triu_flip = TF.vflip(torch.rot90(torch.triu(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+
+  def radial(self, x, num_rays):
+    if self.h != self.w:
+      raise ValueError("height must equal width for radial symmetry transform")
+    mask = torch.triu(torch.ones_like(x))
+    mask = TF.rotate(mask, (360/(num_rays*2)) - 45)
+    mask[:,:,self.h//2:,self.w//2:] = 0
+    masked = mask * x
+    pizza_slice = torch.concat((masked[:, :, :, :self.w//2], TF.hflip(masked[:, :, :, :self.w//2])), -1)
+    pizza = torch.zeros_like(x)
+    for i in range(num_rays):
+      pizza += TF.rotate(pizza_slice, i*(360/num_rays))
+    return pizza
+
 def symmetry_transformation_fn(x):
+  [n, c, h, w] = x.size()
+  if len(args.override_str) > 0 and args.override_str != ".":
+    #using override string
+    func_dict = {"/":"diagonal_pos",
+                 "\\":"diagonal_neg",
+                 "-":"vertical",
+                 "|":"horizontal",
+                 "*":"radial"}
+    m = globals()['SymmTransforms'](x.size())
+    for char in args.override_str:
+      if char == ".":
+        continue
+      t_func = getattr(m, func_dict[char])
+      if char == "*":
+        x = t_func(x, args.n_rays)
+      else:
+        x = t_func(x)
+  else:
+    #if no override, using boolean parameters
+    symm_t = SymmTransforms(x.size())
+    if args.use_diagonal_pos_symmetry:
+      x = symm_t.diagonal_pos(x)
+    if args.use_diagonal_neg_symmetry:
+      x = symm_t.diagonal_neg(x)
     if args.use_horizontal_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
-        print("horizontal symmetry applied")
+      x = symm_t.horizontal(x)
     if args.use_vertical_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
-        print("vertical symmetry applied")
-    return x
+      x = symm_t.vertical(x)
+    if args.use_radial_symmetry:
+      x = symm_t.radial(x, args.n_rays)
+  return x
 
 def do_run():
   seed = args.seed
@@ -1579,8 +1662,13 @@ def save_settings():
       'turbo_mode':turbo_mode,
       'turbo_steps':turbo_steps,
       'turbo_preroll':turbo_preroll,
-      'use_horizontal_symmetry':use_horizontal_symmetry,
-      'use_vertical_symmetry':use_vertical_symmetry,
+      'use_horizontal_symmetry': use_horizontal_symmetry,
+      'use_vertical_symmetry': use_vertical_symmetry,
+      'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+      'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+      'use_radial_symmetry': use_radial_symmetry,
+      'n_rays': n_rays,
+      'override_str':override_str,
       'transformation_percent':transformation_percent,
       #video init settings
       'video_init_steps': video_init_steps,
@@ -1810,17 +1898,17 @@ def download_models(diffusion_model,use_secondary_model,fallback=False):
     model_512_downloaded = False
     model_secondary_downloaded = False
 
-    model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+    model_256_SHA = 'a37c32fffd316cd494cf3f35b339936debdc1576dad13fe57c42399a5dbc78b1'
     model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
     model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
 
     model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
     model_512_link = 'https://the-eye.eu/public/AI/models/512x512_diffusion_unconditional_ImageNet/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
+    model_secondary_link = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
 
     model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
     model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
+    model_secondary_link_fb = 'https://ipfs.pollinations.ai/ipfs/bafybeibaawhhk7fhyhvmm7x24zwwkeuocuizbqbcg5nqx64jq42j75rdiy/secondary_model_imagenet_2.pth'
 
     model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
     model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
@@ -2735,11 +2823,21 @@ cut_ic_pow = 1#@param {type: 'number'}
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
 #@markdown ---
+#@markdown diagonal symmetry and radial symmetry require a square image. n_rays must be at least 1.
 
 #@markdown ####**Transformation Settings:**
-use_vertical_symmetry = False #@param {type:"boolean"}
+use_diagonal_pos_symmetry = False #@param {type:"boolean"}
+use_diagonal_neg_symmetry = False #@param {type:"boolean"}
 use_horizontal_symmetry = False #@param {type:"boolean"}
+use_vertical_symmetry = False #@param {type:"boolean"}
+use_radial_symmetry = False #@param {type:"boolean"}
+n_rays = 1 #@param{type: 'number'}
 transformation_percent = [0.09] #@param
+
+### ADVANCED SYMMETRY:
+# override_str can be used to change the order of transforms, For example r"|-/\*." means to apply horizontal (|), vertical (-), diagonal+ (/), diagonal- (\), radial (*).
+# note, override_str must end in a '.'
+override_str = r"."
 
 
 # %%
@@ -2943,8 +3041,13 @@ args = {
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
-    'use_vertical_symmetry': use_vertical_symmetry,
     'use_horizontal_symmetry': use_horizontal_symmetry,
+    'use_vertical_symmetry': use_vertical_symmetry,
+    'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+    'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+    'use_radial_symmetry': use_radial_symmetry,
+    'n_rays': n_rays,
+    'override_str':override_str,
     'transformation_percent': transformation_percent,
     #video init settings
     'video_init_steps': video_init_steps,
@@ -3164,7 +3267,7 @@ else:
 # !!       "FlowFns2"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.4 [Now with Warp]",
+# !!     "name": "Disco Diffusion v5.5 [Now with Diagonal and Radial Symmetry]",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
