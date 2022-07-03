@@ -2724,13 +2724,70 @@ rand_mag = 0.05
 
 #@markdown ---
 
-#@markdown ####**Cutn Scheduling:**
-#@markdown Format: `[40]*400+[20]*600` = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
 
+#@markdown ####**Cutn Schedule Generator** 
+def cutnschedule(cut_overview_max, cut_innercut_max, cut_overview_min, cut_overview_delay, cut_innercut_delay, overview_bias, inner_bias):
+    import numpy as np
+    # Overview
+    overview_truemid = int(cut_overview_max * 0.5)
+    if overview_bias != 0:
+        overview_bias = 1000 - overview_bias
+        cut_overview = np.linspace(cut_overview_max, cut_overview_max, (cut_overview_delay), dtype='int').tolist()
+        cut_overview += np.linspace(cut_overview_max+1, overview_truemid, (1000-cut_overview_delay-overview_bias)+1, dtype='int').tolist()
+        del cut_overview[cut_overview_delay]
+        cut_overview += np.linspace(cut_overview[-1], cut_overview_min, overview_bias+1, dtype='int').tolist()[1:]
+    else:   
+        cut_overview = np.linspace(cut_overview_max, cut_overview_max, cut_overview_delay, dtype='int').tolist()
+        cut_overview += np.linspace(cut_overview[-1], cut_overview_min, (1000-cut_overview_delay)+1, dtype='int').tolist()
+        del cut_overview[cut_overview_delay]
+    # Inner
+    inner_truemid = int(cut_innercut_max * 0.5)  
+    if inner_bias != 0:
+        cut_innercut = np.linspace(cut_innercut_max+1, inner_truemid, 1000-cut_innercut_delay-inner_bias+1, dtype='int').tolist()
+        del cut_innercut[0]  
+        cut_innercut += np.linspace(cut_innercut[-1], cut_innercut_min, inner_bias+1, dtype='int').tolist()[1:]
+        cut_innercut += np.linspace(cut_innercut_min, cut_innercut_min, cut_innercut_delay, dtype='int').tolist()
+    else:   
+        cut_innercut = np.linspace(cut_innercut_max+1, cut_innercut_min+1, (1000-cut_innercut_delay)+1, dtype='int').tolist()
+        cut_innercut += np.linspace(cut_innercut_min, cut_innercut_min, cut_innercut_delay, dtype='int').tolist()
+        del cut_innercut[0]     
+    cut_innercut.reverse()     
+    return (cut_overview, cut_innercut)
+
+
+ 
+#@markdown cut_overview_max and cut_innercut_max: Maximum value of cut_overview and cut_innercut
+
+#@markdown cut_overview_min and cut_innercut_min: Minimum value of cut_overview and cut_innercut
+
+#@markdown cut_overview_delay and cut_innercut_delay: Delay the initial scalings
+
+#@markdown  overview_bias and inner_bias: Minimum value of 100. Introduces assymetry to the scaling 
+ 
+#@markdown  use_schedule_gen: Overrides standard Cutn Scheduling if ticked
+
+cut_overview_max = 12 #@param{type: 'number'} 
+cut_overview_min = 4 #@param{type: 'number'} 
+cut_innercut_max = 12 #@param{type: 'number'}
+cut_innercut_min = 4 #@param{type: 'number'} 
+cut_overview_delay = 200 #@param{type: 'number'} 
+cut_innercut_delay = 200 #@param{type: 'number'} 
+overview_bias = 0 #@param{type: 'number'}
+inner_bias = 0 #@param{type: 'number'}
+use_schedule_gen = True #@param{type: 'boolean'} 
+
+#@markdown ---
+#@markdown ####**Cutn Scheduling**
+#@markdown ####**OVERRIDEN BY GENERATOR IF use_schedule_gen is ticked**
+#@markdown Format: `[40]*400+[20]*600` = 40 cuts for the first 400 /1000 steps, then 20 for the last 600/1000
 #@markdown cut_overview and cut_innercut are cumulative for total cutn on any given step. Overview cuts see the entire image and are good for early structure, innercuts are your standard cutn.
 
 cut_overview = "[12]*400+[4]*600" #@param {type: 'string'}       
-cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'}  
+cut_innercut ="[4]*400+[12]*600"#@param {type: 'string'} 
+
+#@markdown ---
+
+#@markdown ####**cut_ic_pow and cut_icgray_p Scheduling** 
 cut_ic_pow = 1#@param {type: 'number'}  
 cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 
@@ -2740,6 +2797,44 @@ cut_icgray_p = "[0.2]*400+[0]*600"#@param {type: 'string'}
 use_vertical_symmetry = False #@param {type:"boolean"}
 use_horizontal_symmetry = False #@param {type:"boolean"}
 transformation_percent = [0.09] #@param
+
+
+if use_schedule_gen == True:
+    cut_overview_gen, cut_innercut_gen = cutnschedule(cut_overview_max=cut_overview_max, cut_innercut_max=cut_innercut_max, cut_overview_min=cut_overview_min, cut_overview_delay=cut_overview_delay, cut_innercut_delay=cut_innercut_delay, overview_bias = overview_bias, inner_bias = inner_bias)
+    
+    # Cleans up the cut_overview schedule
+    clearup_overview = dict((i, cut_overview_gen.count(i)) for i in cut_overview_gen)
+    cut_string = ''
+    for key in clearup_overview:
+        cut_string += "["+str(key)+"]*"+str(clearup_overview[key])+"+"
+    cut_string = cut_string[:-1]
+     
+    # Cleans up the cut_innercut schedule
+    clearup_innercut = dict((i, cut_innercut_gen.count(i)) for i in cut_innercut_gen)    
+    inner_string = ''
+    for key in clearup_innercut:
+        inner_string += "["+str(key)+"]*"+str(clearup_innercut[key])+"+"
+    inner_string = inner_string[:-1]
+    cut_overview = cut_string
+    cut_innercut = inner_string    
+print(f'cut_overview: {cut_overview}')
+print(f'cut_innercut: {cut_innercut}')
+
+
+# Output the cut schedule as a plot
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+x = np.linspace(0, 1000, 1000, dtype='int')
+fig, ax = plt.subplots(figsize=(6.5, 3.7))
+overview_plot = ax.plot(x, cut_overview_gen, color='black', label='cut_overview')
+innercut_plot = ax.plot(x, cut_innercut_gen, color='red', label='cut_innercut')
+black_patch = mpatches.Patch(color='black', label='cut_overview')
+red_patch = mpatches.Patch(color='red', label='cut_innercut')
+ax.legend(handles=[black_patch,red_patch])
+ax.set_xlabel('Steps') 
+ax.set_ylabel('Cuts') 
+plt.show()
+
 
 
 # %%
