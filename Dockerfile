@@ -1,24 +1,8 @@
 FROM nvidia/cuda:11.2.0-cudnn8-runtime-ubuntu18.04
 
-CMD ["bash"]
-
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh # buildkit
 
-RUN apt-get update
-
-RUN apt-get install -y curl
-
-RUN apt-get install -y git
-
-RUN apt-get install -y wget
-
-RUN apt-get install -y unzip
-
-RUN apt-get update
-
-RUN apt-get install -y python-pip
-
-RUN apt-get install -y libgl1-mesa-dev
+RUN apt-get update && apt-get install -y curl git wget unzip python-pip libgl1-mesa-dev
 
 RUN curl https://repo.anaconda.com/miniconda/Miniconda3-py39_4.10.3-Linux-x86_64.sh -o Miniconda3-py39_4.10.3-Linux-x86_64.sh # buildkit
 
@@ -41,3 +25,5 @@ WORKDIR /disco-diffusion
 RUN chmod +x setup.sh
 
 RUN ./setup.sh
+
+CMD ["jupyter", "notebook", "--allow-root", "--ip=*", "--no-browser"]
