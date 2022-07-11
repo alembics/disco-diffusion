@@ -1790,7 +1790,8 @@ class SecondaryDiffusionImageNet2(nn.Module):
 # !!   "id": "ModelSettings"
 # !! }}
 #@markdown ####**Models Settings:**
-diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100", "custom"]
+diffusion_model = "256x256_diffusion_uncond" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100", "pixel_art_diffusion_hard_256", "pixel_art_diffusion_soft_256", "pixelartdiffusion4k", "watercolordiffusion", "PulpSciFiDiffusion", "custom"]
+
 use_secondary_model = True #@param {type: 'boolean'}
 diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']
 #@markdown #####**Custom model:**
@@ -1817,22 +1818,42 @@ check_model_SHA = False #@param{type:"boolean"}
 def download_models(diffusion_model,use_secondary_model,fallback=False):
     model_256_downloaded = False
     model_512_downloaded = False
+    model_pixel_art_diffusion_hard_256_downloaded = False
+    model_pixel_art_diffusion_soft_256_downloaded = False
+    model_pixelartdiffusion4k_downloaded = False
+    model_watercolordiffusion_downloaded = False
+    model_PulpSciFiDiffusion_downloaded = False
     model_secondary_downloaded = False
 
-    model_256_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
+    model_256_SHA = 'a37c32fffd316cd494cf3f35b339936debdc1576dad13fe57c42399a5dbc78b1'
     model_512_SHA = '9c111ab89e214862b76e1fa6a1b3f1d329b1a88281885943d2cdbe357ad57648'
+    model_pixel_art_diffusion_hard_256_SHA = 'be4a9de943ec06eef32c65a1008c60ad017723a4d35dc13169c66bb322234161'
+    model_pixel_art_diffusion_soft_256_SHA = 'd321590e46b679bf6def1f1914b47c89e762c76f19ab3e3392c8ca07c791039c'
+    model_pixelartdiffusion4k_SHA = 'a1ba4f13f6dabb72b1064f15d8ae504d98d6192ad343572cc416deda7cccac30'   
+    model_watercolordiffusion_SHA = 'a3e6522f0c8f278f90788298d66383b11ac763dd5e0d62f8252c962c23950bd6' 
+    model_PulpSciFiDiffusion_SHA = 'b79e62613b9f50b8a3173e5f61f0320c7dbb16efad42a92ec94d014f6e17337f'
     model_secondary_SHA = '983e3de6f95c88c81b2ca7ebb2c217933be1973b1ff058776b970f901584613a'
 
     model_256_link = 'https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt'
     model_512_link = 'https://the-eye.eu/public/AI/models/512x512_diffusion_unconditional_ImageNet/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link = 'https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth'
+    model_pixel_art_diffusion_hard_256_link = 'https://huggingface.co/KaliYuga/pixel_art_diffusion_hard_256/resolve/main/pixel_art_diffusion_hard_256.pt'
+    model_pixel_art_diffusion_soft_256_link = 'https://huggingface.co/KaliYuga/pixel_art_diffusion_soft_256/resolve/main/pixel_art_diffusion_soft_256.pt'
+    model_pixelartdiffusion4k_link = 'https://huggingface.co/KaliYuga/pixelartdiffusion4k/resolve/main/pixelartdiffusion4k.pt'
+    model_watercolordiffusion_link = 'https://huggingface.co/KaliYuga/watercolordiffusion/resolve/main/watercolordiffusion.pt'
+    model_PulpSciFiDiffusion_link = 'https://huggingface.co/KaliYuga/PulpSciFiDiffusion/resolve/main/PulpSciFiDiffusion.pt'
+    model_secondary_link = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
 
     model_256_link_fb = 'https://www.dropbox.com/s/9tqnqo930mpnpcn/256x256_diffusion_uncond.pt'
     model_512_link_fb = 'https://huggingface.co/lowlevelware/512x512_diffusion_unconditional_ImageNet/resolve/main/512x512_diffusion_uncond_finetune_008100.pt'
-    model_secondary_link_fb = 'https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth'
+    model_secondary_link_fb = 'https://ipfs.pollinations.ai/ipfs/bafybeibaawhhk7fhyhvmm7x24zwwkeuocuizbqbcg5nqx64jq42j75rdiy/secondary_model_imagenet_2.pth'
 
     model_256_path = f'{model_path}/256x256_diffusion_uncond.pt'
     model_512_path = f'{model_path}/512x512_diffusion_uncond_finetune_008100.pt'
+    model_pixel_art_diffusion_hard_256_path = f'{model_path}/pixel_art_diffusion_hard_256.pt'
+    model_pixel_art_diffusion_soft_256_path = f'{model_path}/pixel_art_diffusion_soft_256.pt'
+    model_pixelartdiffusion4k_path = f'{model_path}/pixelartdiffusion4k.pt'
+    model_watercolordiffusion_path = f'{model_path}/watercolordiffusion.pt'
+    model_PulpSciFiDiffusion_path = f'{model_path}/PulpSciFiDiffusion.pt'
     model_secondary_path = f'{model_path}/secondary_model_imagenet_2.pth'
 
     if fallback:
@@ -1892,6 +1913,103 @@ def download_models(diffusion_model,use_secondary_model,fallback=False):
         else:  
             wget(model_512_link, model_path)
             model_512_downloaded = True
+
+    elif diffusion_model == 'pixel_art_diffusion_hard_256':
+        if os.path.exists(model_pixel_art_diffusion_hard_256_path) and check_model_SHA:
+            print('Checking 256 Pixel Art Hard Model File')
+            with open(model_pixel_art_diffusion_hard_256_path,"rb") as f:
+                  bytes = f.read() 
+                  hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_pixel_art_diffusion_hard_256_SHA:
+                print('256 Pixel Art Hard Model SHA matches')
+                model_pixel_art_diffusion_hard_256_downloaded = True
+            else: 
+                print("256 Pixel Art Hard Model doesn't match, redownloading...")
+                wget(model_pixel_art_diffusion_hard_256_link, model_path)
+                model_pixel_art_diffusion_hard_256_downloaded = True
+        elif os.path.exists(model_pixel_art_diffusion_hard_256_path) and not check_model_SHA or model_pixel_art_diffusion_hard_256_downloaded == True:
+            print('256 Pixel Art Hard Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_pixel_art_diffusion_hard_256_link, model_path)
+            model_pixel_art_diffusion_hard_256_downloaded = True
+
+    elif diffusion_model == 'pixel_art_diffusion_soft_256':
+        if os.path.exists(model_pixel_art_diffusion_soft_256_path) and check_model_SHA:
+            print('Checking 256 Pixel Art Soft Model File')
+            with open(model_pixel_art_diffusion_soft_256_path,"rb") as f:
+                  bytes = f.read() 
+                  hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_pixel_art_diffusion_soft_256_SHA:
+                print('256 Pixel Art Soft Model SHA matches')
+                model_pixel_art_diffusion_soft_256_downloaded = True
+            else: 
+                print("256 Pixel Art Soft Model doesn't match, redownloading...")
+                wget(model_pixel_art_diffusion_soft_256_link, model_path)
+                model_pixel_art_diffusion_soft_256_downloaded = True
+        elif os.path.exists(model_pixel_art_diffusion_soft_256_path) and not check_model_SHA or model_pixel_art_diffusion_soft_256_downloaded == True:
+            print('256 Pixel Art Soft Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_pixel_art_diffusion_soft_256_link, model_path)
+            model_pixel_art_diffusion_soft_256_downloaded = True
+
+    elif diffusion_model == 'pixelartdiffusion4k':
+        if os.path.exists(model_pixelartdiffusion4k_path) and check_model_SHA:
+            print('Checking 256 Pixel Art Soft Model File')
+            with open(model_pixelartdiffusion4k_path,"rb") as f:
+                bytes = f.read() 
+                hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_pixelartdiffusion4k_SHA:
+                print('Pixel Art Diffusion 4k Model SHA matches')
+                model_pixelartdiffusion4k_downloaded = True
+            else: 
+                print("Pixel Art Diffusion 4k Model doesn't match, redownloading...")
+                wget(model_pixelartdiffusion4k_link, model_path)
+                model_pixelartdiffusion4k_downloaded = True
+        elif os.path.exists(model_pixelartdiffusion4k_path) and not check_model_SHA or model_pixelartdiffusion4k_downloaded == True:
+            print('Pixel Art Diffusion 4k Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_pixelartdiffusion4k_link, model_path)
+            model_pixelartdiffusion4k_downloaded = True
+
+    elif diffusion_model == 'watercolordiffusion':
+        if os.path.exists(model_watercolordiffusion_path) and check_model_SHA:
+            print('Checking Watercolor Diffusion Model File')
+            with open(model_watercolordiffusion_path,"rb") as f:
+                bytes = f.read() 
+                hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_watercolordiffusion_SHA:
+                print('Watercolor Diffusion Model SHA matches')
+                model_watercolordiffusion_downloaded = True
+            else: 
+                print("Watercolor Diffusion Model doesn't match, redownloading...")
+                wget(model_watercolordiffusion_link, model_path)
+                model_watercolordiffusion_downloaded = True
+        elif os.path.exists(model_watercolordiffusion_path) and not check_model_SHA or model_watercolordiffusion_downloaded == True:
+            print('Watercolor Diffusion Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_watercolordiffusion_link, model_path)
+            model_watercolordiffusion_downloaded = True
+
+    elif diffusion_model == 'PulpSciFiDiffusion':
+        if os.path.exists(model_PulpSciFiDiffusion_path) and check_model_SHA:
+            print('Checking Pulp Sci-Fi Diffusion Model File')
+            with open(model_PulpSciFiDiffusion_path,"rb") as f:
+                  bytes = f.read() 
+                  hash = hashlib.sha256(bytes).hexdigest();
+            if hash == model_PulpSciFiDiffusion_SHA:
+                print('Pulp Sci-Fi Diffusion Model SHA matches')
+                model_PulpSciFiDiffusion_downloaded = True
+            else: 
+                print("Pulp Sci-Fi Diffusion Model doesn't match, redownloading...")
+                wget(model_PulpSciFiDiffusion_link, model_path)
+                model_PulpSciFiDiffusion_downloaded = True
+        elif os.path.exists(model_PulpSciFiDiffusion_path) and not check_model_SHA or model_PulpSciFiDiffusion_downloaded == True:
+            print('Pulp Sci-Fi Diffusion Model already downloaded, check check_model_SHA if the file is corrupt')
+        else:  
+            wget(model_PulpSciFiDiffusion_link, model_path)
+            model_PulpSciFiDiffusion_downloaded = True
+
+
     # Download the secondary diffusion model v2
     if use_secondary_model:
         if os.path.exists(model_secondary_path) and check_model_SHA:
@@ -1959,6 +2077,91 @@ elif diffusion_model == '256x256_diffusion_uncond':
         'use_fp16': not useCPU,
         'use_scale_shift_norm': True,
     })
+elif diffusion_model == 'pixel_art_diffusion_hard_256':
+    model_config.update({
+          'attention_resolutions': '16',
+          'class_cond': False,
+          'diffusion_steps': 1000,
+          'rescale_timesteps': True,
+          'timestep_respacing': 'ddim100',
+          'image_size': 256,
+          'learn_sigma': True,
+          'noise_schedule': 'linear',
+          'num_channels': 128,
+          'num_heads': 1,
+          'num_res_blocks': 2,
+          'use_checkpoint': use_checkpoint,
+          'use_fp16': True,
+          'use_scale_shift_norm': False,
+      })
+elif diffusion_model == 'pixelartdiffusion4k':
+    model_config.update({
+          'attention_resolutions': '16',
+          'class_cond': False,
+          'diffusion_steps': 1000,
+          'rescale_timesteps': True,
+          'timestep_respacing': 'ddim100',
+          'image_size': 256,
+          'learn_sigma': True,
+          'noise_schedule': 'linear',
+          'num_channels': 128,
+          'num_heads': 1,
+          'num_res_blocks': 2,
+          'use_checkpoint': use_checkpoint,
+          'use_fp16': True,
+          'use_scale_shift_norm': False,
+      })
+elif diffusion_model == 'pixel_art_diffusion_soft_256':
+    model_config.update({
+          'attention_resolutions': '16',
+          'class_cond': False,
+          'diffusion_steps': 1000,
+          'rescale_timesteps': True,
+          'timestep_respacing': 'ddim100',
+          'image_size': 256,
+          'learn_sigma': True,
+          'noise_schedule': 'linear',
+          'num_channels': 128,
+          'num_heads': 1,
+          'num_res_blocks': 2,
+          'use_checkpoint': use_checkpoint,
+          'use_fp16': True,
+          'use_scale_shift_norm': False,
+      })
+elif diffusion_model == 'watercolordiffusion':
+    model_config.update({
+          'attention_resolutions': '16',
+          'class_cond': False,
+          'diffusion_steps': 1000,
+          'rescale_timesteps': True,
+          'timestep_respacing': 'ddim100',
+          'image_size': 256,
+          'learn_sigma': True,
+          'noise_schedule': 'linear',
+          'num_channels': 128,
+          'num_heads': 1,
+          'num_res_blocks': 2,
+          'use_checkpoint': use_checkpoint,
+          'use_fp16': True,
+          'use_scale_shift_norm': False,
+      })
+elif diffusion_model == 'PulpSciFiDiffusion':
+    model_config.update({
+          'attention_resolutions': '16',
+          'class_cond': False,
+          'diffusion_steps': 1000,
+          'rescale_timesteps': True,
+          'timestep_respacing': 'ddim100',
+          'image_size': 256,
+          'learn_sigma': True,
+          'noise_schedule': 'linear',
+          'num_channels': 128,
+          'num_heads': 1,
+          'num_res_blocks': 2,
+          'use_checkpoint': use_checkpoint,
+          'use_fp16': True,
+          'use_scale_shift_norm': False,
+      })
 
 model_default = model_config['image_size']
 
