@@ -87,7 +87,13 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 * Custom models support
 
-## Notebook Provenance 
+#### v5.5 Update: Jul 11th 2022 - Palmweaver / Chris Scalf, KaliYuga_ai, further integration by gandamu / Adam Letts
+
+* OpenCLIP models integration
+* Pixel Art Diffusion (hard and soft), Watercolor Diffusion, and Pulp SciFi Diffusion models
+* cut_ic_pow scheduling
+
+## Notebook Provenance
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
 
@@ -116,3 +122,7 @@ VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transformation_steps by huemin (https://twitter.com/huemin_art). Symmetry integration into Disco Diffusion by Dmitrii Tochilkin (https://twitter.com/cut_pow).
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
+
+Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from KaliYuga (https://twitter.com/KaliYuga_ai). Follow KaliYuga's Twitter for the latest models and for notebooks with specialized settings.
+
+Integration of OpenCLIP models and initiation of integration of KaliYuga models by Palmweaver / Chris Scalf (https://twitter.com/ChrisScalf11)
