@@ -631,6 +631,12 @@ if not useCPU:
         print('Disabling CUDNN for A100 gpu', file=sys.stderr)
         torch.backends.cudnn.enabled = False
 
+!pip install open_clip_torch # These lines are from 'Usage' section for mlfoundation/open_clip to allow import of LAION Vit32
+
+import torch
+from PIL import Image
+import open_clip
+
 # %%
 # !! {"metadata":{
 # !!   "cellView": "form",
@@ -1802,6 +1808,9 @@ RN50x4 = False #@param{type:"boolean"}
 RN50x16 = False #@param{type:"boolean"}
 RN50x64 = False #@param{type:"boolean"}
 
+#@markdown #### OpenCLIP models
+ViTB32_laion2b_e16 = True #@param {type: "boolean"}
+
 #@markdown If you're having issues with model downloads, check this to compare SHA's:
 check_model_SHA = False #@param{type:"boolean"}
 
@@ -1968,6 +1977,7 @@ if RN50x4: clip_models.append(clip.load('RN50x4', jit=False)[0].eval().requires_
 if RN50x16: clip_models.append(clip.load('RN50x16', jit=False)[0].eval().requires_grad_(False).to(device))
 if RN50x64: clip_models.append(clip.load('RN50x64', jit=False)[0].eval().requires_grad_(False).to(device))
 if RN101: clip_models.append(clip.load('RN101', jit=False)[0].eval().requires_grad_(False).to(device))
+if ViTB32_laion2b_e16: clip_models.append(open_clip.create_model('ViT-B-32', pretrained='laion2b_e16').eval().requires_grad_(False).to(device))
 
 normalize = T.Normalize(mean=[0.48145466, 0.4578275, 0.40821073], std=[0.26862954, 0.26130258, 0.27577711])
 lpips_model = lpips.LPIPS(net='vgg').to(device)
