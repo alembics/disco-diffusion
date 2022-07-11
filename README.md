@@ -90,7 +90,7 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 #### v5.5 Update: Jul 11th 2022 - Palmweaver / Chris Scalf, KaliYuga_ai, further integration by gandamu / Adam Letts
 
 * OpenCLIP models integration
-* Pixel Art Diffusion (hard and soft), Watercolor Diffusion, and Pulp SciFi Diffusion models
+* Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models
 * cut_ic_pow scheduling
 
 ## Notebook Provenance
