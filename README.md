@@ -93,6 +93,10 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models
 * cut_ic_pow scheduling
 
+#### v5.6 Update: Jul 13th 2022 - Felipe3DArtist, integration by gandamu / Adam Letts
+
+* Integrated portrait_generator_v001 - 512x512 diffusion model trained on faces - from Felipe3DArtist
+
 ## Notebook Provenance
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
@@ -126,3 +130,5 @@ Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
 Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from KaliYuga (https://twitter.com/KaliYuga_ai). Follow KaliYuga's Twitter for the latest models and for notebooks with specialized settings.
 
 Integration of OpenCLIP models and initiation of integration of KaliYuga models by Palmweaver / Chris Scalf (https://twitter.com/ChrisScalf11)
+
+Integrated portrait_generator_v001 from Felipe3DArtist (https://twitter.com/Felipe3DArtist)
