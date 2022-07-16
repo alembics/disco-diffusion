@@ -9,9 +9,9 @@ FROM nvcr.io/nvidia/pytorch:21.08-py3 AS prep
     RUN wget --progress=bar:force:noscroll -P /scratch/model-lpips https://download.pytorch.org/models/vgg16-397923af.pth 
 
     RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://github.com/intel-isl/DPT/releases/download/1_0/dpt_large-midas-2f21e586.pt
-    RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://v-diffusion.s3.us-west-2.amazonaws.com/512x512_diffusion_uncond_finetune_008100.pt
+    RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://the-eye.eu/public/AI/models/512x512_diffusion_unconditional_ImageNet/512x512_diffusion_uncond_finetune_008100.pt
     RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://openaipublic.blob.core.windows.net/diffusion/jul-2021/256x256_diffusion_uncond.pt
-    RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://v-diffusion.s3.us-west-2.amazonaws.com/secondary_model_imagenet_2.pth
+    RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/models https://the-eye.eu/public/AI/models/v-diffusion/secondary_model_imagenet_2.pth
 
     RUN wget --no-directories --progress=bar:force:noscroll -P /scratch/pretrained https://cloudflare-ipfs.com/ipfs/Qmd2mMnDLWePKmgfS8m6ntAg4nhV5VkUyAydYBp8cWWeB7/AdaBins_nyu.pt
 

@@ -29,7 +29,7 @@ RUN git clone https://github.com/alembics/disco-diffusion.git && \
     git clone https://github.com/assafshocher/ResizeRight.git && \
     git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
     git clone https://github.com/isl-org/MiDaS.git && \
-    git clone https://github.com/crowsonkb/guided-diffusion.git && \
+    git clone https://github.com/kostarion/guided-diffusion.git && \
     git clone https://github.com/shariqfarooq123/AdaBins.git
 
 # Install Python packages
