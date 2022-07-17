@@ -1640,7 +1640,7 @@ def save_settings():
       'video_init_blend_mode':video_init_blend_mode
     }
     # print('Settings:', setting_list)
-    with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+") as f:   #save settings
+    with open(f"{batchFolder}/{batch_name}({batchNum})_settings.txt", "w+", encoding="utf-8") as f:   #save settings
         json.dump(setting_list, f, ensure_ascii=False, indent=4)
 
 # %%
