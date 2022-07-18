@@ -1429,7 +1429,7 @@ def do_run():
                   skip_timesteps=skip_steps,
                   init_image=init,
                   randomize_class=randomize_class,
-                  eta=eta,
+                  eta=eta[args.n_batches-i] if type(eta) is list else eta,
                   transformation_fn=symmetry_transformation_fn,
                   transformation_percent=args.transformation_percent
               )
@@ -2772,7 +2772,7 @@ if intermediate_saves and intermediates_in_subfolder is True:
 perlin_init = False  #@param{type: 'boolean'}
 perlin_mode = 'mixed' #@param ['mixed', 'color', 'gray']
 set_seed = 'random_seed' #@param{type: 'string'}
-eta = 0.8 #@param{type: 'number'}
+eta = [0.4, 1.2] #@param
 clamp_grad = True #@param{type: 'boolean'}
 clamp_max = 0.05 #@param{type: 'number'}
 
@@ -3017,7 +3017,7 @@ args = {
     'perlin_init': perlin_init,
     'perlin_mode': perlin_mode,
     'set_seed': set_seed,
-    'eta': eta,
+    'eta': np.linspace(eta[0], eta[1], n_batches) if type(eta) is list else eta,
     'clamp_grad': clamp_grad,
     'clamp_max': clamp_max,
     'skip_augs': skip_augs,
