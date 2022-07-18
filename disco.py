@@ -1393,7 +1393,7 @@ def do_run():
                 grad = torch.zeros_like(x)
           if args.clamp_grad and x_is_NaN == False:
               magnitude = grad.square().mean().sqrt()
-              return grad * magnitude.clamp(max=args.clamp_max[1000-t_int] if type(args.clamp_max) is list else args.clamp_max ) / magnitude  #min=-0.02, min=-clamp_max, 
+              return grad * magnitude.clamp(max=args.clamp_max[1000-t_int] if type(args.clamp_max) is np.ndarray else args.clamp_max ) / magnitude  #min=-0.02, min=-clamp_max, 
           return grad
   
       if args.diffusion_sampling_mode == 'ddim':
@@ -1430,7 +1430,7 @@ def do_run():
                   skip_timesteps=skip_steps,
                   init_image=init,
                   randomize_class=randomize_class,
-                  eta=eta[1000-t_int] if type(eta) is list else eta,
+                  eta=args.eta[1000-t_int] if type(args.eta) is np.ndarray else args.eta,
                   transformation_fn=symmetry_transformation_fn,
                   transformation_percent=args.transformation_percent
               )
