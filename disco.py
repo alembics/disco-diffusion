@@ -298,9 +298,6 @@ if skip_for_run_all == False:
       Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
 
       Custom models support
-  v5.5 Update: Jun 24th 2022 - Aztecman / Carson Bentley
-
-      Diagonal Symmetry
     '''
   )
 
@@ -1073,6 +1070,19 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
                                           sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
   return next_step_pil
 
+# square padding based on code solution posted by 'Clever Crossbill'
+def square_pad(image):
+    img_size = image.size()[2:]
+    max_wh = max(img_size)
+    p_top, p_left = [(max_wh - s) // 2 for s in img_size]
+    p_bottom, p_right = [max_wh - (s+pad) for s, pad in zip(img_size, [p_top, p_left])]
+    padding = (p_left, p_top, p_right, p_bottom)
+    return TF.pad(image, padding, 0, 'constant'), padding
+
+def remove_pad(image, pad):
+    h, w = image.size()[2:]
+    return image[:,:,pad[3]:h-pad[1],pad[0]:w-pad[2]]
+
 def triu_secondary(x, diag_offset):
   mask = torch.ones_like(x)
   mask = torch.triu(mask, diagonal=diag_offset)
@@ -1112,16 +1122,29 @@ class SymmTransforms:
     return x_triu + x_triu_flip
 
   def radial(self, x, num_rays):
+    [n, c, h, w] = [self.n, self.c, self.h, self.w]
+    pad = (0,0,0,0)
     if self.h != self.w:
-      raise ValueError("height must equal width for radial symmetry transform")
+      x, pad = square_pad(x)
+      [n, c, h, w] = x.size()
+        
     mask = torch.triu(torch.ones_like(x))
-    mask = TF.rotate(mask, (360/(num_rays*2)) - 45)
-    mask[:,:,self.h//2:,self.w//2:] = 0
-    masked = mask * x
-    pizza_slice = torch.concat((masked[:, :, :, :self.w//2], TF.hflip(masked[:, :, :, :self.w//2])), -1)
+    if self.w <= self.h:
+      mask = TF.rotate(mask, (360/(num_rays*2)) - 45)
+      masked = mask * x
+      pizza_slice = torch.concat((masked[:, :, :, :w//2], TF.hflip(masked[:, :, :, :w//2])), -1)
+    else:
+      mask = TF.rotate(mask, (360/(num_rays*2)) + 45)
+      masked = mask * x
+      pizza_slice = torch.concat((TF.vflip(masked[:, :, h//2:, :]), masked[:, :, h//2:, :]), -2)
+            
     pizza = torch.zeros_like(x)
     for i in range(num_rays):
       pizza += TF.rotate(pizza_slice, i*(360/num_rays))
+            
+    if self.h != self.w:
+      pizza = remove_pad(pizza, pad)
+            
     return pizza
 
 def symmetry_transformation_fn(x):
