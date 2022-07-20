@@ -1,7 +1,7 @@
 # %%
 # !! {"metadata":{
-# !!   "id": "view-in-github",
-# !!   "colab_type": "text"
+# !!   "colab_type": "text",
+# !!   "id": "view-in-github"
 # !! }}
 """
 <a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open In Colab"/></a>
@@ -314,6 +314,10 @@ if skip_for_run_all == False:
   v5.6 Update: Jul 13th 2022 - Felipe3DArtist integration by gandamu / Adam Letts
 
       portrait_generator_v001 diffusion model integrated
+      
+  v5.7 Update: Jul 20th 2022 - Aztecman / Carson Bentley
+
+      Diagonal Symmetry, Radial Symmetry
     '''
   )
 
@@ -1089,16 +1093,110 @@ def do_3d_step(img_filepath, frame_num, midas_model, midas_transform):
                                           sampling_mode=args.sampling_mode, midas_weight=args.midas_weight)
   return next_step_pil
 
+def square_pad(image):
+  img_size = image.size()[2:]
+  max_wh = max(img_size)
+  p_top, p_left = [(max_wh - s) // 2 for s in img_size]
+  p_bottom, p_right = [max_wh - (s+pad) for s, pad in zip(img_size, [p_top, p_left])]
+  padding = (p_left, p_top, p_right, p_bottom)
+  return TF.pad(image, padding, 0, 'constant'), padding
+
+def remove_pad(image, pad):
+  h, w = image.size()[2:]
+  return image[:,:,pad[3]:h-pad[1],pad[0]:w-pad[2]]
+
+def triu_secondary(x, diag_offset):
+  mask = torch.ones_like(x)
+  mask = torch.triu(mask, diagonal=diag_offset)
+  mask = TF.hflip(mask)
+  return x * mask
+
+class SymmTransforms:
+  """
+  Symmetry Transforms
+  """
+  def __init__(self, x_shape):
+    [self.n, self.c, self.h, self.w] = x_shape
+    pass
+
+  def horizontal(self, x):
+    print("horizontal symmetry applied")
+    return torch.concat((x[:, :, :, :self.w//2], torch.flip(x[:, :, :, :self.w//2], [-1])), -1)
+    
+  def vertical(self, x):
+    print("vertical symmetry applied")
+    return torch.concat((x[:, :, :self.h//2, :], torch.flip(x[:, :, :self.h//2, :], [-2])), -2)
+    
+  def diagonal_pos(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = x")
+    x_triu = triu_secondary(x, 1)
+    x_triu_flip = TF.hflip(torch.rot90(triu_secondary(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+    
+  def diagonal_neg(self, x):
+    if self.h != self.w:
+      raise ValueError("height must equal width for diagonal symmetry")
+    print("diagonal symmetry mirroring across the line of y = -x")
+    x_triu = torch.triu(x, 1)
+    x_triu_flip = TF.vflip(torch.rot90(torch.triu(x, 0), 1, (2, 3)))
+    return x_triu + x_triu_flip
+
+  def radial(self, x, num_rays):
+    [n, c, h, w] = [self.n, self.c, self.h, self.w]
+    pad = (0,0,0,0)
+    if self.h != self.w:
+      x, pad = square_pad(x)
+      [n, c, h, w] = x.size()       
+    mask = torch.triu(torch.ones_like(x))
+    if self.w <= self.h: #default: main slice at 12 o-clock pointing down
+      mask = TF.rotate(mask, (360/(num_rays*2)) - 45)
+      masked = mask * x
+      pizza_slice = torch.concat((masked[:, :, :, :w//2], TF.hflip(masked[:, :, :, :w//2])), -1)
+    else: #if landscape format, main slice at 9 o-clock pointing right
+      mask = TF.rotate(mask, (360/(num_rays*2)) + 45)
+      masked = mask * x
+      pizza_slice = torch.concat((TF.vflip(masked[:, :, h//2:, :]), masked[:, :, h//2:, :]), -2)   
+    pizza = torch.zeros_like(x)
+    for i in range(num_rays):
+      pizza += TF.rotate(pizza_slice, i*(360/num_rays))      
+    if self.h != self.w:
+      pizza = remove_pad(pizza, pad)           
+    return pizza
+
 def symmetry_transformation_fn(x):
+  [n, c, h, w] = x.size()
+  if len(args.override_str) > 0 and args.override_str != ".":
+    #using override string
+    func_dict = {"/":"diagonal_pos",
+                 "\\":"diagonal_neg",
+                 "-":"vertical",
+                 "|":"horizontal",
+                 "*":"radial"}
+    m = globals()['SymmTransforms'](x.size())
+    for char in args.override_str:
+      if char == ".":
+        continue
+      t_func = getattr(m, func_dict[char])
+      if char == "*":
+        x = t_func(x, args.n_rays)
+      else:
+        x = t_func(x)
+  else:
+    #if no override, using boolean parameters
+    symm_t = SymmTransforms(x.size())
+    if args.use_diagonal_pos_symmetry:
+      x = symm_t.diagonal_pos(x)
+    if args.use_diagonal_neg_symmetry:
+      x = symm_t.diagonal_neg(x)
     if args.use_horizontal_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :, :w//2], torch.flip(x[:, :, :, :w//2], [-1])), -1)
-        print("horizontal symmetry applied")
+      x = symm_t.horizontal(x)
     if args.use_vertical_symmetry:
-        [n, c, h, w] = x.size()
-        x = torch.concat((x[:, :, :h//2, :], torch.flip(x[:, :, :h//2, :], [-2])), -2)
-        print("vertical symmetry applied")
-    return x
+      x = symm_t.vertical(x)
+    if args.use_radial_symmetry:
+      x = symm_t.radial(x, args.n_rays)
+  return x
 
 def do_run():
   seed = args.seed
@@ -1620,8 +1718,13 @@ def save_settings():
       'turbo_mode':turbo_mode,
       'turbo_steps':turbo_steps,
       'turbo_preroll':turbo_preroll,
-      'use_horizontal_symmetry':use_horizontal_symmetry,
-      'use_vertical_symmetry':use_vertical_symmetry,
+      'use_horizontal_symmetry': use_horizontal_symmetry,
+      'use_vertical_symmetry': use_vertical_symmetry,
+      'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+      'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+      'use_radial_symmetry': use_radial_symmetry,
+      'n_rays': n_rays,
+      'override_str':override_str,
       'transformation_percent':transformation_percent,
       #video init settings
       'video_init_steps': video_init_steps,
@@ -2115,7 +2218,6 @@ if side_x != width_height[0] or side_y != width_height[1]:
 #Make folder for batch
 batchFolder = f'{outDirPath}/{batch_name}'
 createPath(batchFolder)
-
 
 # %%
 # !! {"metadata":{
@@ -2662,7 +2764,6 @@ if animation_mode == 'Video Input':
   
     os.chdir(PROJECT_DIR)
 
-
 # %%
 # !! {"metadata":{
 # !!   "id": "FlowFns2"
@@ -2819,12 +2920,21 @@ elif diffusion_model in kaliyuga_watercolor_model_names:
     cut_icgray_p = watercolor_cut_icgray_p
 
 #@markdown ---
+#@markdown diagonal symmetry requires a square image. n_rays must be at least 1 (for radial symmetry).
 
 #@markdown ####**Transformation Settings:**
-use_vertical_symmetry = False #@param {type:"boolean"}
+use_diagonal_pos_symmetry = False #@param {type:"boolean"}
+use_diagonal_neg_symmetry = False #@param {type:"boolean"}
 use_horizontal_symmetry = False #@param {type:"boolean"}
+use_vertical_symmetry = False #@param {type:"boolean"}
+use_radial_symmetry = False #@param {type:"boolean"}
+n_rays = 1 #@param{type: 'number'}
 transformation_percent = [0.09] #@param
 
+### ADVANCED SYMMETRY:
+# override_str can be used to change the order of transforms, For example r"|-/\*." means to apply horizontal (|), vertical (-), diagonal+ (/), diagonal- (\), radial (*).
+# note, override_str must end in a '.'
+override_str = r"."
 
 # %%
 # !! {"metadata":{
@@ -3028,8 +3138,13 @@ args = {
     'turbo_mode':turbo_mode,
     'turbo_steps':turbo_steps,
     'turbo_preroll':turbo_preroll,
-    'use_vertical_symmetry': use_vertical_symmetry,
     'use_horizontal_symmetry': use_horizontal_symmetry,
+    'use_vertical_symmetry': use_vertical_symmetry,
+    'use_diagonal_pos_symmetry': use_diagonal_pos_symmetry,
+    'use_diagonal_neg_symmetry': use_diagonal_neg_symmetry,
+    'use_radial_symmetry': use_radial_symmetry,
+    'n_rays': n_rays,
+    'override_str':override_str,
     'transformation_percent': transformation_percent,
     #video init settings
     'video_init_steps': video_init_steps,
@@ -3096,8 +3211,8 @@ finally:
 
 # %%
 # !! {"metadata":{
-# !!   "id": "CreateVid",
-# !!   "cellView": "form"
+# !!   "cellView": "form",
+# !!   "id": "CreateVid"
 # !! }}
 import PIL
 # @title ### **Create video**
@@ -3227,8 +3342,8 @@ else:
 
 # %%
 # !! {"main_metadata":{
-# !!   "anaconda-cloud": {},
 # !!   "accelerator": "GPU",
+# !!   "anaconda-cloud": {},
 # !!   "colab": {
 # !!     "collapsed_sections": [
 # !!       "CreditsChTop",
@@ -3246,14 +3361,14 @@ else:
 # !!       "FlowFns1",
 # !!       "FlowFns2"
 # !!     ],
+# !!     "include_colab_link": true,
 # !!     "machine_shape": "hm",
 # !!     "name": "Disco Diffusion v5.6 [Now with portrait_generator_v001]",
 # !!     "private_outputs": true,
-# !!     "provenance": [],
-# !!     "include_colab_link": true
+# !!     "provenance": []
 # !!   },
 # !!   "kernelspec": {
-# !!     "display_name": "Python 3",
+# !!     "display_name": "Python 3 (ipykernel)",
 # !!     "language": "python",
 # !!     "name": "python3"
 # !!   },
@@ -3267,6 +3382,6 @@ else:
 # !!     "name": "python",
 # !!     "nbconvert_exporter": "python",
 # !!     "pygments_lexer": "ipython3",
-# !!     "version": "3.6.1"
+# !!     "version": "3.9.12"
 # !!   }
 # !! }}
