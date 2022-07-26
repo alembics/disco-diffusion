@@ -29,11 +29,11 @@ RUN git clone https://github.com/alembics/disco-diffusion.git && \
     git clone https://github.com/assafshocher/ResizeRight.git && \
     git clone https://github.com/MSFTserver/pytorch3d-lite.git && \
     git clone https://github.com/isl-org/MiDaS.git && \
-    git clone https://github.com/crowsonkb/guided-diffusion.git && \
+    git clone https://github.com/kostarion/guided-diffusion.git && \
     git clone https://github.com/shariqfarooq123/AdaBins.git
 
 # Install Python packages
-RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0 lpips datetime timm ipywidgets omegaconf>=2.0.0 pytorch-lightning>=1.0.8 torch-fidelity einops wandb pandas ftfy
+RUN pip install imageio imageio-ffmpeg==0.4.4 pyspng==0.1.0 lpips datetime timm ipywidgets omegaconf>=2.0.0 pytorch-lightning>=1.0.8 torch-fidelity einops wandb pandas ftfy opencv-python regex clip matplotlib
 
 # Precache other big files
 COPY --chown=disco --from=modelprep /scratch/clip /home/disco/.cache/clip
