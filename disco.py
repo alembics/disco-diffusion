@@ -1571,6 +1571,7 @@ def save_settings():
       'steps': steps,
       'diffusion_steps': diffusion_steps,
       'diffusion_sampling_mode': diffusion_sampling_mode,
+      'custom_model_path': custom_model_path,
       'ViTB32': ViTB32,
       'ViTB16': ViTB16,
       'ViTL14': ViTL14,
@@ -1830,7 +1831,7 @@ diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_d
 use_secondary_model = True #@param {type: 'boolean'}
 diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']
 #@markdown #####**Custom model:**
-custom_path = '/content/drive/MyDrive/deep_learning/ddpm/ema_0.9999_058000.pt'#@param {type: 'string'}
+custom_model_path = '/content/drive/MyDrive/deep_learning/ddpm/ema_0.9999_058000.pt'#@param {type: 'string'}
 
 #@markdown #####**CLIP settings:**
 use_checkpoint = True #@param {type: 'boolean'}
@@ -3065,7 +3066,7 @@ args = SimpleNamespace(**args)
 print('Prepping model...')
 model, diffusion = create_model_and_diffusion(**model_config)
 if diffusion_model == 'custom':
-    model.load_state_dict(torch.load(custom_path, map_location='cpu'))
+    model.load_state_dict(torch.load(custom_model_path, map_location='cpu'))
 else:
     model.load_state_dict(torch.load(f'{model_path}/{get_model_filename(diffusion_model)}', map_location='cpu'))
 model.requires_grad_(False).eval().to(device)
