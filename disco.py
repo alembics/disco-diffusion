@@ -1823,6 +1823,7 @@ class SecondaryDiffusionImageNet2(nn.Module):
 
 # %%
 # !! {"metadata":{
+# !!   "cellView": "form",
 # !!   "id": "ModelSettings"
 # !! }}
 #@markdown ####**Models Settings (note: For pixel art, the best is pixelartdiffusion_expanded):**
@@ -2072,6 +2073,7 @@ if diffusion_model == 'custom':
 
 # %%
 # !! {"metadata":{
+# !!   "cellView": "form",
 # !!   "id": "BasicSettings"
 # !! }}
 #@markdown ####**Basic Settings:**
@@ -2860,6 +2862,7 @@ image_prompts = {
 
 # %%
 # !! {"metadata":{
+# !!   "cellView": "form",
 # !!   "id": "DoTheRun"
 # !! }}
 #@title Do the Run!
