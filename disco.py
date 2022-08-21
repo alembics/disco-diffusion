@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.6 - Now with portrait_generator_v001
+# Disco Diffusion v5.61 - Now with portrait_generator_v001
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -314,6 +314,11 @@ if skip_for_run_all == False:
   v5.6 Update: Jul 13th 2022 - Felipe3DArtist integration by gandamu / Adam Letts
 
       portrait_generator_v001 diffusion model integrated
+
+  v5.61 Update: Aug 21st 2022 - gandamu / Adam Letts
+
+      Correct progress bars issue caused by recent Google Colab environment changes
+      Adjust 512x512 diffusion model download URI priority due to issues with the previous primary source
     '''
   )
 
@@ -3252,7 +3257,7 @@ else:
 # !!       "FlowFns2"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.6 [Now with portrait_generator_v001]",
+# !!     "name": "Disco Diffusion v5.61 [Now with portrait_generator_v001]",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
