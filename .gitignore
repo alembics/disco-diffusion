@@ -1,4 +1,4 @@
-# Disco-specfic ignores
+# Disco-specific ignores
 init_images/*
 images_out/*
 MiDaS/
