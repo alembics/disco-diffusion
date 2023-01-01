@@ -2,16 +2,16 @@
 
 <a href="https://colab.research.google.com/github/alembics/disco-diffusion/blob/main/Disco_Diffusion.ipynb" target="_parent"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab"/></a>
 
-A frankensteinian amalgamation of notebooks, models and techniques for the generation of AI Art and Animations.
+A Frankensteinian amalgamation of notebooks, models, and techniques for generating AI Art and Animations.
 
 [to be updated with further info soon]
 
 ## Contributing
 This project uses a special conversion tool to convert the python files into notebooks for easier development.
 
-What this means is you do not have to touch the notebook directly to make changes to it
+You do not have to touch the notebook directly to make changes.
 
-the tool being used is called [Colab-Convert](https://github.com/MSFTserver/colab-convert)
+The tool being used is called [Colab-Convert](https://github.com/MSFTserver/colab-convert)
 
 - install using `pip install colab-convert`
 - convert .py to .ipynb `colab-convert /path/to/file.py /path/to/file.ipynb`
@@ -20,10 +20,10 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 
 ## Changelog
 #### v1 Oct 29th 2021 - Somnai  
-* Initial QoL improvements added, including user friendly UI, settings+prompt saving and improved google drive folder organization.
+* Initial QoL improvements added, including user-friendly UI, settings+prompt saving, and improved google drive folder organization.
 
 #### v1.1 Nov 13th 2021 - Somnai
-* Now includes sizing options, intermediate saves and fixed image prompts and perlin inits. unexposed batch option since it doesn't work
+* Now includes sizing options, intermediate saves, fixed image prompts, and Perlin inits. The Unexposed batch option since doesn't work
 
 #### v2 Update: Nov 22nd 2021 - Somnai
 * Initial addition of Katherine Crowson's Secondary Model Method (https://colab.research.google.com/drive/1mpkrhOjoyzPeSWy2r7T8EYRaU7amYOOi#scrollTo=X5gODNAMEUCR)
@@ -32,8 +32,8 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 #### v3 Update: Dec 24th 2021 - Somnai
 * Implemented Dango's advanced cutout method
 * Added SLIP models, thanks to NeuralDivergent
-* Fixed issue with NaNs resulting in black images, with massive help and testing from @Softology
-* Perlin now changes properly within batches (not sure where this perlin_regen code came from originally, but thank you)
+* Fixed issue with NaNs resulting in black images, massive help, and testing from @Softology
+* Perlin now changes correctly within batches (not sure where this perlin_regen code came from originally, but thank you)
 
 #### v4 Update: Jan 2022 - Somnai
 * Implemented Diffusion Zooming
@@ -42,17 +42,17 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 
 #### v4.1 Update: Jan 14th 2022 - Somnai
 * Added video input mode
-* Added license that somehow went missing
-* Added improved prompt keyframing, fixed image_prompts and multiple prompts
+* The Added license that somehow went missing
+* Added improved prompt keyframing, fixed image_prompts, and multiple prompts
 * Improved UI
-* Significant under the hood cleanup and improvement
+* Significant under-the-hood cleanup and improvement
 * Refined defaults for each mode
 * Removed SLIP models for the time being due to import conflicts
 * Added latent-diffusion SuperRes for sharpening
 * Added resume run mode
 
 #### v5 Update: Feb 20th 2022 - gandamu / Adam Letts
-* Added 3D animation mode. Uses weighted combination of AdaBins and MiDaS depth estimation models. Uses pytorch3d for 3D transforms on Colab and/or Linux.
+* Added 3D animation mode. Uses a weighted combination of AdaBins and MiDaS depth estimation models. Uses pytorch3d for 3D transforms on Colab and/or Linux.
 
 #### v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
 
@@ -61,17 +61,17 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 * 3D rotation parameter units are now degrees (rather than radians)
 * Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
 * Added video_init_seed_continuity option to make init video animations more continuous
-* Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
+* Removed pytorch3d from needing to be compiled with a lite version made explicitly for Disco Diffusion
 * Remove Super Resolution
 * Remove Slip Models
-* Update for crossplatform support
+* Update for cross-platform support
 
 #### v5.1 Update: Apr 4th 2022 - MSFTserver aka HostsServer
 
-* Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
+* Removed pytorch3d from needing to be compiled with a lite version made explicitly for Disco Diffusion
 * Remove Super Resolution
 * Remove Slip Models
-* Update for crossplatform support
+* Update for cross-platform support
 
 #### v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
 
@@ -101,11 +101,11 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 
 Original notebook by Katherine Crowson (https://github.com/crowsonkb, https://twitter.com/RiversHaveWings). It uses either OpenAI's 256x256 unconditional ImageNet or Katherine Crowson's fine-tuned 512x512 diffusion model (https://github.com/openai/guided-diffusion), together with CLIP (https://github.com/openai/CLIP) to connect text prompts with images.
 
-Modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
+It was modified by Daniel Russell (https://github.com/russelldc, https://twitter.com/danielrussruss) to include (hopefully) optimal params for quick generations in 15-100 timesteps rather than 1000, as well as more robust augmentations.
 
-Further improvements from Dango233 and nshepperd helped improve the quality of diffusion in general, and especially so for shorter runs like this notebook aims to achieve.
+Further improvements from Dango233 and nshepperd helped improve the quality of diffusion in general, especially for shorter runs like this notebook aims to achieve.
 
-Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may greatly improve accuracy.
+Vark added code to load in multiple Clip models at once, which all prompts are evaluated against, which may significantly improve accuracy.
 
 The latest zoom, pan, rotation, and keyframes features were taken from Chigozie Nri's VQGAN Zoom Notebook (https://github.com/chigozienri, https://twitter.com/chigozienri)
 
@@ -113,13 +113,13 @@ Advanced DangoCutn Cutout method is also from Dango223.
 
 --
 
-Somnai (https://twitter.com/Somnai_dreams) added 2D Diffusion animation techniques, QoL improvements and various implementations of tech and techniques, mostly listed in the changelog below.
+Somnai (https://twitter.com/Somnai_dreams) added 2D Diffusion animation techniques, QoL improvements, and various implementations of tech and techniques, mostly listed in the changelog below.
 
-3D animation implementation added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
+3D animation implementation was added by Adam Letts (https://twitter.com/gandamu_ml) in collaboration with Somnai.
 
 Turbo feature by Chris Allen (https://twitter.com/zippy731)
 
-Improvements to ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
+Improvements to the ability to run on local systems, Windows support, and dependency installation by HostsServer (https://twitter.com/HostsServer)
 
 VR Mode by Tom Mason (https://twitter.com/nin_artificial)
 
@@ -127,7 +127,7 @@ Horizontal and Vertical symmetry functionality by nshepperd. Symmetry transforma
 
 Warp and custom model support by Alex Spirin (https://twitter.com/devdef).
 
-Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from KaliYuga (https://twitter.com/KaliYuga_ai). Follow KaliYuga's Twitter for the latest models and for notebooks with specialized settings.
+Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from KaliYuga (https://twitter.com/KaliYuga_ai). Follow KaliYuga's Twitter for the latest models and notebooks with specialized settings.
 
 Integration of OpenCLIP models and initiation of integration of KaliYuga models by Palmweaver / Chris Scalf (https://twitter.com/ChrisScalf11)
 
