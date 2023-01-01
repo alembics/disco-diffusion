@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.61 - Now with portrait_generator_v001
+# Disco Diffusion v5.7 - Now with MiDaS (3D mode) not being broken
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -319,6 +319,10 @@ if skip_for_run_all == False:
 
       Correct progress bars issue caused by recent Google Colab environment changes
       Adjust 512x512 diffusion model download URI priority due to issues with the previous primary source
+
+  v5.7 Update: Dec 31st 2022 - Steffen Moelter (with minor colab-convert integration by gandamu)
+
+      Clone MiDaS v3 specifically. This fixes 3D mode. It had been broken since MiDaS v3.1 introduced an incompatibility.
     '''
   )
 

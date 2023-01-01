@@ -7,6 +7,7 @@ A frankensteinian amalgamation of notebooks, models and techniques for the gener
 [to be updated with further info soon]
 
 ## Contributing
+
 This project uses a special conversion tool to convert the python files into notebooks for easier development.
 
 What this means is you do not have to touch the notebook directly to make changes to it
@@ -17,85 +18,96 @@ the tool being used is called [Colab-Convert](https://github.com/MSFTserver/cola
 - convert .py to .ipynb `colab-convert /path/to/file.py /path/to/file.ipynb`
 - convert .ipynb to .py `colab-convert /path/to/file.ipynb /path/to/file.py`
 
-
 ## Changelog
-#### v1 Oct 29th 2021 - Somnai  
-* Initial QoL improvements added, including user friendly UI, settings+prompt saving and improved google drive folder organization.
+
+#### v1 Oct 29th 2021 - Somnai
+
+- Initial QoL improvements added, including user friendly UI, settings+prompt saving and improved google drive folder organization.
 
 #### v1.1 Nov 13th 2021 - Somnai
-* Now includes sizing options, intermediate saves and fixed image prompts and perlin inits. unexposed batch option since it doesn't work
+
+- Now includes sizing options, intermediate saves and fixed image prompts and perlin inits. unexposed batch option since it doesn't work
 
 #### v2 Update: Nov 22nd 2021 - Somnai
-* Initial addition of Katherine Crowson's Secondary Model Method (https://colab.research.google.com/drive/1mpkrhOjoyzPeSWy2r7T8EYRaU7amYOOi#scrollTo=X5gODNAMEUCR)
-* Fix for incorrectly named settings files
+
+- Initial addition of Katherine Crowson's Secondary Model Method (https://colab.research.google.com/drive/1mpkrhOjoyzPeSWy2r7T8EYRaU7amYOOi#scrollTo=X5gODNAMEUCR)
+- Fix for incorrectly named settings files
 
 #### v3 Update: Dec 24th 2021 - Somnai
-* Implemented Dango's advanced cutout method
-* Added SLIP models, thanks to NeuralDivergent
-* Fixed issue with NaNs resulting in black images, with massive help and testing from @Softology
-* Perlin now changes properly within batches (not sure where this perlin_regen code came from originally, but thank you)
+
+- Implemented Dango's advanced cutout method
+- Added SLIP models, thanks to NeuralDivergent
+- Fixed issue with NaNs resulting in black images, with massive help and testing from @Softology
+- Perlin now changes properly within batches (not sure where this perlin_regen code came from originally, but thank you)
 
 #### v4 Update: Jan 2022 - Somnai
-* Implemented Diffusion Zooming
-* Added Chigozie keyframing
-* Made a bunch of edits to processes
+
+- Implemented Diffusion Zooming
+- Added Chigozie keyframing
+- Made a bunch of edits to processes
 
 #### v4.1 Update: Jan 14th 2022 - Somnai
-* Added video input mode
-* Added license that somehow went missing
-* Added improved prompt keyframing, fixed image_prompts and multiple prompts
-* Improved UI
-* Significant under the hood cleanup and improvement
-* Refined defaults for each mode
-* Removed SLIP models for the time being due to import conflicts
-* Added latent-diffusion SuperRes for sharpening
-* Added resume run mode
+
+- Added video input mode
+- Added license that somehow went missing
+- Added improved prompt keyframing, fixed image_prompts and multiple prompts
+- Improved UI
+- Significant under the hood cleanup and improvement
+- Refined defaults for each mode
+- Removed SLIP models for the time being due to import conflicts
+- Added latent-diffusion SuperRes for sharpening
+- Added resume run mode
 
 #### v5 Update: Feb 20th 2022 - gandamu / Adam Letts
-* Added 3D animation mode. Uses weighted combination of AdaBins and MiDaS depth estimation models. Uses pytorch3d for 3D transforms on Colab and/or Linux.
+
+- Added 3D animation mode. Uses weighted combination of AdaBins and MiDaS depth estimation models. Uses pytorch3d for 3D transforms on Colab and/or Linux.
 
 #### v5.1 Update: Mar 30th 2022 - zippy / Chris Allen and gandamu / Adam Letts
 
-* Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
-* Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
-* 3D rotation parameter units are now degrees (rather than radians)
-* Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
-* Added video_init_seed_continuity option to make init video animations more continuous
-* Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
-* Remove Super Resolution
-* Remove Slip Models
-* Update for crossplatform support
+- Integrated Turbo+Smooth features from Disco Diffusion Turbo -- just the implementation, without its defaults.
+- Implemented resume of turbo animations in such a way that it's now possible to resume from different batch folders and batch numbers.
+- 3D rotation parameter units are now degrees (rather than radians)
+- Corrected name collision in sampling_mode (now diffusion_sampling_mode for plms/ddim, and sampling_mode for 3D transform sampling)
+- Added video_init_seed_continuity option to make init video animations more continuous
+- Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
+- Remove Super Resolution
+- Remove Slip Models
+- Update for crossplatform support
 
 #### v5.1 Update: Apr 4th 2022 - MSFTserver aka HostsServer
 
-* Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
-* Remove Super Resolution
-* Remove Slip Models
-* Update for crossplatform support
+- Removed pytorch3d from needing to be compiled with a lite version specifically made for Disco Diffusion
+- Remove Super Resolution
+- Remove Slip Models
+- Update for crossplatform support
 
 #### v5.2 Update: Apr 10th 2022 - nin_artificial / Tom Mason
 
-* VR Mode
+- VR Mode
 
 #### v5.3 Update: Jun 10th 2022 - nshepperd, huemin, cut_pow
 
-* Horizontal and Vertical symmetry
-* Addition of ViT-L/14@336px model (requires high VRAM)
+- Horizontal and Vertical symmetry
+- Addition of ViT-L/14@336px model (requires high VRAM)
 
 #### v5.4 Update: Jun 14th 2022 - devdef / Alex Spirin, integrated into DD main by gandamu / Adam Letts
 
-* Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
-* Custom models support
+- Warp mode - for smooth/continuous video input results leveraging optical flow estimation and frame blending
+- Custom models support
 
 #### v5.5 Update: Jul 11th 2022 - Palmweaver / Chris Scalf, KaliYuga_ai, further integration by gandamu / Adam Letts
 
-* OpenCLIP models integration
-* Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models
-* cut_ic_pow scheduling
+- OpenCLIP models integration
+- Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models
+- cut_ic_pow scheduling
 
 #### v5.6 Update: Jul 13th 2022 - Felipe3DArtist, integration by gandamu / Adam Letts
 
-* Integrated portrait_generator_v001 - 512x512 diffusion model trained on faces - from Felipe3DArtist
+- Integrated portrait_generator_v001 - 512x512 diffusion model trained on faces - from Felipe3DArtist
+
+#### v5.7 Update: Dec 31st 2022 - Steffen Moelter (with minor colab-convert integration by gandamu)
+
+- Clone MiDaS v3 specifically. This fixes 3D mode. It had been broken since MiDaS v3.1 introduced an incompatibility.
 
 ## Notebook Provenance
 
@@ -132,3 +144,5 @@ Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from 
 Integration of OpenCLIP models and initiation of integration of KaliYuga models by Palmweaver / Chris Scalf (https://twitter.com/ChrisScalf11)
 
 Integrated portrait_generator_v001 from Felipe3DArtist (https://twitter.com/Felipe3DArtist)
+
+MiDaS version tag fix by Steffen Moelter (a necessary fix for 3D animation mode after MiDaS v3.1 was introduced).
