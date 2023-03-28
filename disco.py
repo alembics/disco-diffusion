@@ -1348,8 +1348,9 @@ def do_run():
           del init2
   
       cur_t = None
-  
+      t_int = 0
       def cond_fn(x, t, y=None):
+          global t_int
           with torch.enable_grad():
               x_is_NaN = False
               x = x.detach().requires_grad_()
@@ -1409,7 +1410,7 @@ def do_run():
                 grad = torch.zeros_like(x)
           if args.clamp_grad and x_is_NaN == False:
               magnitude = grad.square().mean().sqrt()
-              return grad * magnitude.clamp(max=args.clamp_max) / magnitude  #min=-0.02, min=-clamp_max, 
+              return grad * magnitude.clamp(max=args.clamp_max[1000-t_int] if type(args.clamp_max) is np.ndarray else args.clamp_max ) / magnitude  #min=-0.02, min=-clamp_max, 
           return grad
   
       if args.diffusion_sampling_mode == 'ddim':
@@ -1446,7 +1447,7 @@ def do_run():
                   skip_timesteps=skip_steps,
                   init_image=init,
                   randomize_class=randomize_class,
-                  eta=eta,
+                  eta=args.eta[1000-t_int] if type(args.eta) is np.ndarray else args.eta,
                   transformation_fn=symmetry_transformation_fn,
                   transformation_percent=args.transformation_percent
               )
@@ -2789,9 +2790,9 @@ if intermediate_saves and intermediates_in_subfolder is True:
 perlin_init = False  #@param{type: 'boolean'}
 perlin_mode = 'mixed' #@param ['mixed', 'color', 'gray']
 set_seed = 'random_seed' #@param{type: 'string'}
-eta = 0.8 #@param{type: 'number'}
+eta = [0.9, 0.1] #@param
 clamp_grad = True #@param{type: 'boolean'}
-clamp_max = 0.05 #@param{type: 'number'}
+clamp_max = [0.1, 0.04] #@param
 
 
 ### EXTRA ADVANCED SETTINGS:
@@ -3034,9 +3035,9 @@ args = {
     'perlin_init': perlin_init,
     'perlin_mode': perlin_mode,
     'set_seed': set_seed,
-    'eta': eta,
+    'eta': np.linspace(eta[0], eta[1], cutn_batches) if type(eta) is list else eta,
     'clamp_grad': clamp_grad,
-    'clamp_max': clamp_max,
+    'clamp_max': np.linspace(clamp_max[0], clamp_max[1], 1000) if type(clamp_max) is list else clamp_max,
     'skip_augs': skip_augs,
     'randomize_class': randomize_class,
     'clip_denoised': clip_denoised,
