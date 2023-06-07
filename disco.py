@@ -12,7 +12,7 @@
 # !!   "id": "TitleTop"
 # !! }}
 """
-# Disco Diffusion v5.7 - Now with MiDaS (3D mode) not being broken
+# Disco Diffusion v5.8 - Now with stsp and ltsp sampling
 
 Disco Diffusion - http://discodiffusion.com/ , https://github.com/alembics/disco-diffusion
 
@@ -71,6 +71,8 @@ Pixel Art Diffusion, Watercolor Diffusion, and Pulp SciFi Diffusion models from 
 Integration of OpenCLIP models and initiation of integration of KaliYuga models by Palmweaver / Chris Scalf (https://twitter.com/ChrisScalf11)
 
 Integrated portrait_generator_v001 from Felipe3DArtist (https://twitter.com/Felipe3DArtist)
+
+Integratedion of sampling with splitting Numerical methods from sWizad (https://github.com/sWizad/split-diffusion)
 """
 
 # %%
@@ -323,6 +325,8 @@ if skip_for_run_all == False:
   v5.7 Update: Dec 31st 2022 - Steffen Moelter (with minor colab-convert integration by gandamu)
 
       Clone MiDaS v3 specifically. This fixes 3D mode. It had been broken since MiDaS v3.1 introduced an incompatibility.
+      
+  v5.8 Update: Jun 5st 2023 - Added STSP and LTSP Sampling with Splitting Numerical Methods from space-nuko repository. (integration by DrSen)
     '''
   )
 
@@ -567,7 +571,7 @@ try:
     from guided_diffusion.script_util import create_model_and_diffusion
 except:
     if not os.path.exists("guided-diffusion"):
-        gitclone("https://github.com/kostarion/guided-diffusion")
+        gitclone("https://github.com/space-nuko/guided-diffusion.git")
     sys.path.append(f'{PROJECT_DIR}/guided-diffusion')
 
 try:
@@ -1414,6 +1418,10 @@ def do_run():
   
       if args.diffusion_sampling_mode == 'ddim':
           sample_fn = diffusion.ddim_sample_loop_progressive
+      elif args.diffusion_sampling_mode == 'ltsp':
+          sample_fn = diffusion.ltsp_sample_loop_progressive
+      elif args.diffusion_sampling_mode == 'stsp':
+          sample_fn = diffusion.stsp_sample_loop_progressive
       else:
           sample_fn = diffusion.plms_sample_loop_progressive
 
@@ -1449,6 +1457,34 @@ def do_run():
                   eta=eta,
                   transformation_fn=symmetry_transformation_fn,
                   transformation_percent=args.transformation_percent
+              )
+          if args.diffusion_sampling_mode == 'stsp':
+              samples = sample_fn(
+                  model,
+                  (batch_size, 3, args.side_y, args.side_x),
+                  clip_denoised=clip_denoised,
+                  model_kwargs={},
+                  cond_fn=cond_fn,
+                  impu_fn=None,
+                  progress=True,
+                  skip_timesteps=skip_steps,
+                  init_image=init,
+                  randomize_class=randomize_class,
+                  order=2,
+              )
+          if args.diffusion_sampling_mode == 'ltsp':
+              samples = sample_fn(
+                  model,
+                  (batch_size, 3, args.side_y, args.side_x),
+                  clip_denoised=clip_denoised,
+                  model_kwargs={},
+                  cond_fn=cond_fn,
+                  impu_fn=None,
+                  progress=True,
+                  skip_timesteps=skip_steps,
+                  init_image=init,
+                  randomize_class=randomize_class,
+                  order=2,
               )
           else:
               samples = sample_fn(
@@ -1845,7 +1881,7 @@ class SecondaryDiffusionImageNet2(nn.Module):
 diffusion_model = "512x512_diffusion_uncond_finetune_008100" #@param ["256x256_diffusion_uncond", "512x512_diffusion_uncond_finetune_008100", "portrait_generator_v001", "pixelartdiffusion_expanded", "pixel_art_diffusion_hard_256", "pixel_art_diffusion_soft_256", "pixelartdiffusion4k", "watercolordiffusion_2", "watercolordiffusion", "PulpSciFiDiffusion", "custom"]
 
 use_secondary_model = True #@param {type: 'boolean'}
-diffusion_sampling_mode = 'ddim' #@param ['plms','ddim']
+diffusion_sampling_mode = 'stsp' #@param ['plms','ddim','stsp','ltsp']
 #@markdown #####**Custom model:**
 custom_path = '/content/drive/MyDrive/deep_learning/ddpm/ema_0.9999_058000.pt'#@param {type: 'string'}
 
@@ -2092,7 +2128,7 @@ if diffusion_model == 'custom':
 # !! }}
 #@markdown ####**Basic Settings:**
 batch_name = 'TimeToDisco' #@param{type: 'string'}
-steps = 250 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
+steps = 142 #@param [25,50,100,150,250,500,1000]{type: 'raw', allow-input: true}
 width_height_for_512x512_models = [1280, 768] #@param{type: 'raw'}
 clip_guidance_scale = 5000 #@param{type: 'number'}
 tv_scale = 0#@param{type: 'number'}
@@ -3264,7 +3300,7 @@ else:
 # !!       "FlowFns2"
 # !!     ],
 # !!     "machine_shape": "hm",
-# !!     "name": "Disco Diffusion v5.61 [Now with portrait_generator_v001]",
+# !!     "name": "Disco Diffusion v5.8 - Now with stsp and ltsp sampling",
 # !!     "private_outputs": true,
 # !!     "provenance": [],
 # !!     "include_colab_link": true
